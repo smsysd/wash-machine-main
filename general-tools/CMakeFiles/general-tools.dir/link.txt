@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgeneral-tools.a CMakeFiles/general-tools.dir/general_tools.c.o
+/usr/bin/ranlib libgeneral-tools.a
