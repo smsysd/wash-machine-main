@@ -8,6 +8,10 @@
 #ifndef GENERAL_H_
 #define GENERAL_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -71,5 +75,9 @@ ReturnCode setCallHandleCalls(uint16_t callHandleId, uint32_t nCalls);
 ReturnCode addCallHandleCalls(uint16_t callHandleId, int32_t nCalls);
 
 void loop();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* GENERAL_H_ */

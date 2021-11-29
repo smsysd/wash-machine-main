@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpi/workspace/sm-sys-dev/mspi-linux/general-tools
+# Install script for directory: /home/elpi/workspace/sm-sys-dev/general-tools/general-tools
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
