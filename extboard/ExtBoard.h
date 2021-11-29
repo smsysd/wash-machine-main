@@ -54,8 +54,9 @@ namespace ExtBoard {
 	void init(json& extboard, json& performingSystem, json& buttons, json& display, json& leds, json& effects);
 	
 	/* Light control */
-	void setLightEffect(int id);
-	void resetLightEffect(LightEffectType type);
+	void startLightEffect(int id);
+	void stopLightEffect(LightEffectType type);
+	void resetLight();
 
 	/* Event handlers registration */
 	void registerOnButtonPushedHandler(void (*handler)(int iButton));
