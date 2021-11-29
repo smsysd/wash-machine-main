@@ -21,14 +21,25 @@ enum class Mode {
 
 Mode mode = Mode::GIVE_CASH;
 
+void onCashAppeared();
+void onCashRunout();
+
 int main(int argc, char const *argv[]) {
-	init();
+	init(onCashAppeared, onCashRunout);
 	printLogo();
 	setGiveMoneyMode();
 	
 	while (true) {
-		
+
 	}
 
 	return 0;
+}
+
+void onCashAppeared() {
+
+}
+
+void onCashRunout() {
+
 }

@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-void init();
+void init(void (*onCashAppeared)(), void (*onCashRunout)());
 void printLogo();
 void setGiveMoneyMode();
 void setProgram(int iProg);
