@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/elpi/workspace/sm-sys-dev/qrscaner-linux/qrscaner-linux/qrscaner.c
+qrscaner.h
+/home/elpi/workspace/sm-sys-dev/qrscaner-linux/qrscaner-linux/qrscaner.h
+string.h
+-
+stdio.h
+-
+pthread.h
+-
+
+/home/elpi/workspace/sm-sys-dev/qrscaner-linux/qrscaner-linux/qrscaner.h
+

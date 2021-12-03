@@ -51,7 +51,7 @@ namespace ExtBoard {
 		CENTER = 0x01
 	};
 
-	void init(json& extboard, json& performingSystem, json& buttons, json& display, json& leds, json& effects);
+	void init(json& extboard, json& performingUnits, json& relaysGroups, json& buttons, json& display, json& leds, json& effects);
 	
 	/* Light control */
 	void startLightEffect(int id);
@@ -62,7 +62,7 @@ namespace ExtBoard {
 	void registerOnButtonPushedHandler(void (*handler)(int iButton));
 	void registerOnEffectEndHandler(void (*handler)(int iEffect));
 	void registerOnCardReadHandler(void (*handler)(const char* uid));
-	void registerOnCashAddedHandler(void (*handler)(int nCash));
+	void registerOnCashAddedHandler(void (*handler)(double nCash));
 	void registerOnObjectCloserHandler(void (*handler)());
 
 	/* Performer unit functions */
