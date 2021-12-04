@@ -4,6 +4,7 @@
 #include "../jparser-linux/JParser.h"
 #include "../logger-linux/Logger.h"
 #include "../qrscaner-linux/qrscaner.h"
+#include "../timer/Timer.h"
 #include "render.h"
 #include "button_driver.h"
 #include "bonus.h"
@@ -24,37 +25,36 @@ using ButtonType = bd::ButtonType;
 namespace utils {
 
 namespace {
-	enum class Mode {
-		III
-	};
-
 	void (*_onCashAppeared)();
 	void (*_onCashRunout)();
 	void (*_onButtonPushed)(ButtonType type, int iButton);
-	void (*_onCard)(const char* uid);
-	void (*_onQr)(const char* qr);
+	void (*_onCard)(const char* cardid);
 
 	JParser* _hwconfig = nullptr;
 	JParser* _config = nullptr;
 	JParser* _effectscnf = nullptr;
 	JParser* _bonuscnf = nullptr;
 	JParser* _framescnf = nullptr;
+
 	Logger* _log = nullptr;
+	Timer* _wdtimer = nullptr;
+
 	vector<Program> _programs;
+	vector<Program> _servicePrograms;
 	int _currentProgram = -1;
+	int _logoFrame = -1;
+	int _unknownCardFrame = -1;
 
 	double _nMoney = 0;
 
-	Mode _mode = Mode::III;
 
 }
 
-void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushed)(ButtonType type, int iButton), void (*onCard)(const char* uid), void (*onQr)(const char* qr)) {
+void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushed)(ButtonType type, int iButton), void (*onCard)(const char* cardid)) {
 	_onCashAppeared = onCashAppeared;
 	_onCashRunout = onCashRunout;
 	_onButtonPushed = onButtonPushed;
 	_onCard = onCard;
-	_onQr = onQr;
 
 	try {
 		_log = new Logger("./log.txt");
@@ -125,10 +125,15 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 	// render
 	try {
 		_framescnf = new JParser("./config/frames.json");
+		try {
+			_logoFrame = _config->get("logo-frame");
+		} catch (exception& e) {
+			_log->log(Logger::Type::WARNING, "CONFIG", "fail to get logo frame: " + string(e.what()));
+		}
 		render::init(displayCnf, _framescnf->get("frames"));
 		_log->log(Logger::Type::INFO, "UTILS INIT", "render core init");
 	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init render core: " + string(e.what()));
+		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		throw runtime_error("fail to init render core: " + string(e.what()));
 	}
 
@@ -140,7 +145,7 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 		int height = JParser::getf(qrscnf, "height", "qr-scaner");
 		char cdriver[256] = {0};
 		strcpy(cdriver, driver.c_str());
-		int rc = qrscaner_init(cdriver, width, height, _onQr);
+		int rc = qrscaner_init(cdriver, width, height, _onCard);
 		if (rc == 0) {
 			_log->log(Logger::Type::INFO, "UTILS INIT", "qr-scaner init");
 		} else {
@@ -179,15 +184,31 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 		throw runtime_error("fail to fill programs: " + string(e.what()));
 	}
 	
+	try {
+		json& programs = _config->get("service-programs");
+		for (int i = 0; i < programs.size(); i++) {
+			json& jp = programs[i];
+			Program sp;
+			sp.id = JParser::getf(jp, "id", "program at [" + to_string(i) + "]");
+			sp.frame = JParser::getf(jp, "frame", "program at [" + to_string(i) + "]");
+			sp.relayGroup = JParser::getf(jp, "relay-group", "program at [" + to_string(i) + "]");
+			sp.freeUseTimeSec = JParser::getf(jp, "free-use-time", "program at [" + to_string(i) + "]");
+			sp.name = JParser::getf(jp, "name", "program at [" + to_string(i) + "]");
+			sp.remainFreeUseTimeSec = sp.freeUseTimeSec;
+			sp.rate = 0;
+			_servicePrograms.push_back(sp);
+		}
+	} catch (exception& e) {
+		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to fill programs: " + string(e.what()));
+		throw runtime_error("fail to fill programs: " + string(e.what()));
+	}
+
 
 	// extboard callbacks
 	ExtBoard::registerOnCashAddedHandler(_onCashAdd);
 	ExtBoard::registerOnCardReadHandler(_onCard);
 
-}
-
-void printLogo() {
-
+	_wdtimer = new Timer(1, 0, _withdraw);
 }
 
 void setGiveMoneyMode() {
@@ -210,16 +231,33 @@ int getProgramByButton(int iButton) {
 
 }
 
-void bonusEnd() {
+bool writeOffBonuses(const char* uid) {
 
 }
 
-void bonusBegin(const char* uid) {
+void accrueRemainBonuses(const char* uid) {
 
 }
 
-bool isServiceCard(const char* uid) {
+// additionaly check local storage service cards
+CardInfo getCardInfo(const char* qrOrCardid) {
 
+}
+
+int getProgramByButton(int iButton) {
+
+}
+
+int getProgramFrame(int iProgram) {
+
+}
+
+void printLogoFrame() {
+	render::showFrame(_logoFrame);
+}
+
+void printUnknownCardFrame() {
+	render::showFrame(_unknownCardFrame);
 }
 
 namespace {
@@ -231,8 +269,8 @@ void _onCashAdd(double nMoney) {
 	_nMoney += nMoney;
 }
 
-void _withdraw(void* arg) {
-
+Timer::Action _withdraw(timer_t) {
+	return Timer::Action::CONTINUE;
 }
 
 }

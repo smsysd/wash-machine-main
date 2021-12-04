@@ -14,9 +14,20 @@ using json = nlohmann::json;
 
 namespace bonus {
 
+struct CardInfo {
+	enum Type {
+		BONUS,
+		SERVICE,
+		UNKNOWN
+	};
+	Type type;
+	char uid[256];
+};
+
 void init(json& bonusSysCnf, json& promotions, json& programs);
+CardInfo getCardInfo(const char* qrOrCardid);
 double writeoff(const char* uid);
-void accrue(const char* uid, double nBonuses);
+void accrue(const char* uid);
 double getRate(int iProgram);
 double getCoef();
 

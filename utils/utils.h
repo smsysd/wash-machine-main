@@ -5,10 +5,14 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <time.h>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 namespace bd = button_driver;
 using ButtonType = bd::ButtonType;
+using CardInfo = bonus::CardInfo;
 
 namespace utils {
 
@@ -20,24 +24,30 @@ struct Program {
 	double rate;
 	int freeUseTimeSec;
 	int remainFreeUseTimeSec;
+	time_point<steady_clock> tBegin;
+	duration<long> duration;
 };
 
 void init(
 	void (*onCashAppeared)(),
 	void (*onCashRunout)(),
 	void (*onButtonPushed)(ButtonType type, int iButton),
-	void (*onCard)(const char* uid),
-	void (*onQr)(const char* qr));
+	void (*onCard)(const char* cardid));
 
-void printLogo();
 void setGiveMoneyMode();
 void setProgramMode();
 void setServiceMode(const char* uid);
 void setProgram(int iProg);
+
+bool writeOffBonuses(const char* uid);
+void accrueRemainBonuses(const char* uid);
+
+CardInfo getCardInfo(const char* qrOrCardid); // additionaly check local storage service cards
 int getProgramByButton(int iButton);
-void bonusEnd();
-void bonusBegin(const char* uid);
-bool isServiceCard(const char* uid);
+int getProgramFrame(int iProgram);
+
+void printLogoFrame();
+void printUnknownCardFrame();
 
 }
 

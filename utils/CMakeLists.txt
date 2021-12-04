@@ -2,6 +2,6 @@ cmake_minimum_required(VERSION 3.9)
 
 project(utils)
 
-add_library(utils utils.cpp)
+add_library(utils utils.cpp bonus.cpp button_driver.cpp render.cpp)
 
-target_link_libraries(utils extboard jparser logger general-tools qrscaner render)
+target_link_libraries(utils extboard jparser logger general-tools qrscaner timer)

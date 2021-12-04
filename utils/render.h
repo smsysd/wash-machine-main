@@ -11,6 +11,7 @@ using namespace std;
 
 namespace render {
 	void init(json& displaycnf, json& framescnf);
+	void showFrame(int iFrame);
 }
 
 #endif

@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/elpi/workspace/sm-sys-dev/linux-timer/timer/Timer.cpp
+Timer.h
+/home/elpi/workspace/sm-sys-dev/linux-timer/timer/Timer.h
+signal.h
+-
+sys/time.h
+-
+signal.h
+-
+unistd.h
+-
+time.h
+-
+stdexcept
+-
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+stdint.h
+-
+
+/home/elpi/workspace/sm-sys-dev/linux-timer/timer/Timer.h
+signal.h
+-
+time.h
+-
+

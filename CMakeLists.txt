@@ -10,7 +10,9 @@ add_subdirectory(logger-linux)
 add_subdirectory(mspi-linux)
 add_subdirectory(extboard)
 add_subdirectory(qrscaner-linux)
+add_subdirectory(timer)
 add_subdirectory(utils)
+
 
 add_executable(wash-machine main.cpp)
 
