@@ -32,10 +32,10 @@ void init(
 	void (*onCashAppeared)(),
 	void (*onCashRunout)(),
 	void (*onButtonPushed)(ButtonType type, int iButton),
-	void (*onCard)(const char* cardid));
+	void (*onCard)(const char* cardid),
+	void (*onServiceEnd)());
 
 void setGiveMoneyMode();
-void setProgramMode();
 void setServiceMode(const char* uid);
 void setProgram(int iProg);
 

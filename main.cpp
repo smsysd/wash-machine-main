@@ -35,7 +35,7 @@ void onCard(const char* uid);
 void onQr(const char* qr);
 
 int main(int argc, char const *argv[]) {
-	init(onCashAppeared, onCashRunout, onButtonPushed, onCard);
+	init(onCashAppeared, onCashRunout, onButtonPushed, onCard, onServiceEnd);
 	printLogoFrame();
 	setGiveMoneyMode();
 	
@@ -65,6 +65,7 @@ void onButtonPushed(ButtonType type, int iButton) {
 			accrueRemainBonuses(card.uid);
 		}
 		setGiveMoneyMode();
+		mode = Mode::GIVE_MONEY;
 		break;
 	case button_driver::ButtonType::PROGRAM:
 		if (mode == Mode::PROGRAM) {
@@ -87,4 +88,9 @@ void onCard(const char* cardid) {
 	if (card.type == bonus::CardInfo::UNKNOWN) {
 		printUnknownCardFrame();
 	}
+}
+
+void onServiceEnd() {
+	setGiveMoneyMode();
+	mode = Mode::GIVE_MONEY;
 }

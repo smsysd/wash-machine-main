@@ -12,6 +12,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <string.h>
+#include <mutex>
 
 #include <iostream>
 #include <string>
@@ -20,15 +21,15 @@
 
 using namespace std;
 namespace bd = button_driver;
-using ButtonType = bd::ButtonType;
 
 namespace utils {
 
 namespace {
 	void (*_onCashAppeared)();
 	void (*_onCashRunout)();
-	void (*_onButtonPushed)(ButtonType type, int iButton);
+	void (*_onButtonPushed)(bd::ButtonType type, int iButton);
 	void (*_onCard)(const char* cardid);
+	void (*_onServiceEnd)();
 
 	JParser* _hwconfig = nullptr;
 	JParser* _config = nullptr;
@@ -38,6 +39,7 @@ namespace {
 
 	Logger* _log = nullptr;
 	Timer* _wdtimer = nullptr;
+	mutex _moneyMutex;
 
 	vector<Program> _programs;
 	vector<Program> _servicePrograms;
@@ -50,11 +52,21 @@ namespace {
 
 }
 
-void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushed)(ButtonType type, int iButton), void (*onCard)(const char* cardid)) {
+void init(
+	void (*onCashAppeared)(),
+	void (*onCashRunout)(),
+	void (*onButtonPushed)(bd::ButtonType type, int iButton),
+	void (*onCard)(const char* cardid),
+	void (*onServiceEnd)())
+{
 	_onCashAppeared = onCashAppeared;
 	_onCashRunout = onCashRunout;
 	_onButtonPushed = onButtonPushed;
 	_onCard = onCard;
+	_onServiceEnd = onServiceEnd;
+
+	cout << "init general-tools.." << endl;
+	general_tools_init();
 
 	try {
 		_log = new Logger("./log.txt");
@@ -63,6 +75,7 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 	}
 
 	try {
+		cout << "load necessary config files.." << endl;
 		_hwconfig = new JParser("./config/hwconfig.json");
 		_config = new JParser("./config/config.json");
 	} catch (exception& e) {
@@ -89,6 +102,7 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 
 	// extboard
 	try {
+		cout << "init extboard.." << endl;
 		json& extBoardCnf = _hwconfig->get("ext-board");
 		json& relaysGroups = _config->get("relays-groups");
 		json& performingUnitsCnf = _hwconfig->get("performing-units");
@@ -107,7 +121,6 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 			}
 		}
 		ExtBoard::init(extBoardCnf, performingUnitsCnf, relaysGroups, buttonsCnf, displayCnf, ledsCnf, effectsCnf);
-		_log->log(Logger::Type::INFO, "UTILS INIT", "expander board init");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));
@@ -115,8 +128,8 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 
 	// button
 	try {
+		cout << "init button driver.." << endl;
 		bd::init(buttonsCnf, _onButtonPushed);
-		_log->log(Logger::Type::INFO, "UTILS INIT", "button driver init");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init button driver: " + string(e.what()));
 		throw runtime_error("fail to init button driver: " + string(e.what()));
@@ -124,6 +137,7 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 
 	// render
 	try {
+		cout << "init render module.." << endl;
 		_framescnf = new JParser("./config/frames.json");
 		try {
 			_logoFrame = _config->get("logo-frame");
@@ -131,7 +145,6 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 			_log->log(Logger::Type::WARNING, "CONFIG", "fail to get logo frame: " + string(e.what()));
 		}
 		render::init(displayCnf, _framescnf->get("frames"));
-		_log->log(Logger::Type::INFO, "UTILS INIT", "render core init");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		throw runtime_error("fail to init render core: " + string(e.what()));
@@ -139,6 +152,7 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 
 	// qr scaner
 	try {
+		cout << "init qr scanner.." << endl;
 		json& qrscnf = _hwconfig->get("qr-scaner");
 		string driver = JParser::getf(qrscnf, "driver", "qr-scaner");
 		int width = JParser::getf(qrscnf, "width", "qr-scaner");
@@ -147,7 +161,7 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 		strcpy(cdriver, driver.c_str());
 		int rc = qrscaner_init(cdriver, width, height, _onCard);
 		if (rc == 0) {
-			_log->log(Logger::Type::INFO, "UTILS INIT", "qr-scaner init");
+			qrscaner_start();
 		} else {
 			throw runtime_error(to_string(rc));
 		}
@@ -157,15 +171,16 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 
 	// bonus system
 	try {
+		cout << "init bonus system module.." << endl;
 		_bonuscnf = new JParser("./config/bonus.json");
 		bonus::init(_bonuscnf->get("bonus-sys"), _bonuscnf->get("promotions"), _config->get("programs"));
-		_log->log(Logger::Type::INFO, "INIT", "bonus system init");
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to init bonus system: " + string(e.what()));
 	}
 
 	// fill programs
 	try {
+		cout << "fill client programs.." << endl;
 		json& programs = _config->get("programs");
 		for (int i = 0; i < programs.size(); i++) {
 			json& jp = programs[i];
@@ -185,6 +200,7 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 	}
 	
 	try {
+		cout << "fil service programs.." << endl;
 		json& programs = _config->get("service-programs");
 		for (int i = 0; i < programs.size(); i++) {
 			json& jp = programs[i];
@@ -205,26 +221,29 @@ void init(void (*onCashAppeared)(), void (*onCashRunout)(), void (*onButtonPushe
 
 
 	// extboard callbacks
+	cout << "register exboard callbacks.." << endl;
 	ExtBoard::registerOnCashAddedHandler(_onCashAdd);
 	ExtBoard::registerOnCardReadHandler(_onCard);
 
+	cout << "register genereal handler.." << endl;
+	callHandler(_handler, NULL, 500, 0);
+
+	cout << "start withdraw timer.." << endl;
 	_wdtimer = new Timer(1, 0, _withdraw);
+
+	cout << "initialize complete." << endl;
 }
 
 void setGiveMoneyMode() {
-
-}
-
-void setProgramMode() {
-
+	cout << "apply 'give money' mode.." << endl;
 }
 
 void setServiceMode(const char* uid) {
-
+	cout << "apply 'service' mode.." << endl;
 }
 
 void setProgram(int iProg) {
-
+	cout << "try set program " << iProg << endl;
 }
 
 int getProgramByButton(int iButton) {
@@ -232,11 +251,11 @@ int getProgramByButton(int iButton) {
 }
 
 bool writeOffBonuses(const char* uid) {
-
+	cout << "try write off bonuses.." << endl;
 }
 
 void accrueRemainBonuses(const char* uid) {
-
+	cout << "accrue bonuses.." << endl;
 }
 
 // additionaly check local storage service cards
@@ -263,14 +282,23 @@ void printUnknownCardFrame() {
 namespace {
 
 void _onCashAdd(double nMoney) {
+	cout << "money received: " << nMoney << endl;
+	_moneyMutex.lock();
 	if (_nMoney == 0) {
 		_onCashAppeared();
 	}
 	_nMoney += nMoney;
+	_moneyMutex.unlock();
 }
 
 Timer::Action _withdraw(timer_t) {
+	_moneyMutex.lock();
+	_moneyMutex.unlock();
 	return Timer::Action::CONTINUE;
+}
+
+ReturnCode _handler(uint16_t id, void* arg) {
+	return OK;
 }
 
 }
