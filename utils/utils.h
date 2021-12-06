@@ -38,13 +38,14 @@ void init(
 void setGiveMoneyMode();
 void setServiceMode(const char* uid);
 void setProgram(int iProg);
+void setServiceProgram(int iProg);
 
 bool writeOffBonuses(const char* uid);
 void accrueRemainBonuses(const char* uid);
 
 CardInfo getCardInfo(const char* qrOrCardid); // additionaly check local storage service cards
 int getProgramByButton(int iButton);
-int getProgramFrame(int iProgram);
+int getServiceProgramByButton(int iButton);
 
 void printLogoFrame();
 void printUnknownCardFrame();

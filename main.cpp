@@ -58,20 +58,20 @@ void onCashRunout() {
 }
 
 void onButtonPushed(ButtonType type, int iButton) {
-	switch (type) {
-	case button_driver::ButtonType::END:
-		if (mode == Mode::PROGRAM && isCardRead) {
-			isCardRead = false;
-			accrueRemainBonuses(card.uid);
-		}
-		setGiveMoneyMode();
-		mode = Mode::GIVE_MONEY;
-		break;
-	case button_driver::ButtonType::PROGRAM:
-		if (mode == Mode::PROGRAM) {
+	if (mode == Mode::PROGRAM) {
+		switch (type) {
+		case button_driver::ButtonType::END:
+			if (isCardRead) {
+				isCardRead = false;
+				accrueRemainBonuses(card.uid);
+			}
+			setGiveMoneyMode();
+			mode = Mode::GIVE_MONEY;
+			break;
+		case button_driver::ButtonType::PROGRAM:
 			setProgram(getProgramByButton(iButton));
+			break;
 		}
-		break;
 	}
 }
 

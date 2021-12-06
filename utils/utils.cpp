@@ -243,10 +243,28 @@ void setServiceMode(const char* uid) {
 }
 
 void setProgram(int iProg) {
-	cout << "try set program " << iProg << endl;
+	if (iProg >= _programs.size() || iProg < 0) {
+		return;
+		cout << "incorrect set program" << endl;
+	}
+
+	cout << "program '' set" << endl;
+}
+
+void setServiceProgram(int iProg) {
+	if (iProg >= _servicePrograms.size() || iProg < 0) {
+		return;
+		cout << "incorrect set service program" << endl;
+	}
+
+	cout << "service program '' set" << endl;
 }
 
 int getProgramByButton(int iButton) {
+
+}
+
+int getServiceProgramByButton(int iButton) {
 
 }
 
@@ -260,14 +278,6 @@ void accrueRemainBonuses(const char* uid) {
 
 // additionaly check local storage service cards
 CardInfo getCardInfo(const char* qrOrCardid) {
-
-}
-
-int getProgramByButton(int iButton) {
-
-}
-
-int getProgramFrame(int iProgram) {
 
 }
 
