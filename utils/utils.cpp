@@ -33,9 +33,9 @@ namespace {
 
 	JParser* _hwconfig = nullptr;
 	JParser* _config = nullptr;
-	JParser* _effectscnf = nullptr;
+	JParser* _effects = nullptr;
 	JParser* _bonuscnf = nullptr;
-	JParser* _framescnf = nullptr;
+	JParser* _frames = nullptr;
 
 	Logger* _log = nullptr;
 	Timer* _wdtimer = nullptr;
@@ -83,7 +83,7 @@ void init(
 	}
 
 	try {
-		_effectscnf = new JParser("./config/effects.json");
+		_effects = new JParser("./config/effects.json");
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "UTILS", "fail to load effects: " + string(e.what()));
 	}
@@ -95,7 +95,7 @@ void init(
 		buttonsCnf = _hwconfig->get("buttons");
 		displayCnf = _hwconfig->get("display");
 	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to get config: " + string(e.what()));
+		_log->log(Logger::Type::ERROR, "CONFIG", "fail to get config: " + string(e.what()));
 		throw runtime_error("fail to get config: " + string(e.what()));
 	}
 
@@ -112,15 +112,15 @@ void init(
 		} catch (exception& e) {
 			_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to load leds: " + string(e.what()));
 		}
-		json effectsCnf;
-		if (_effectscnf != nullptr) {
+		json effects;
+		if (_effects != nullptr) {
 			try {
-				effectsCnf = _effectscnf->get("effects");
+				effects = _effects->get("effects");
 			} catch (exception& e) {
 				_log->log(Logger::Type::WARNING, "UTILS INIT", "fail get load effects: " + string(e.what()));
 			}
 		}
-		ExtBoard::init(extBoardCnf, performingUnitsCnf, relaysGroups, buttonsCnf, displayCnf, ledsCnf, effectsCnf);
+		ExtBoard::init(extBoardCnf, performingUnitsCnf, relaysGroups, buttonsCnf, ledsCnf, effects);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));
@@ -138,13 +138,13 @@ void init(
 	// render
 	try {
 		cout << "init render module.." << endl;
-		_framescnf = new JParser("./config/frames.json");
+		_frames = new JParser("./config/frames.json");
 		try {
 			_logoFrame = _config->get("logo-frame");
 		} catch (exception& e) {
 			_log->log(Logger::Type::WARNING, "CONFIG", "fail to get logo frame: " + string(e.what()));
 		}
-		render::init(displayCnf, _framescnf->get("frames"));
+		render::init(displayCnf, _frames->get("frames"));
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		throw runtime_error("fail to init render core: " + string(e.what()));
@@ -244,20 +244,20 @@ void setServiceMode(const char* uid) {
 
 void setProgram(int iProg) {
 	if (iProg >= _programs.size() || iProg < 0) {
-		return;
 		cout << "incorrect set program" << endl;
+		return;
 	}
 
-	cout << "program '' set" << endl;
+	cout << "program '" << _programs[iProg].name << "' set" << endl;
 }
 
 void setServiceProgram(int iProg) {
 	if (iProg >= _servicePrograms.size() || iProg < 0) {
-		return;
 		cout << "incorrect set service program" << endl;
+		return;
 	}
 
-	cout << "service program '' set" << endl;
+	cout << "service program '" << _servicePrograms[iProg].name << "' set" << endl;
 }
 
 int getProgramByButton(int iButton) {

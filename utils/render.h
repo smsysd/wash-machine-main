@@ -10,7 +10,7 @@
 using namespace std;
 
 namespace render {
-	void init(json& displaycnf, json& framescnf);
+	void init(json& displaycnf, json& frames);
 	void showFrame(int iFrame);
 }
 

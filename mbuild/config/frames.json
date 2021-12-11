@@ -1,0 +1,33 @@
+{
+	"general-option": {
+		"default-color": 255,
+		"default-font": 0,
+		"default-cursor": [0, 2]
+	},
+
+	"frames": [
+		{
+			"id": 0,
+			"font": 0,
+			"bg": "none",
+			"mode": "center",
+			"color": 255,
+			"lines": [
+				"ПОЖАЛУЙСТА",
+				"ВНЕСИТЕ {c0f:ДЕНЬГИ}"
+			]
+		},
+
+		{
+			"id": 1,
+			"font": 0,
+			"bg": "none",
+			"mode": "center",
+			"color": 255,
+			"lines": [
+				"ВЫБЕРИТЕ ПРОГРАММУ",
+				"{$cf0:money} RUB."
+			]
+		}
+	]
+}

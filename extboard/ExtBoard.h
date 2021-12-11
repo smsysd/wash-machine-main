@@ -22,41 +22,43 @@ namespace ExtBoard {
 			WRITE1_LP = 0x03,
 			WRITE0_IL = 0x06,
 			WRITE1_IL = 0x05,
-			DELAY = 0x10
-		};
-
-		enum class LightEffectType {
-			MAIN = 0x01,
-			SUB = 0x02
+			DELAY = 0x0A,
+			NODELAY = 0x0B
 		};
 
 		struct LightInstruction{
-			LightCmd cmd;
-			uint8_t data0;
-			uint8_t data1;
-			
+			uint8_t cmd;
+			uint8_t data;
 		};
 
 		struct LightEffect {
 			int id;
-			LightEffectType type;
 			uint16_t delay;
 			uint8_t nRepeats;
-			LightInstruction instructions[1024];
+			LightInstruction instructions[508];
 		};
 	}
+
+	enum class LightEffectType {
+		MAIN = 0x01,
+		SUB = 0x02
+	};
 
 	enum class DisplayStringMode {
 		DEFAULT = 0x00,
 		CENTER = 0x01
 	};
 
-	void init(json& extboard, json& performingUnits, json& relaysGroups, json& buttons, json& display, json& leds, json& effects);
+	void init(json& extboard, json& performingUnits, json& relaysGroups, json& buttons, json& leds, json& effects);
 	
 	/* Light control */
-	void startLightEffect(int id);
-	void stopLightEffect(LightEffectType type);
-	void resetLight();
+	void startLightEffect(int id, LightEffectType type);
+	void resetLightEffect(LightEffectType type);
+
+	/* Performing functions */
+	void relievePressure();
+	void setRelayGroup(int iGroup);
+	void setRelaysState(int address, int states);
 
 	/* Event handlers registration */
 	void registerOnButtonPushedHandler(void (*handler)(int iButton));
@@ -64,20 +66,6 @@ namespace ExtBoard {
 	void registerOnCardReadHandler(void (*handler)(const char* uid));
 	void registerOnCashAddedHandler(void (*handler)(double nCash));
 	void registerOnObjectCloserHandler(void (*handler)());
-
-	/* Performer unit functions */
-	void relievePressure();
-	void setProgram(int iProg);
-	void setRelaysState(int address, int states);
-
-	/* Display functions */
-	void clearDisplay();
-	void printBlock(int x, int y, int iBlock);
-	void print(int x, int y, int color, char* str);
-	void printFrame(int iFrame);
-	void loadChar(int font, int iChar, RGB332 bitmap);
-	void loadBlock(int iBlock, RGB332 bitmap);
-
 }
 
 #endif
