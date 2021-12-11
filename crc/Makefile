@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-dev/mspi-linux
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-dev/crc
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-dev/mspi-linux
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-dev/crc
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,14 +99,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/mspi-linux/CMakeFiles /home/elpi/workspace/sm-sys-dev/mspi-linux/crc//CMakeFiles/progress.marks
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/mspi-linux/CMakeFiles 0
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/crc/CMakeFiles /home/elpi/workspace/sm-sys-dev/crc/crc//CMakeFiles/progress.marks
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/crc/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/clean
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/preinstall
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/preinstall
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 crc/CMakeFiles/crc.dir/rule:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/CMakeFiles/crc.dir/rule
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crc/CMakeFiles/crc.dir/rule
 .PHONY : crc/CMakeFiles/crc.dir/rule
 
 # Convenience name for target.
@@ -141,8 +141,62 @@ crc: crc/CMakeFiles/crc.dir/rule
 
 # fast build rule for target.
 crc/fast:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/build
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/build
 .PHONY : crc/fast
+
+crc16.o: crc16.c.o
+
+.PHONY : crc16.o
+
+# target to build an object file
+crc16.c.o:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc16.c.o
+.PHONY : crc16.c.o
+
+crc16.i: crc16.c.i
+
+.PHONY : crc16.i
+
+# target to preprocess a source file
+crc16.c.i:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc16.c.i
+.PHONY : crc16.c.i
+
+crc16.s: crc16.c.s
+
+.PHONY : crc16.s
+
+# target to generate assembly for a file
+crc16.c.s:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc16.c.s
+.PHONY : crc16.c.s
+
+crc32.o: crc32.c.o
+
+.PHONY : crc32.o
+
+# target to build an object file
+crc32.c.o:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc32.c.o
+.PHONY : crc32.c.o
+
+crc32.i: crc32.c.i
+
+.PHONY : crc32.i
+
+# target to preprocess a source file
+crc32.c.i:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc32.c.i
+.PHONY : crc32.c.i
+
+crc32.s: crc32.c.s
+
+.PHONY : crc32.s
+
+# target to generate assembly for a file
+crc32.c.s:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc32.c.s
+.PHONY : crc32.c.s
 
 crc8.o: crc8.c.o
 
@@ -150,7 +204,7 @@ crc8.o: crc8.c.o
 
 # target to build an object file
 crc8.c.o:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc8.c.o
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc8.c.o
 .PHONY : crc8.c.o
 
 crc8.i: crc8.c.i
@@ -159,7 +213,7 @@ crc8.i: crc8.c.i
 
 # target to preprocess a source file
 crc8.c.i:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc8.c.i
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc8.c.i
 .PHONY : crc8.c.i
 
 crc8.s: crc8.c.s
@@ -168,8 +222,35 @@ crc8.s: crc8.c.s
 
 # target to generate assembly for a file
 crc8.c.s:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc8.c.s
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/crc8.c.s
 .PHONY : crc8.c.s
+
+lrc8.o: lrc8.c.o
+
+.PHONY : lrc8.o
+
+# target to build an object file
+lrc8.c.o:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/lrc8.c.o
+.PHONY : lrc8.c.o
+
+lrc8.i: lrc8.c.i
+
+.PHONY : lrc8.i
+
+# target to preprocess a source file
+lrc8.c.i:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/lrc8.c.i
+.PHONY : lrc8.c.i
+
+lrc8.s: lrc8.c.s
+
+.PHONY : lrc8.s
+
+# target to generate assembly for a file
+lrc8.c.s:
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(MAKE) $(MAKESILENT) -f crc/CMakeFiles/crc.dir/build.make crc/CMakeFiles/crc.dir/lrc8.c.s
+.PHONY : lrc8.c.s
 
 # Help Target
 help:
@@ -180,9 +261,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... crc"
+	@echo "... crc16.o"
+	@echo "... crc16.i"
+	@echo "... crc16.s"
+	@echo "... crc32.o"
+	@echo "... crc32.i"
+	@echo "... crc32.s"
 	@echo "... crc8.o"
 	@echo "... crc8.i"
 	@echo "... crc8.s"
+	@echo "... lrc8.o"
+	@echo "... lrc8.i"
+	@echo "... lrc8.s"
 .PHONY : help
 
 
@@ -194,6 +284,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

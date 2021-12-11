@@ -29,5 +29,13 @@
 				"{$cf0:money} RUB."
 			]
 		}
+	],
+
+	"backgrounds": [
+		{
+			"id": 0,
+			"image": "./config/img/1.bmp"
+		}
+
 	]
 }

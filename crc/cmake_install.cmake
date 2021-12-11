@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpi/workspace/sm-sys-dev/mspi-linux/crc
+# Install script for directory: /home/elpi/workspace/sm-sys-dev/crc/crc
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

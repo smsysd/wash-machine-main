@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/elpi/workspace/sm-sys-dev/mspi-linux/crc/crc.h
+/home/elpi/workspace/sm-sys-dev/crc/crc/crc.h
 stdint.h
 -
 
-/home/elpi/workspace/sm-sys-dev/mspi-linux/crc/crc8.c
+/home/elpi/workspace/sm-sys-dev/crc/crc/crc32.c
 crc.h
-/home/elpi/workspace/sm-sys-dev/mspi-linux/crc/crc.h
+/home/elpi/workspace/sm-sys-dev/crc/crc/crc.h
 stdint.h
 -
 

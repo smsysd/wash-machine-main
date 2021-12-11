@@ -4,7 +4,10 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/elpi/workspace/sm-sys-dev/mspi-linux/crc/crc8.c" "/home/elpi/workspace/sm-sys-dev/mspi-linux/crc/CMakeFiles/crc.dir/crc8.c.o"
+  "/home/elpi/workspace/sm-sys-dev/crc/crc/crc16.c" "/home/elpi/workspace/sm-sys-dev/crc/crc/CMakeFiles/crc.dir/crc16.c.o"
+  "/home/elpi/workspace/sm-sys-dev/crc/crc/crc32.c" "/home/elpi/workspace/sm-sys-dev/crc/crc/CMakeFiles/crc.dir/crc32.c.o"
+  "/home/elpi/workspace/sm-sys-dev/crc/crc/crc8.c" "/home/elpi/workspace/sm-sys-dev/crc/crc/CMakeFiles/crc.dir/crc8.c.o"
+  "/home/elpi/workspace/sm-sys-dev/crc/crc/lrc8.c" "/home/elpi/workspace/sm-sys-dev/crc/crc/CMakeFiles/crc.dir/lrc8.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

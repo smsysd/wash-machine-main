@@ -62,10 +62,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-dev/mspi-linux
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-dev/crc
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-dev/mspi-linux
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-dev/crc
 
 # Include any dependencies generated for this target.
 include crc/CMakeFiles/crc.dir/depend.make
@@ -78,30 +78,75 @@ include crc/CMakeFiles/crc.dir/flags.make
 
 crc/CMakeFiles/crc.dir/crc8.c.o: crc/CMakeFiles/crc.dir/flags.make
 crc/CMakeFiles/crc.dir/crc8.c.o: crc/crc8.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elpi/workspace/sm-sys-dev/mspi-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object crc/CMakeFiles/crc.dir/crc8.c.o"
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/crc.dir/crc8.c.o -c /home/elpi/workspace/sm-sys-dev/mspi-linux/crc/crc8.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elpi/workspace/sm-sys-dev/crc/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object crc/CMakeFiles/crc.dir/crc8.c.o"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/crc.dir/crc8.c.o -c /home/elpi/workspace/sm-sys-dev/crc/crc/crc8.c
 
 crc/CMakeFiles/crc.dir/crc8.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/crc.dir/crc8.c.i"
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/elpi/workspace/sm-sys-dev/mspi-linux/crc/crc8.c > CMakeFiles/crc.dir/crc8.c.i
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/elpi/workspace/sm-sys-dev/crc/crc/crc8.c > CMakeFiles/crc.dir/crc8.c.i
 
 crc/CMakeFiles/crc.dir/crc8.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/crc.dir/crc8.c.s"
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/elpi/workspace/sm-sys-dev/mspi-linux/crc/crc8.c -o CMakeFiles/crc.dir/crc8.c.s
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/elpi/workspace/sm-sys-dev/crc/crc/crc8.c -o CMakeFiles/crc.dir/crc8.c.s
+
+crc/CMakeFiles/crc.dir/lrc8.c.o: crc/CMakeFiles/crc.dir/flags.make
+crc/CMakeFiles/crc.dir/lrc8.c.o: crc/lrc8.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elpi/workspace/sm-sys-dev/crc/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object crc/CMakeFiles/crc.dir/lrc8.c.o"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/crc.dir/lrc8.c.o -c /home/elpi/workspace/sm-sys-dev/crc/crc/lrc8.c
+
+crc/CMakeFiles/crc.dir/lrc8.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/crc.dir/lrc8.c.i"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/elpi/workspace/sm-sys-dev/crc/crc/lrc8.c > CMakeFiles/crc.dir/lrc8.c.i
+
+crc/CMakeFiles/crc.dir/lrc8.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/crc.dir/lrc8.c.s"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/elpi/workspace/sm-sys-dev/crc/crc/lrc8.c -o CMakeFiles/crc.dir/lrc8.c.s
+
+crc/CMakeFiles/crc.dir/crc16.c.o: crc/CMakeFiles/crc.dir/flags.make
+crc/CMakeFiles/crc.dir/crc16.c.o: crc/crc16.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elpi/workspace/sm-sys-dev/crc/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object crc/CMakeFiles/crc.dir/crc16.c.o"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/crc.dir/crc16.c.o -c /home/elpi/workspace/sm-sys-dev/crc/crc/crc16.c
+
+crc/CMakeFiles/crc.dir/crc16.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/crc.dir/crc16.c.i"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/elpi/workspace/sm-sys-dev/crc/crc/crc16.c > CMakeFiles/crc.dir/crc16.c.i
+
+crc/CMakeFiles/crc.dir/crc16.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/crc.dir/crc16.c.s"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/elpi/workspace/sm-sys-dev/crc/crc/crc16.c -o CMakeFiles/crc.dir/crc16.c.s
+
+crc/CMakeFiles/crc.dir/crc32.c.o: crc/CMakeFiles/crc.dir/flags.make
+crc/CMakeFiles/crc.dir/crc32.c.o: crc/crc32.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elpi/workspace/sm-sys-dev/crc/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object crc/CMakeFiles/crc.dir/crc32.c.o"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/crc.dir/crc32.c.o -c /home/elpi/workspace/sm-sys-dev/crc/crc/crc32.c
+
+crc/CMakeFiles/crc.dir/crc32.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/crc.dir/crc32.c.i"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/elpi/workspace/sm-sys-dev/crc/crc/crc32.c > CMakeFiles/crc.dir/crc32.c.i
+
+crc/CMakeFiles/crc.dir/crc32.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/crc.dir/crc32.c.s"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/elpi/workspace/sm-sys-dev/crc/crc/crc32.c -o CMakeFiles/crc.dir/crc32.c.s
 
 # Object files for target crc
 crc_OBJECTS = \
-"CMakeFiles/crc.dir/crc8.c.o"
+"CMakeFiles/crc.dir/crc8.c.o" \
+"CMakeFiles/crc.dir/lrc8.c.o" \
+"CMakeFiles/crc.dir/crc16.c.o" \
+"CMakeFiles/crc.dir/crc32.c.o"
 
 # External object files for target crc
 crc_EXTERNAL_OBJECTS =
 
 crc/libcrc.a: crc/CMakeFiles/crc.dir/crc8.c.o
+crc/libcrc.a: crc/CMakeFiles/crc.dir/lrc8.c.o
+crc/libcrc.a: crc/CMakeFiles/crc.dir/crc16.c.o
+crc/libcrc.a: crc/CMakeFiles/crc.dir/crc32.c.o
 crc/libcrc.a: crc/CMakeFiles/crc.dir/build.make
 crc/libcrc.a: crc/CMakeFiles/crc.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/elpi/workspace/sm-sys-dev/mspi-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C static library libcrc.a"
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux/crc && $(CMAKE_COMMAND) -P CMakeFiles/crc.dir/cmake_clean_target.cmake
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux/crc && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/crc.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/elpi/workspace/sm-sys-dev/crc/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C static library libcrc.a"
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && $(CMAKE_COMMAND) -P CMakeFiles/crc.dir/cmake_clean_target.cmake
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/crc.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 crc/CMakeFiles/crc.dir/build: crc/libcrc.a
@@ -109,10 +154,10 @@ crc/CMakeFiles/crc.dir/build: crc/libcrc.a
 .PHONY : crc/CMakeFiles/crc.dir/build
 
 crc/CMakeFiles/crc.dir/clean:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux/crc && $(CMAKE_COMMAND) -P CMakeFiles/crc.dir/cmake_clean.cmake
+	cd /home/elpi/workspace/sm-sys-dev/crc/crc && $(CMAKE_COMMAND) -P CMakeFiles/crc.dir/cmake_clean.cmake
 .PHONY : crc/CMakeFiles/crc.dir/clean
 
 crc/CMakeFiles/crc.dir/depend:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/elpi/workspace/sm-sys-dev/mspi-linux /home/elpi/workspace/sm-sys-dev/mspi-linux/crc /home/elpi/workspace/sm-sys-dev/mspi-linux /home/elpi/workspace/sm-sys-dev/mspi-linux/crc /home/elpi/workspace/sm-sys-dev/mspi-linux/crc/CMakeFiles/crc.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/elpi/workspace/sm-sys-dev/crc && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/elpi/workspace/sm-sys-dev/crc /home/elpi/workspace/sm-sys-dev/crc/crc /home/elpi/workspace/sm-sys-dev/crc /home/elpi/workspace/sm-sys-dev/crc/crc /home/elpi/workspace/sm-sys-dev/crc/crc/CMakeFiles/crc.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : crc/CMakeFiles/crc.dir/depend
 
