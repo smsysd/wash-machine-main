@@ -14,6 +14,16 @@ namespace render {
 		LEDMATRIX,
 		STD
 	};
+	enum VarType {
+		INT,
+		FLOAT,
+		STRING
+	};
+
+	// must be register before init
+	void regVar(int* var, string name);
+	void regVar(double* var, string name);
+	void regVar(const char* var, string name);
 
 	void init(json& displaycnf, json& frames, json& option, json& bg, json& fonts);
 	void showFrame(int iFrame);

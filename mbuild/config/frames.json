@@ -26,7 +26,7 @@
 			"color": 255,
 			"lines": [
 				"ВЫБЕРИТЕ ПРОГРАММУ",
-				"{$cf0:money} RUB."
+				"{cf0:{$:money}} RUB."
 			]
 		}
 	],
@@ -34,7 +34,7 @@
 	"backgrounds": [
 		{
 			"id": 0,
-			"image": "./config/img/1.bmp"
+			"name": "1.bmp"
 		}
 
 	],

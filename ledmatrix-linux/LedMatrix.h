@@ -32,6 +32,7 @@ public:
 
 	void switchBuffer();
     void clear();
+	void reset();
     void setCursor(int x, int y);
 	void setDefaultCursor(int x, int y);
 

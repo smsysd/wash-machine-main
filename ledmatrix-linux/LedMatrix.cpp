@@ -53,6 +53,10 @@ void LedMatrix::clear() {
     _cmd(Cmd::CLEAR, _toMedium);
 }
 
+void LedMatrix::reset() {
+	_cmd(Cmd::RESET, _toLarge);
+}
+
 void LedMatrix::setCursor(int x, int y) {
 	int buf[10];
 	buf[0] = (uint8_t)x | (y << 8);
