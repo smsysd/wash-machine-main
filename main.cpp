@@ -33,6 +33,7 @@ void onCashRunout();
 void onButtonPushed(ButtonType type, int iButton);
 void onCard(const char* uid);
 void onQr(const char* qr);
+void onServiceEnd();
 
 int main(int argc, char const *argv[]) {
 	init(onCashAppeared, onCashRunout, onButtonPushed, onCard, onServiceEnd);

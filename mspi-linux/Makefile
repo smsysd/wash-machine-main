@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-dev/mspi-linux
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-dev/mspi-linux
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,14 +99,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/mspi-linux/CMakeFiles /home/elpi/workspace/sm-sys-dev/mspi-linux/mspi-linux//CMakeFiles/progress.marks
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/mspi-linux/CMakeFiles 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles /home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux//CMakeFiles/progress.marks
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/clean
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 mspi-linux/CMakeFiles/mspi.dir/rule:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/CMakeFiles/mspi.dir/rule
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspi-linux/CMakeFiles/mspi.dir/rule
 .PHONY : mspi-linux/CMakeFiles/mspi.dir/rule
 
 # Convenience name for target.
@@ -141,7 +141,7 @@ mspi: mspi-linux/CMakeFiles/mspi.dir/rule
 
 # fast build rule for target.
 mspi/fast:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/build
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/build
 .PHONY : mspi/fast
 
 Mspi.o: Mspi.cpp.o
@@ -150,7 +150,7 @@ Mspi.o: Mspi.cpp.o
 
 # target to build an object file
 Mspi.cpp.o:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/Mspi.cpp.o
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/Mspi.cpp.o
 .PHONY : Mspi.cpp.o
 
 Mspi.i: Mspi.cpp.i
@@ -159,7 +159,7 @@ Mspi.i: Mspi.cpp.i
 
 # target to preprocess a source file
 Mspi.cpp.i:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/Mspi.cpp.i
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/Mspi.cpp.i
 .PHONY : Mspi.cpp.i
 
 Mspi.s: Mspi.cpp.s
@@ -168,7 +168,7 @@ Mspi.s: Mspi.cpp.s
 
 # target to generate assembly for a file
 Mspi.cpp.s:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/Mspi.cpp.s
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/Mspi.cpp.s
 .PHONY : Mspi.cpp.s
 
 # Help Target
@@ -194,6 +194,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/elpi/workspace/sm-sys-dev/mspi-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

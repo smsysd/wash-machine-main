@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/home/elpi/workspace/sm-sys-dev/linux-timer/timer/Timer.cpp
+/home/elpi/workspace/sm-sys/wash-machine-main/timer/Timer.cpp
 Timer.h
-/home/elpi/workspace/sm-sys-dev/linux-timer/timer/Timer.h
+/home/elpi/workspace/sm-sys/wash-machine-main/timer/Timer.h
 signal.h
 -
 sys/time.h
@@ -30,7 +30,7 @@ string.h
 stdint.h
 -
 
-/home/elpi/workspace/sm-sys-dev/linux-timer/timer/Timer.h
+/home/elpi/workspace/sm-sys/wash-machine-main/timer/Timer.h
 signal.h
 -
 time.h

@@ -13,31 +13,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-namespace ExtBoard {
-	namespace {
-		enum class LightCmd {
-			WRITE0_BM = 0x02,
-			WRITE1_BM = 0x01,
-			WRITE0_LP = 0x04,
-			WRITE1_LP = 0x03,
-			WRITE0_IL = 0x06,
-			WRITE1_IL = 0x05,
-			DELAY = 0x0A,
-			NODELAY = 0x0B
-		};
-
-		struct LightInstruction{
-			uint8_t cmd;
-			uint8_t data;
-		};
-
-		struct LightEffect {
-			int id;
-			uint16_t delay;
-			uint8_t nRepeats;
-			LightInstruction instructions[508];
-		};
-	}
+namespace extboard {
 
 	enum class LightEffectType {
 		MAIN = 0x01,

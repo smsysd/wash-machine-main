@@ -25,9 +25,9 @@ struct CardInfo {
 };
 
 void init(json& bonusSysCnf, json& promotions, json& programs);
-CardInfo getCardInfo(const char* qrOrCardid);
+CardInfo open(const char* qrOrCardid);
 double writeoff(const char* uid);
-void accrue(const char* uid);
+void close(const char* uid);
 double getRate(int iProgram);
 double getCoef();
 

@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-dev/qrscaner-linux
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-dev/qrscaner-linux
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,14 +99,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/qrscaner-linux/CMakeFiles /home/elpi/workspace/sm-sys-dev/qrscaner-linux/qrscaner-linux//CMakeFiles/progress.marks
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/qrscaner-linux/CMakeFiles 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles /home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux//CMakeFiles/progress.marks
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/clean
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 qrscaner-linux/CMakeFiles/qrscaner.dir/rule:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/CMakeFiles/qrscaner.dir/rule
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 qrscaner-linux/CMakeFiles/qrscaner.dir/rule
 .PHONY : qrscaner-linux/CMakeFiles/qrscaner.dir/rule
 
 # Convenience name for target.
@@ -141,7 +141,7 @@ qrscaner: qrscaner-linux/CMakeFiles/qrscaner.dir/rule
 
 # fast build rule for target.
 qrscaner/fast:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/build
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/build
 .PHONY : qrscaner/fast
 
 qrscaner.o: qrscaner.c.o
@@ -150,7 +150,7 @@ qrscaner.o: qrscaner.c.o
 
 # target to build an object file
 qrscaner.c.o:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/qrscaner.c.o
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/qrscaner.c.o
 .PHONY : qrscaner.c.o
 
 qrscaner.i: qrscaner.c.i
@@ -159,7 +159,7 @@ qrscaner.i: qrscaner.c.i
 
 # target to preprocess a source file
 qrscaner.c.i:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/qrscaner.c.i
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/qrscaner.c.i
 .PHONY : qrscaner.c.i
 
 qrscaner.s: qrscaner.c.s
@@ -168,7 +168,7 @@ qrscaner.s: qrscaner.c.s
 
 # target to generate assembly for a file
 qrscaner.c.s:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/qrscaner.c.s
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/qrscaner.c.s
 .PHONY : qrscaner.c.s
 
 # Help Target
@@ -194,6 +194,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/elpi/workspace/sm-sys-dev/qrscaner-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

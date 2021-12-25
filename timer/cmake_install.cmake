@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpi/workspace/sm-sys-dev/linux-timer/timer
+# Install script for directory: /home/elpi/workspace/sm-sys/wash-machine-main/timer
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

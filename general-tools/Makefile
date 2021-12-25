@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-dev/general-tools
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-dev/general-tools
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,14 +99,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/general-tools/CMakeFiles /home/elpi/workspace/sm-sys-dev/general-tools/general-tools//CMakeFiles/progress.marks
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/general-tools/CMakeFiles 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles /home/elpi/workspace/sm-sys/wash-machine-main/general-tools//CMakeFiles/progress.marks
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/clean
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 general-tools/CMakeFiles/general-tools.dir/rule:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/CMakeFiles/general-tools.dir/rule
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 general-tools/CMakeFiles/general-tools.dir/rule
 .PHONY : general-tools/CMakeFiles/general-tools.dir/rule
 
 # Convenience name for target.
@@ -141,7 +141,7 @@ general-tools: general-tools/CMakeFiles/general-tools.dir/rule
 
 # fast build rule for target.
 general-tools/fast:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f general-tools/CMakeFiles/general-tools.dir/build.make general-tools/CMakeFiles/general-tools.dir/build
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f general-tools/CMakeFiles/general-tools.dir/build.make general-tools/CMakeFiles/general-tools.dir/build
 .PHONY : general-tools/fast
 
 general_tools.o: general_tools.c.o
@@ -150,7 +150,7 @@ general_tools.o: general_tools.c.o
 
 # target to build an object file
 general_tools.c.o:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f general-tools/CMakeFiles/general-tools.dir/build.make general-tools/CMakeFiles/general-tools.dir/general_tools.c.o
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f general-tools/CMakeFiles/general-tools.dir/build.make general-tools/CMakeFiles/general-tools.dir/general_tools.c.o
 .PHONY : general_tools.c.o
 
 general_tools.i: general_tools.c.i
@@ -159,7 +159,7 @@ general_tools.i: general_tools.c.i
 
 # target to preprocess a source file
 general_tools.c.i:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f general-tools/CMakeFiles/general-tools.dir/build.make general-tools/CMakeFiles/general-tools.dir/general_tools.c.i
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f general-tools/CMakeFiles/general-tools.dir/build.make general-tools/CMakeFiles/general-tools.dir/general_tools.c.i
 .PHONY : general_tools.c.i
 
 general_tools.s: general_tools.c.s
@@ -168,7 +168,7 @@ general_tools.s: general_tools.c.s
 
 # target to generate assembly for a file
 general_tools.c.s:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(MAKE) $(MAKESILENT) -f general-tools/CMakeFiles/general-tools.dir/build.make general-tools/CMakeFiles/general-tools.dir/general_tools.c.s
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f general-tools/CMakeFiles/general-tools.dir/build.make general-tools/CMakeFiles/general-tools.dir/general_tools.c.s
 .PHONY : general_tools.c.s
 
 # Help Target
@@ -194,6 +194,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/elpi/workspace/sm-sys-dev/general-tools && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

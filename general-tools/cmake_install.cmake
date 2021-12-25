@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpi/workspace/sm-sys-dev/general-tools/general-tools
+# Install script for directory: /home/elpi/workspace/sm-sys/wash-machine-main/general-tools
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

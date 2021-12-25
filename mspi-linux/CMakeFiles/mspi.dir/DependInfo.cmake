@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/elpi/workspace/sm-sys-dev/mspi-linux/mspi-linux/Mspi.cpp" "/home/elpi/workspace/sm-sys-dev/mspi-linux/mspi-linux/CMakeFiles/mspi.dir/Mspi.cpp.o"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/Mspi.cpp" "/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/CMakeFiles/mspi.dir/Mspi.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -14,8 +14,8 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/elpi/workspace/sm-sys-dev/mspi-linux/crc/CMakeFiles/crc.dir/DependInfo.cmake"
-  "/home/elpi/workspace/sm-sys-dev/mspi-linux/general-tools/CMakeFiles/general-tools.dir/DependInfo.cmake"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/crc/CMakeFiles/crc.dir/DependInfo.cmake"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/CMakeFiles/general-tools.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

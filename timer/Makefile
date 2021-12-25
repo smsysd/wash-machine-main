@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-dev/linux-timer
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-dev/linux-timer
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,14 +99,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/linux-timer/CMakeFiles /home/elpi/workspace/sm-sys-dev/linux-timer/timer//CMakeFiles/progress.marks
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-dev/linux-timer/CMakeFiles 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles /home/elpi/workspace/sm-sys/wash-machine-main/timer//CMakeFiles/progress.marks
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/clean
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 timer/CMakeFiles/timer.dir/rule:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/CMakeFiles/timer.dir/rule
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer/CMakeFiles/timer.dir/rule
 .PHONY : timer/CMakeFiles/timer.dir/rule
 
 # Convenience name for target.
@@ -141,7 +141,7 @@ timer: timer/CMakeFiles/timer.dir/rule
 
 # fast build rule for target.
 timer/fast:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/build
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/build
 .PHONY : timer/fast
 
 Timer.o: Timer.cpp.o
@@ -150,7 +150,7 @@ Timer.o: Timer.cpp.o
 
 # target to build an object file
 Timer.cpp.o:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/Timer.cpp.o
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/Timer.cpp.o
 .PHONY : Timer.cpp.o
 
 Timer.i: Timer.cpp.i
@@ -159,7 +159,7 @@ Timer.i: Timer.cpp.i
 
 # target to preprocess a source file
 Timer.cpp.i:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/Timer.cpp.i
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/Timer.cpp.i
 .PHONY : Timer.cpp.i
 
 Timer.s: Timer.cpp.s
@@ -168,7 +168,7 @@ Timer.s: Timer.cpp.s
 
 # target to generate assembly for a file
 Timer.cpp.s:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/Timer.cpp.s
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/Timer.cpp.s
 .PHONY : Timer.cpp.s
 
 # Help Target
@@ -194,6 +194,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/elpi/workspace/sm-sys-dev/linux-timer && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

@@ -10,7 +10,12 @@
 using namespace std;
 
 namespace render {
-	void init(json& displaycnf, json& frames);
+	enum DisplayType {
+		LEDMATRIX,
+		STD
+	};
+
+	void init(json& displaycnf, json& frames, json& option, json& bg, json& fonts);
 	void showFrame(int iFrame);
 }
 

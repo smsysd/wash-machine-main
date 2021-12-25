@@ -49,7 +49,25 @@ namespace {
 
 	double _nMoney = 0;
 
+	void _onCashAdd(double nMoney) {
+		cout << "money received: " << nMoney << endl;
+		_moneyMutex.lock();
+		if (_nMoney == 0) {
+			_onCashAppeared();
+		}
+		_nMoney += nMoney;
+		_moneyMutex.unlock();
+	}
 
+	Timer::Action _withdraw(timer_t) {
+		_moneyMutex.lock();
+		_moneyMutex.unlock();
+		return Timer::Action::CONTINUE;
+	}
+
+	ReturnCode _handler(uint16_t id, void* arg) {
+		return OK;
+	}
 }
 
 void init(
@@ -120,7 +138,7 @@ void init(
 				_log->log(Logger::Type::WARNING, "UTILS INIT", "fail get load effects: " + string(e.what()));
 			}
 		}
-		ExtBoard::init(extBoardCnf, performingUnitsCnf, relaysGroups, buttonsCnf, ledsCnf, effects);
+		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, buttonsCnf, ledsCnf, effects);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));
@@ -139,12 +157,15 @@ void init(
 	try {
 		cout << "init render module.." << endl;
 		_frames = new JParser("./config/frames.json");
+		json& go = _frames->get("general-option");
+		json& bg = _frames->get("backgrounds");
+		json& fonts = _frames->get("fonts");
 		try {
 			_logoFrame = _config->get("logo-frame");
 		} catch (exception& e) {
 			_log->log(Logger::Type::WARNING, "CONFIG", "fail to get logo frame: " + string(e.what()));
 		}
-		render::init(displayCnf, _frames->get("frames"));
+		render::init(displayCnf, _frames->get("frames"), go, bg, fonts);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		throw runtime_error("fail to init render core: " + string(e.what()));
@@ -222,8 +243,8 @@ void init(
 
 	// extboard callbacks
 	cout << "register exboard callbacks.." << endl;
-	ExtBoard::registerOnCashAddedHandler(_onCashAdd);
-	ExtBoard::registerOnCardReadHandler(_onCard);
+	extboard::registerOnCashAddedHandler(_onCashAdd);
+	extboard::registerOnCardReadHandler(_onCard);
 
 	cout << "register genereal handler.." << endl;
 	callHandler(_handler, NULL, 500, 0);
@@ -289,27 +310,4 @@ void printUnknownCardFrame() {
 	render::showFrame(_unknownCardFrame);
 }
 
-namespace {
-
-void _onCashAdd(double nMoney) {
-	cout << "money received: " << nMoney << endl;
-	_moneyMutex.lock();
-	if (_nMoney == 0) {
-		_onCashAppeared();
-	}
-	_nMoney += nMoney;
-	_moneyMutex.unlock();
-}
-
-Timer::Action _withdraw(timer_t) {
-	_moneyMutex.lock();
-	_moneyMutex.unlock();
-	return Timer::Action::CONTINUE;
-}
-
-ReturnCode _handler(uint16_t id, void* arg) {
-	return OK;
-}
-
-}
 }

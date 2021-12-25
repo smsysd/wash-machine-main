@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpi/workspace/sm-sys-dev/qrscaner-linux/qrscaner-linux
+# Install script for directory: /home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

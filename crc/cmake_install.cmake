@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpi/workspace/sm-sys-dev/crc/crc
+# Install script for directory: /home/elpi/workspace/sm-sys/wash-machine-main/crc
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

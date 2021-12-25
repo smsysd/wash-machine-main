@@ -2,6 +2,10 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#include "button_driver.h"
+#include "render.h"
+#include "bonus.h"
+
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -25,7 +29,7 @@ struct Program {
 	int freeUseTimeSec;
 	int remainFreeUseTimeSec;
 	time_point<steady_clock> tBegin;
-	duration<long> duration;
+	steady_clock::duration duration;
 };
 
 void init(

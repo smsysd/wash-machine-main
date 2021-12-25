@@ -37,5 +37,9 @@
 			"image": "./config/img/1.bmp"
 		}
 
+	],
+
+	"fonts": [
+		{"id": 1, "name": "font.json", "index": "macro"}
 	]
 }

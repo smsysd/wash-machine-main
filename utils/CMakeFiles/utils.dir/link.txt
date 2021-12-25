@@ -1,0 +1,2 @@
+/usr/bin/ar qc libutils.a CMakeFiles/utils.dir/utils.cpp.o CMakeFiles/utils.dir/bonus.cpp.o CMakeFiles/utils.dir/button_driver.cpp.o CMakeFiles/utils.dir/render.cpp.o
+/usr/bin/ranlib libutils.a
