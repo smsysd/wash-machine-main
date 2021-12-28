@@ -14,6 +14,11 @@ using json = nlohmann::json;
 
 namespace bonus {
 
+enum Type {
+	AQUANTER,
+	GAZOIL
+};
+
 struct CardInfo {
 	enum Type {
 		BONUS,
@@ -25,6 +30,8 @@ struct CardInfo {
 };
 
 struct Program {
+	int id;
+	string name;
 	int defFrame;
 	int bonusFrame;
 	double rate;

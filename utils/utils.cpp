@@ -166,6 +166,7 @@ void init(
 			_log->log(Logger::Type::WARNING, "CONFIG", "fail to get logo frame: " + string(e.what()));
 		}
 		render::init(displayCnf, _frames->get("frames"), go, bg, fonts);
+		render::regVar(&_nMoney, L"money");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		// throw runtime_error("fail to init render core: " + string(e.what()));
