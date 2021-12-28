@@ -104,12 +104,14 @@ mbuild/wash-machine: general-tools/libgeneral-tools.a
 mbuild/wash-machine: logger-linux/liblogger.a
 mbuild/wash-machine: jparser-linux/libjparser.a
 mbuild/wash-machine: mspi-linux/libmspi.a
-mbuild/wash-machine: crc/libcrc.a
 mbuild/wash-machine: general-tools/libgeneral-tools.a
 mbuild/wash-machine: qrscaner-linux/libqrscaner.a
 mbuild/wash-machine: timer/libtimer.a
+mbuild/wash-machine: ledmatrix-linux/libledmatrix.a
 mbuild/wash-machine: font-linux/libfont.a
 mbuild/wash-machine: rgb332/librgb332.a
+mbuild/wash-machine: mb-ascii-linux/libmb-ascii.a
+mbuild/wash-machine: crc/libcrc.a
 mbuild/wash-machine: CMakeFiles/wash-machine.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable mbuild/wash-machine"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/wash-machine.dir/link.txt --verbose=$(VERBOSE)

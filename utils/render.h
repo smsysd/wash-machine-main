@@ -20,7 +20,6 @@ namespace render {
 		STRING
 	};
 
-	// must be register before init
 	void regVar(int* var, string name);
 	void regVar(double* var, string name);
 	void regVar(const char* var, string name);

@@ -36,6 +36,7 @@ void onQr(const char* qr);
 void onServiceEnd();
 
 int main(int argc, char const *argv[]) {
+
 	init(onCashAppeared, onCashRunout, onButtonPushed, onCard, onServiceEnd);
 	printLogoFrame();
 	setGiveMoneyMode();

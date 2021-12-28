@@ -1,8 +1,7 @@
 {
 	"bonus-sys": {
-		"type": "acuanter",
-		"server-name": "localhost",
-		"pos": "qwerty"
+		"type": "aquanter",
+		"certificate": "./config/bonus_cert.json"
 	},
 
 	"promotions": [
@@ -10,7 +9,7 @@
 			"type": "coefficient",
 			"priority": 1,
 			"k": 1.2,
-			"sumk": 1.0,
+			"sumk": 1.1,
 			"time": "20:30-6:00",
 			"week-days": "every",
 			"months": [1, 2, 3, 11, 12]
@@ -18,7 +17,7 @@
 		{
 			"type": "coefficient",
 			"priority": 2,
-			"k": 1.2,
+			"k": 1.4,
 			"sumk": 1.2,
 			"time": "every",
 			"week-days": [1, 2, 3, 4],
@@ -28,7 +27,7 @@
 			"type": "coefficient",
 			"priority": 2,
 			"k": 1.5,
-			"sumk": 0.8,
+			"sumk": 1.3,
 			"time": "every",
 			"week-days": [1],
 			"months": [1, 2, 3, 11, 12]

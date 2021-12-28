@@ -21,15 +21,35 @@ struct CardInfo {
 		UNKNOWN
 	};
 	Type type;
-	char uid[256];
+	char uid[64];
+};
+
+struct Program {
+	int defFrame;
+	int bonusFrame;
+	double rate;
+};
+
+struct Promotion {
+	enum Type {
+		COEFFICIENT
+	};
+	Type type;
+	double k;
+	double sk;
+	int priority;
+	int time[2];
+	bool weekdays[7];
+	bool months[12];
 };
 
 void init(json& bonusSysCnf, json& promotions, json& programs);
-CardInfo open(const char* qrOrCardid);
-double writeoff(const char* uid);
-void close(const char* uid);
+CardInfo open(const char* access);
+double writeoff(double desired);
+void close();
 double getRate(int iProgram);
 double getCoef();
+int getProgramFrame(int iProgram);
 
 }
 

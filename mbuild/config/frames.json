@@ -2,7 +2,8 @@
 	"general-option": {
 		"default-color": 255,
 		"default-font": 0,
-		"default-cursor": [0, 2]
+		"default-cursor": [0, 2],
+		"default-mode": "center"
 	},
 
 	"frames": [
@@ -26,7 +27,7 @@
 			"color": 255,
 			"lines": [
 				"ВЫБЕРИТЕ ПРОГРАММУ",
-				"{cf0:{$:money}} RUB."
+				"{cf0:$money} RUB."
 			]
 		}
 	],

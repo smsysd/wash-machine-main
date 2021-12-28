@@ -1,0 +1,116 @@
+[2021-12-29 12:14:49][ERROR][CONFIG] fail to get config: fail to get config field 'buttons': no such
+[2021-12-29 12:16:41][ERROR][CONFIG] fail to get config: fail to get config field 'buttons' from './config/hwconfig.json': no such
+[2021-12-29 12:18:44][ERROR][UTILS INIT] fail to init expander board: fail to get config field 'ext-board' from './config/hwconfig.json': no such
+[2021-12-29 12:19:07][ERROR][UTILS INIT] fail to init expander board: fail to get config field 'relays-groups' from './config/config.json': no such
+[2021-12-29 12:19:35][ERROR][UTILS INIT] fail to init expander board: fail to get config field 'performing-units' from './config/hwconfig.json': no such
+[2021-12-29 12:19:58][ERROR][UTILS INIT] fail to init expander board: fail to get config field 'performing-units' from './config/hwconfig.json': no such
+[2021-12-29 12:20:16][ERROR][UTILS INIT] fail to init expander board: fail to get config field 'performing-units' from './config/hwconfig.json': no such
+[2021-12-29 12:20:24][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:20:24][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:20:24][ERROR][RENDER] fail to init render core: fail to get field 'address' from 'display': no such
+[2021-12-29 12:21:20][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:21:20][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:21:20][ERROR][RENDER] fail to init render core: fail to get field 'dir-pin' from 'display': no such
+[2021-12-29 12:21:41][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:21:41][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:21:41][ERROR][RENDER] fail to init render core: fail to get field 'driver' from 'display': no such
+[2021-12-29 12:21:58][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:21:58][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:21:58][ERROR][RENDER] fail to init render core: fail to open driver
+[2021-12-29 12:22:11][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:22:11][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:22:11][ERROR][RENDER] fail to init render core: fail to open driver
+[2021-12-29 12:27:50][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:27:50][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:27:50][ERROR][RENDER] fail to init render core: fail to open driver
+[2021-12-29 12:28:51][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:28:51][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:28:52][ERROR][RENDER] fail to init render core: timeout
+[2021-12-29 12:36:03][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:36:03][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:36:04][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 12:41:10][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:41:10][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:41:10][ERROR][RENDER] fail to init render core: fail to get field 'default-mode' from 'general-option': no such
+[2021-12-29 12:41:30][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:41:30][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:41:30][ERROR][RENDER] fail to init render core: fail to load 0frame: fail to parse frame format: |json.exception.type_error.302| type must be array, but is string
+[2021-12-29 12:44:36][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:44:36][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:44:36][ERROR][RENDER] fail to init render core: fail to load 0 frame: fail to parse frame format: |json.exception.type_error.302| type must be array, but is string
+[2021-12-29 12:46:15][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:46:15][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:46:15][ERROR][RENDER] fail to init render core: fail to load 0 frame: fail to parse frame format: |json.exception.type_error.302| type must be array, but is string
+[2021-12-29 12:47:46][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:47:46][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:47:46][ERROR][RENDER] fail to init render core: fail to load 0 frame: fail to parse frame format: |json.exception.type_error.302| type must be array, but is string
+[2021-12-29 12:51:46][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:51:46][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:51:46][ERROR][RENDER] fail to init render core: fail to load 0 frame: fail to parse frame format: |json.exception.type_error.302| type must be array, but is string
+[2021-12-29 12:52:26][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:52:26][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:52:26][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 12:52:26][WARNING][UTILS INIT] fail to init bonus system: fail to get config field 'programs' from './config/config.json': no such
+[2021-12-29 12:52:26][ERROR][UTILS INIT] fail to fill programs: fail to get config field 'programs' from './config/config.json': no such
+[2021-12-29 12:53:30][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:53:30][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:53:30][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 12:53:30][WARNING][UTILS INIT] fail to init bonus system: fail to get config field 'programs' from './config/config.json': no such
+[2021-12-29 12:53:30][ERROR][UTILS INIT] fail to fill programs: fail to get config field 'programs' from './config/config.json': no such
+[2021-12-29 12:56:07][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:56:07][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:56:07][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 12:56:07][WARNING][UTILS INIT] fail to init bonus system: fail to get config field 'programs' from './config/config.json': no such
+[2021-12-29 12:56:07][ERROR][UTILS INIT] fail to fill programs: fail to get config field 'programs' from './config/config.json': no such
+[2021-12-29 12:57:58][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 12:57:58][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 12:57:58][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 12:57:58][WARNING][UTILS INIT] fail to init bonus system: fail to get config field 'programs' from './config/config.json': no such
+[2021-12-29 12:57:58][ERROR][UTILS INIT] fail to fill programs: fail to get config field 'programs' from './config/config.json': no such
+[2021-12-29 13:00:40][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:00:40][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:00:41][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:01:11][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:01:11][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:01:11][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:01:11][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:01:11][ERROR][UTILS INIT] fail to fill programs: fail to get config field 'service-programs' from './config/config.json': no such
+[2021-12-29 13:02:07][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:02:07][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:02:07][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:02:07][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:02:07][ERROR][UTILS INIT] fail to fill programs: fail to get field 'id' from 'program at |0|': no such
+[2021-12-29 13:02:36][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:02:36][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:02:37][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:02:37][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:02:37][ERROR][UTILS INIT] fail to fill programs: fail to get field 'frame' from 'program at |0|': no such
+[2021-12-29 13:05:00][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:05:00][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:05:00][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:05:00][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:05:00][ERROR][UTILS INIT] fail to fill programs: fail to get field 'relay-group' from 'program at |0|': no such
+[2021-12-29 13:05:40][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:05:40][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:05:40][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:05:40][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:05:40][ERROR][UTILS INIT] fail to fill programs: fail to get field 'free-use-time' from 'program at |0|': no such
+[2021-12-29 13:06:01][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:06:01][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:06:01][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:06:01][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:06:01][ERROR][UTILS INIT] fail to fill programs: fail to get field 'id' from 'program at |0|': no such
+[2021-12-29 13:06:32][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:06:32][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:06:33][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:06:33][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:06:33][ERROR][UTILS INIT] fail to fill programs: fail to get field 'free-use-time' from 'program at |0|': no such
+[2021-12-29 13:07:27][WARNING][UTILS INIT] fail to load leds: fail to get config field 'leds' from './config/hwconfig.json': no such
+[2021-12-29 13:07:27][WARNING][CONFIG] fail to get logo frame: fail to get config field 'logo-frame' from './config/config.json': no such
+[2021-12-29 13:07:28][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:07:28][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:09:29][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:09:29][WARNING][UTILS INIT] fail to init qr-scaner: fail to get config field 'qr-scaner' from './config/hwconfig.json': no such
+[2021-12-29 13:10:44][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-29 13:10:44][WARNING][UTILS INIT] fail to init qr-scaner: fail to get field 'width' from 'qr-scaner': no such
+[2021-12-29 13:11:16][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout

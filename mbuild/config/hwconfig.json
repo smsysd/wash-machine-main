@@ -1,5 +1,30 @@
 {
+	"buttons": [
+
+	],
+
+	"ext-board": {
+
+	},
+
+	"performing-units": [
+
+	],
+
 	"display": {
-		"type": "ledmatrix"
-	}
+		"type": "ledmatrix",
+		"address": 8,
+		"dir-pin": -1,
+		"driver": "/dev/ttyUSB0"
+	},
+
+	"qr-scaner": {
+		"width": 1980,
+		"height": 1080,
+		"driver": "/dev/video0"
+	},
+
+	"leds": [
+		{"id": 0, "type": "123"}
+	]
 }

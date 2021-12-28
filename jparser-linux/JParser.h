@@ -20,4 +20,5 @@ public:
 	static json& getByName(json& jarray, string name, string from = "some jarray");
 private:
     json _jconfig;
+	string _path;
 };

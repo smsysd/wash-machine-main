@@ -81,7 +81,7 @@ void LedMatrix::writeString(char* str) {
 	_mb->str(_deviceAddress, str, _toLarge);
 }
 
-void LedMatrix::writeString(string str) {
+void LedMatrix::writeString(wstring str) {
 	char outbuf[512];
 	char* ip = (char *) str.c_str();
 	char* op = outbuf;

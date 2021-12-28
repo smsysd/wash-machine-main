@@ -168,7 +168,7 @@ void init(
 		render::init(displayCnf, _frames->get("frames"), go, bg, fonts);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
-		throw runtime_error("fail to init render core: " + string(e.what()));
+		// throw runtime_error("fail to init render core: " + string(e.what()));
 	}
 
 	// qr scaner
@@ -207,7 +207,6 @@ void init(
 			json& jp = programs[i];
 			Program sp;
 			sp.id = JParser::getf(jp, "id", "program at [" + to_string(i) + "]");
-			sp.frame = JParser::getf(jp, "frame", "program at [" + to_string(i) + "]");
 			sp.relayGroup = JParser::getf(jp, "relay-group", "program at [" + to_string(i) + "]");
 			sp.freeUseTimeSec = JParser::getf(jp, "free-use-time", "program at [" + to_string(i) + "]");
 			sp.name = JParser::getf(jp, "name", "program at [" + to_string(i) + "]");
@@ -229,7 +228,7 @@ void init(
 			sp.id = JParser::getf(jp, "id", "program at [" + to_string(i) + "]");
 			sp.frame = JParser::getf(jp, "frame", "program at [" + to_string(i) + "]");
 			sp.relayGroup = JParser::getf(jp, "relay-group", "program at [" + to_string(i) + "]");
-			sp.freeUseTimeSec = JParser::getf(jp, "free-use-time", "program at [" + to_string(i) + "]");
+			sp.freeUseTimeSec = -1;
 			sp.name = JParser::getf(jp, "name", "program at [" + to_string(i) + "]");
 			sp.remainFreeUseTimeSec = sp.freeUseTimeSec;
 			sp.rate = 0;
@@ -282,15 +281,16 @@ void setServiceProgram(int iProg) {
 }
 
 int getProgramByButton(int iButton) {
-
+	return -1;
 }
 
 int getServiceProgramByButton(int iButton) {
-
+	return -1;
 }
 
 bool writeOffBonuses(const char* uid) {
 	cout << "try write off bonuses.." << endl;
+	return false;
 }
 
 void accrueRemainBonuses(const char* uid) {
@@ -299,7 +299,9 @@ void accrueRemainBonuses(const char* uid) {
 
 // additionaly check local storage service cards
 CardInfo getCardInfo(const char* qrOrCardid) {
-
+	CardInfo ci;
+	ci.type = CardInfo::BONUS;
+	return ci;
 }
 
 void printLogoFrame() {

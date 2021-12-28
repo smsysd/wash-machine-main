@@ -14,7 +14,7 @@ using namespace std;
 class LedMatrix {
 public:
     enum class Mode {
-        STD = 0x00,
+        LEFT = 0x00,
 		CENTER = 0x01
     };
 
@@ -26,7 +26,7 @@ public:
 
     void setOpt(Mode mode, int font, int color);
     void writeString(char* str);
-	void writeString(string str);
+	void writeString(wstring str);
 	void writePrepareBlock(int iBlock);
     void writeBlock(int x, int y, RGB332& bitmap);
 

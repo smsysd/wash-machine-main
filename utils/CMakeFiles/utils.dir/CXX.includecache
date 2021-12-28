@@ -6,6 +6,16 @@
 
 #IncludeRegexTransform: 
 
+/home/elpi/workspace/sm-sys/wash-machine-main/BMP.h
+fstream
+-
+vector
+-
+stdexcept
+-
+iostream
+-
+
 /home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
 ../rgb332/rgb332.h
 /home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
@@ -390,6 +400,10 @@ vector
 string
 -
 
+/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/Logger.h
+string
+-
+
 /home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
 stdint.h
 -
@@ -417,7 +431,29 @@ render.h
 /home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
 ../font-linux/Font.h
 /home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
+../BMP.h
+/home/elpi/workspace/sm-sys/wash-machine-main/BMP.h
+../logger-linux/Logger.h
+/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/Logger.h
 stdint.h
+-
+vector
+-
+iostream
+-
+thread
+-
+string
+-
+wchar.h
+-
+wctype.h
+-
+codecvt
+-
+locale
+-
+unistd.h
 -
 
 /home/elpi/workspace/sm-sys/wash-machine-main/utils/render.h

@@ -31,6 +31,12 @@
 /home/elpi/workspace/sm-sys/wash-machine-main/timer/CMakeFiles/edit_cache.dir
 /home/elpi/workspace/sm-sys/wash-machine-main/timer/CMakeFiles/rebuild_cache.dir
 /home/elpi/workspace/sm-sys/wash-machine-main/timer/CMakeFiles/timer.dir
+/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/CMakeFiles/rebuild_cache.dir
+/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/CMakeFiles/edit_cache.dir
+/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/CMakeFiles/ledmatrix.dir
+/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/CMakeFiles/rebuild_cache.dir
+/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/CMakeFiles/edit_cache.dir
+/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/CMakeFiles/mb-ascii.dir
 /home/elpi/workspace/sm-sys/wash-machine-main/utils/CMakeFiles/rebuild_cache.dir
 /home/elpi/workspace/sm-sys/wash-machine-main/utils/CMakeFiles/edit_cache.dir
 /home/elpi/workspace/sm-sys/wash-machine-main/utils/CMakeFiles/utils.dir

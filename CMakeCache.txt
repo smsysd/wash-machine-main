@@ -252,6 +252,15 @@ jparser_BINARY_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/jparser-
 jparser_SOURCE_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux
 
 //Value Computed by CMake
+ledmatrix_BINARY_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux
+
+//Dependencies for the target
+ledmatrix_LIB_DEPENDS:STATIC=general;crc;general;font;general;mb-ascii;
+
+//Value Computed by CMake
+ledmatrix_SOURCE_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux
+
+//Value Computed by CMake
 logger-linux_BINARY_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux
 
 //Value Computed by CMake
@@ -262,6 +271,15 @@ logger_BINARY_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/logger-li
 
 //Value Computed by CMake
 logger_SOURCE_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux
+
+//Value Computed by CMake
+mb-ascii_BINARY_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux
+
+//Dependencies for the target
+mb-ascii_LIB_DEPENDS:STATIC=general;crc;general;wiringPi;
+
+//Value Computed by CMake
+mb-ascii_SOURCE_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux
 
 //Value Computed by CMake
 mspi_BINARY_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux
@@ -303,7 +321,7 @@ timer_SOURCE_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/timer
 utils_BINARY_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/utils
 
 //Dependencies for the target
-utils_LIB_DEPENDS:STATIC=general;extboard;general;jparser;general;logger;general;general-tools;general;qrscaner;general;timer;general;rgb332;general;font;
+utils_LIB_DEPENDS:STATIC=general;extboard;general;jparser;general;logger;general;general-tools;general;qrscaner;general;timer;general;rgb332;general;font;general;pthread;general;ledmatrix;
 
 //Value Computed by CMake
 utils_SOURCE_DIR:STATIC=/home/elpi/workspace/sm-sys/wash-machine-main/utils
@@ -419,7 +437,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=12
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=14
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

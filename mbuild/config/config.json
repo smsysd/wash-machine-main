@@ -1,0 +1,14 @@
+{
+	"relays-groups": [
+		{"id": 0}
+	],
+
+	"programs": [
+		{"id": 0, "name": "pause", "frame": 0, "bonus-frame": 1, "relay-group": 0, "free-use-time": 10}
+	],
+	"service-programs": [
+		{"id": 0, "name": "pause", "frame": 0, "relay-group": 0}
+	],
+
+	"logo-frame": 0
+}

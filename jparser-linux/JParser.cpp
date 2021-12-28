@@ -9,7 +9,8 @@ using namespace std;
 using json = nlohmann::json;
 
 JParser::JParser(string path) {
-	ifstream configFile(path);
+	_path = path;
+	ifstream configFile(path, ios_base::in);
 	if (configFile.is_open()) {
 		// get length of file:
 		configFile.seekg (0, configFile.end);
@@ -27,18 +28,18 @@ JParser::JParser(string path) {
 			} catch (exception& e) {
 				configFile.close();
 				delete[] buffer;
-				throw runtime_error(string("json file have syntax error: ") + string(e.what()) );
+				throw runtime_error(string("json file '" + path + "' have syntax error: ") + string(e.what()) );
 			}
 		}
 		else {
 			configFile.close();
 			delete[] buffer;
-			throw runtime_error("fail to load config file");
+			throw runtime_error("fail to read config file '" + path + "'");
 		}
 		configFile.close();
 		delete[] buffer;
 	} else {
-		throw runtime_error("cannot open config file");
+		throw runtime_error("cannot open config file '" + path + "'");
 	}
 }
 
@@ -54,7 +55,7 @@ json& JParser::get(string field) {
 			throw runtime_error("no such");
 		}
 	} catch (exception& e) {
-		throw runtime_error("fail to get config field '" + field + "': " + string(e.what()));
+		throw runtime_error("fail to get config field '" + field + "' from '" + _path + "': " + string(e.what()));
 	}
 }
 

@@ -16,7 +16,9 @@ set(CMAKE_MAKEFILE_DEPENDS
   "font-linux/CMakeLists.txt"
   "general-tools/CMakeLists.txt"
   "jparser-linux/CMakeLists.txt"
+  "ledmatrix-linux/CMakeLists.txt"
   "logger-linux/CMakeLists.txt"
+  "mb-ascii-linux/CMakeLists.txt"
   "mspi-linux/CMakeLists.txt"
   "qrscaner-linux/CMakeLists.txt"
   "rgb332/CMakeLists.txt"
@@ -62,6 +64,8 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "extboard/CMakeFiles/CMakeDirectoryInformation.cmake"
   "qrscaner-linux/CMakeFiles/CMakeDirectoryInformation.cmake"
   "timer/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "ledmatrix-linux/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "mb-ascii-linux/CMakeFiles/CMakeDirectoryInformation.cmake"
   "utils/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
@@ -78,5 +82,7 @@ set(CMAKE_DEPEND_INFO_FILES
   "extboard/CMakeFiles/extboard.dir/DependInfo.cmake"
   "qrscaner-linux/CMakeFiles/qrscaner.dir/DependInfo.cmake"
   "timer/CMakeFiles/timer.dir/DependInfo.cmake"
+  "ledmatrix-linux/CMakeFiles/ledmatrix.dir/DependInfo.cmake"
+  "mb-ascii-linux/CMakeFiles/mb-ascii.dir/DependInfo.cmake"
   "utils/CMakeFiles/utils.dir/DependInfo.cmake"
   )

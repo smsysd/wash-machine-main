@@ -20,11 +20,13 @@ set(CMAKE_TARGET_LINKED_INFO_FILES
   "/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/CMakeFiles/logger.dir/DependInfo.cmake"
   "/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/CMakeFiles/jparser.dir/DependInfo.cmake"
   "/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/CMakeFiles/mspi.dir/DependInfo.cmake"
-  "/home/elpi/workspace/sm-sys/wash-machine-main/crc/CMakeFiles/crc.dir/DependInfo.cmake"
   "/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/CMakeFiles/qrscaner.dir/DependInfo.cmake"
   "/home/elpi/workspace/sm-sys/wash-machine-main/timer/CMakeFiles/timer.dir/DependInfo.cmake"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/CMakeFiles/ledmatrix.dir/DependInfo.cmake"
   "/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/CMakeFiles/font.dir/DependInfo.cmake"
   "/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/CMakeFiles/rgb332.dir/DependInfo.cmake"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/CMakeFiles/mb-ascii.dir/DependInfo.cmake"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/crc/CMakeFiles/crc.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

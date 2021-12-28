@@ -4,4 +4,4 @@ project(utils)
 
 add_library(utils utils.cpp bonus.cpp button_driver.cpp render.cpp)
 
-target_link_libraries(utils extboard jparser logger general-tools qrscaner timer rgb332 font pthread)
+target_link_libraries(utils extboard jparser logger general-tools qrscaner timer rgb332 font pthread ledmatrix)

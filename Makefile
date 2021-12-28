@@ -273,6 +273,32 @@ timer/fast:
 .PHONY : timer/fast
 
 #=============================================================================
+# Target rules for targets named ledmatrix
+
+# Build rule for target.
+ledmatrix: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix
+.PHONY : ledmatrix
+
+# fast build rule for target.
+ledmatrix/fast:
+	$(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/build
+.PHONY : ledmatrix/fast
+
+#=============================================================================
+# Target rules for targets named mb-ascii
+
+# Build rule for target.
+mb-ascii: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii
+.PHONY : mb-ascii
+
+# fast build rule for target.
+mb-ascii/fast:
+	$(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/build
+.PHONY : mb-ascii/fast
+
+#=============================================================================
 # Target rules for targets named utils
 
 # Build rule for target.
@@ -325,7 +351,9 @@ help:
 	@echo "... font"
 	@echo "... general-tools"
 	@echo "... jparser"
+	@echo "... ledmatrix"
 	@echo "... logger"
+	@echo "... mb-ascii"
 	@echo "... mspi"
 	@echo "... qrscaner"
 	@echo "... rgb332"

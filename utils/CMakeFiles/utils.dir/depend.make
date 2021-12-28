@@ -5,6 +5,7 @@ utils/CMakeFiles/utils.dir/bonus.cpp.o: jparser-linux/JParser.h
 utils/CMakeFiles/utils.dir/bonus.cpp.o: json.h
 utils/CMakeFiles/utils.dir/bonus.cpp.o: utils/bonus.cpp
 utils/CMakeFiles/utils.dir/bonus.cpp.o: utils/bonus.h
+utils/CMakeFiles/utils.dir/bonus.cpp.o: utils/render.h
 
 utils/CMakeFiles/utils.dir/button_driver.cpp.o: extboard/ExtBoard.h
 utils/CMakeFiles/utils.dir/button_driver.cpp.o: general-tools/general_tools.h
@@ -15,10 +16,12 @@ utils/CMakeFiles/utils.dir/button_driver.cpp.o: rgb332/rgb332.h
 utils/CMakeFiles/utils.dir/button_driver.cpp.o: utils/button_driver.cpp
 utils/CMakeFiles/utils.dir/button_driver.cpp.o: utils/button_driver.h
 
+utils/CMakeFiles/utils.dir/render.cpp.o: BMP.h
 utils/CMakeFiles/utils.dir/render.cpp.o: font-linux/Font.h
 utils/CMakeFiles/utils.dir/render.cpp.o: jparser-linux/JParser.h
 utils/CMakeFiles/utils.dir/render.cpp.o: json.h
 utils/CMakeFiles/utils.dir/render.cpp.o: ledmatrix-linux/LedMatrix.h
+utils/CMakeFiles/utils.dir/render.cpp.o: logger-linux/Logger.h
 utils/CMakeFiles/utils.dir/render.cpp.o: mb-ascii-linux/MbAsciiMaster.h
 utils/CMakeFiles/utils.dir/render.cpp.o: rgb332/rgb332.h
 utils/CMakeFiles/utils.dir/render.cpp.o: utils/render.cpp

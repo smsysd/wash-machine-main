@@ -83,6 +83,8 @@ all: mspi-linux/all
 all: extboard/all
 all: qrscaner-linux/all
 all: timer/all
+all: ledmatrix-linux/all
+all: mb-ascii-linux/all
 all: utils/all
 
 .PHONY : all
@@ -98,6 +100,8 @@ preinstall: mspi-linux/preinstall
 preinstall: extboard/preinstall
 preinstall: qrscaner-linux/preinstall
 preinstall: timer/preinstall
+preinstall: ledmatrix-linux/preinstall
+preinstall: mb-ascii-linux/preinstall
 preinstall: utils/preinstall
 
 .PHONY : preinstall
@@ -114,6 +118,8 @@ clean: mspi-linux/clean
 clean: extboard/clean
 clean: qrscaner-linux/clean
 clean: timer/clean
+clean: ledmatrix-linux/clean
+clean: mb-ascii-linux/clean
 clean: utils/clean
 
 .PHONY : clean
@@ -209,6 +215,24 @@ jparser-linux/clean: jparser-linux/CMakeFiles/jparser.dir/clean
 .PHONY : jparser-linux/clean
 
 #=============================================================================
+# Directory level rules for directory ledmatrix-linux
+
+# Recursive "all" directory target.
+ledmatrix-linux/all: ledmatrix-linux/CMakeFiles/ledmatrix.dir/all
+
+.PHONY : ledmatrix-linux/all
+
+# Recursive "preinstall" directory target.
+ledmatrix-linux/preinstall:
+
+.PHONY : ledmatrix-linux/preinstall
+
+# Recursive "clean" directory target.
+ledmatrix-linux/clean: ledmatrix-linux/CMakeFiles/ledmatrix.dir/clean
+
+.PHONY : ledmatrix-linux/clean
+
+#=============================================================================
 # Directory level rules for directory logger-linux
 
 # Recursive "all" directory target.
@@ -225,6 +249,24 @@ logger-linux/preinstall:
 logger-linux/clean: logger-linux/CMakeFiles/logger.dir/clean
 
 .PHONY : logger-linux/clean
+
+#=============================================================================
+# Directory level rules for directory mb-ascii-linux
+
+# Recursive "all" directory target.
+mb-ascii-linux/all: mb-ascii-linux/CMakeFiles/mb-ascii.dir/all
+
+.PHONY : mb-ascii-linux/all
+
+# Recursive "preinstall" directory target.
+mb-ascii-linux/preinstall:
+
+.PHONY : mb-ascii-linux/preinstall
+
+# Recursive "clean" directory target.
+mb-ascii-linux/clean: mb-ascii-linux/CMakeFiles/mb-ascii.dir/clean
+
+.PHONY : mb-ascii-linux/clean
 
 #=============================================================================
 # Directory level rules for directory mspi-linux
@@ -330,15 +372,17 @@ CMakeFiles/wash-machine.dir/all: mspi-linux/CMakeFiles/mspi.dir/all
 CMakeFiles/wash-machine.dir/all: extboard/CMakeFiles/extboard.dir/all
 CMakeFiles/wash-machine.dir/all: qrscaner-linux/CMakeFiles/qrscaner.dir/all
 CMakeFiles/wash-machine.dir/all: timer/CMakeFiles/timer.dir/all
+CMakeFiles/wash-machine.dir/all: ledmatrix-linux/CMakeFiles/ledmatrix.dir/all
+CMakeFiles/wash-machine.dir/all: mb-ascii-linux/CMakeFiles/mb-ascii.dir/all
 CMakeFiles/wash-machine.dir/all: utils/CMakeFiles/utils.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/wash-machine.dir/build.make CMakeFiles/wash-machine.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/wash-machine.dir/build.make CMakeFiles/wash-machine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=29,30 "Built target wash-machine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=33,34 "Built target wash-machine"
 .PHONY : CMakeFiles/wash-machine.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/wash-machine.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 30
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 34
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/wash-machine.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
 .PHONY : CMakeFiles/wash-machine.dir/rule
@@ -387,7 +431,7 @@ crc/CMakeFiles/crc.dir/clean:
 rgb332/CMakeFiles/rgb332.dir/all:
 	$(MAKE) $(MAKESILENT) -f rgb332/CMakeFiles/rgb332.dir/build.make rgb332/CMakeFiles/rgb332.dir/depend
 	$(MAKE) $(MAKESILENT) -f rgb332/CMakeFiles/rgb332.dir/build.make rgb332/CMakeFiles/rgb332.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=20,21 "Built target rgb332"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=24,25 "Built target rgb332"
 .PHONY : rgb332/CMakeFiles/rgb332.dir/all
 
 # Build rule for subdir invocation for target.
@@ -468,7 +512,7 @@ jparser-linux/CMakeFiles/jparser.dir/clean:
 logger-linux/CMakeFiles/logger.dir/all:
 	$(MAKE) $(MAKESILENT) -f logger-linux/CMakeFiles/logger.dir/build.make logger-linux/CMakeFiles/logger.dir/depend
 	$(MAKE) $(MAKESILENT) -f logger-linux/CMakeFiles/logger.dir/build.make logger-linux/CMakeFiles/logger.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=14,15 "Built target logger"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=16,17 "Built target logger"
 .PHONY : logger-linux/CMakeFiles/logger.dir/all
 
 # Build rule for subdir invocation for target.
@@ -523,7 +567,7 @@ mspi-linux/CMakeFiles/mspi.dir/all: crc/CMakeFiles/crc.dir/all
 mspi-linux/CMakeFiles/mspi.dir/all: general-tools/CMakeFiles/general-tools.dir/all
 	$(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/depend
 	$(MAKE) $(MAKESILENT) -f mspi-linux/CMakeFiles/mspi.dir/build.make mspi-linux/CMakeFiles/mspi.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=16,17 "Built target mspi"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=20,21 "Built target mspi"
 .PHONY : mspi-linux/CMakeFiles/mspi.dir/all
 
 # Build rule for subdir invocation for target.
@@ -582,7 +626,7 @@ extboard/CMakeFiles/extboard.dir/clean:
 qrscaner-linux/CMakeFiles/qrscaner.dir/all:
 	$(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/depend
 	$(MAKE) $(MAKESILENT) -f qrscaner-linux/CMakeFiles/qrscaner.dir/build.make qrscaner-linux/CMakeFiles/qrscaner.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=18,19 "Built target qrscaner"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=22,23 "Built target qrscaner"
 .PHONY : qrscaner-linux/CMakeFiles/qrscaner.dir/all
 
 # Build rule for subdir invocation for target.
@@ -609,7 +653,7 @@ qrscaner-linux/CMakeFiles/qrscaner.dir/clean:
 timer/CMakeFiles/timer.dir/all:
 	$(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/depend
 	$(MAKE) $(MAKESILENT) -f timer/CMakeFiles/timer.dir/build.make timer/CMakeFiles/timer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=22,23 "Built target timer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=26,27 "Built target timer"
 .PHONY : timer/CMakeFiles/timer.dir/all
 
 # Build rule for subdir invocation for target.
@@ -630,6 +674,63 @@ timer/CMakeFiles/timer.dir/clean:
 .PHONY : timer/CMakeFiles/timer.dir/clean
 
 #=============================================================================
+# Target rules for target ledmatrix-linux/CMakeFiles/ledmatrix.dir
+
+# All Build rule for target.
+ledmatrix-linux/CMakeFiles/ledmatrix.dir/all: crc/CMakeFiles/crc.dir/all
+ledmatrix-linux/CMakeFiles/ledmatrix.dir/all: rgb332/CMakeFiles/rgb332.dir/all
+ledmatrix-linux/CMakeFiles/ledmatrix.dir/all: font-linux/CMakeFiles/font.dir/all
+ledmatrix-linux/CMakeFiles/ledmatrix.dir/all: mb-ascii-linux/CMakeFiles/mb-ascii.dir/all
+	$(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/depend
+	$(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=14,15 "Built target ledmatrix"
+.PHONY : ledmatrix-linux/CMakeFiles/ledmatrix.dir/all
+
+# Build rule for subdir invocation for target.
+ledmatrix-linux/CMakeFiles/ledmatrix.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 13
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/CMakeFiles/ledmatrix.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
+.PHONY : ledmatrix-linux/CMakeFiles/ledmatrix.dir/rule
+
+# Convenience name for target.
+ledmatrix: ledmatrix-linux/CMakeFiles/ledmatrix.dir/rule
+
+.PHONY : ledmatrix
+
+# clean rule for target.
+ledmatrix-linux/CMakeFiles/ledmatrix.dir/clean:
+	$(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/clean
+.PHONY : ledmatrix-linux/CMakeFiles/ledmatrix.dir/clean
+
+#=============================================================================
+# Target rules for target mb-ascii-linux/CMakeFiles/mb-ascii.dir
+
+# All Build rule for target.
+mb-ascii-linux/CMakeFiles/mb-ascii.dir/all: crc/CMakeFiles/crc.dir/all
+	$(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/depend
+	$(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=18,19 "Built target mb-ascii"
+.PHONY : mb-ascii-linux/CMakeFiles/mb-ascii.dir/all
+
+# Build rule for subdir invocation for target.
+mb-ascii-linux/CMakeFiles/mb-ascii.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 7
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/CMakeFiles/mb-ascii.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
+.PHONY : mb-ascii-linux/CMakeFiles/mb-ascii.dir/rule
+
+# Convenience name for target.
+mb-ascii: mb-ascii-linux/CMakeFiles/mb-ascii.dir/rule
+
+.PHONY : mb-ascii
+
+# clean rule for target.
+mb-ascii-linux/CMakeFiles/mb-ascii.dir/clean:
+	$(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/clean
+.PHONY : mb-ascii-linux/CMakeFiles/mb-ascii.dir/clean
+
+#=============================================================================
 # Target rules for target utils/CMakeFiles/utils.dir
 
 # All Build rule for target.
@@ -643,14 +744,16 @@ utils/CMakeFiles/utils.dir/all: mspi-linux/CMakeFiles/mspi.dir/all
 utils/CMakeFiles/utils.dir/all: extboard/CMakeFiles/extboard.dir/all
 utils/CMakeFiles/utils.dir/all: qrscaner-linux/CMakeFiles/qrscaner.dir/all
 utils/CMakeFiles/utils.dir/all: timer/CMakeFiles/timer.dir/all
+utils/CMakeFiles/utils.dir/all: ledmatrix-linux/CMakeFiles/ledmatrix.dir/all
+utils/CMakeFiles/utils.dir/all: mb-ascii-linux/CMakeFiles/mb-ascii.dir/all
 	$(MAKE) $(MAKESILENT) -f utils/CMakeFiles/utils.dir/build.make utils/CMakeFiles/utils.dir/depend
 	$(MAKE) $(MAKESILENT) -f utils/CMakeFiles/utils.dir/build.make utils/CMakeFiles/utils.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=24,25,26,27,28 "Built target utils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles --progress-num=28,29,30,31,32 "Built target utils"
 .PHONY : utils/CMakeFiles/utils.dir/all
 
 # Build rule for subdir invocation for target.
 utils/CMakeFiles/utils.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 28
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 32
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 utils/CMakeFiles/utils.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
 .PHONY : utils/CMakeFiles/utils.dir/rule
