@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <ctime>
 
 using namespace std;
 using namespace utils;

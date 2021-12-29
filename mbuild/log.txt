@@ -114,3 +114,5 @@
 [2021-12-29 13:10:44][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
 [2021-12-29 13:10:44][WARNING][UTILS INIT] fail to init qr-scaner: fail to get field 'width' from 'qr-scaner': no such
 [2021-12-29 13:11:16][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: timeout
+[2021-12-30 07:11:56][ERROR][RENDER] fail to init render core: fail to hardware init: fail init display: fail to open driver
+[2021-12-30 07:11:56][WARNING][UTILS INIT] fail to init bonus system: fail to load promomtion 0: incorrect 'months'

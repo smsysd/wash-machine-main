@@ -21,42 +21,23 @@ enum Type {
 
 struct CardInfo {
 	enum Type {
-		BONUS,
+		BONUS_PERS,
+		BONUS_ORG,
 		SERVICE,
 		UNKNOWN
 	};
 	Type type;
-	char uid[64];
-};
-
-struct Program {
-	int id;
-	string name;
-	int defFrame;
-	int bonusFrame;
-	double rate;
-};
-
-struct Promotion {
-	enum Type {
-		COEFFICIENT
-	};
-	Type type;
-	double k;
-	double sk;
-	int priority;
-	int time[2];
-	bool weekdays[7];
-	bool months[12];
+	uint64_t id;
+	double count;
 };
 
 void init(json& bonusSysCnf, json& promotions, json& programs);
 CardInfo open(const char* access);
 double writeoff(double desired);
-void close();
-double getRate(int iProgram);
+void close(double acrue);
+double getRate(int idProgram);
 double getCoef();
-int getProgramFrame(int iProgram);
+int getProgramFrame(int idProgram);
 
 }
 
