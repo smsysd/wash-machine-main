@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.cpp
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.cpp
 JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 string
 -
 fstream
@@ -18,13 +18,13 @@ stdexcept
 iostream
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 string
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 algorithm
 -
 cstddef

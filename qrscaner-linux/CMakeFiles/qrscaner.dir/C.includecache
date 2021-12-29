@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.c
+/home/jodzik/projects/finish/wash-machine-main/qrscaner-linux/qrscaner.c
 qrscaner.h
-/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.h
+/home/jodzik/projects/finish/wash-machine-main/qrscaner-linux/qrscaner.h
 string.h
 -
 stdio.h
@@ -16,5 +16,5 @@ stdio.h
 pthread.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.h
+/home/jodzik/projects/finish/wash-machine-main/qrscaner-linux/qrscaner.h
 

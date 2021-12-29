@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/elpi/workspace/sm-sys/wash-machine-main/BMP.h
+/home/jodzik/projects/finish/wash-machine-main/BMP.h
 fstream
 -
 vector
@@ -16,13 +16,13 @@ stdexcept
 iostream
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/extboard/ExtBoard.h
+/home/jodzik/projects/finish/wash-machine-main/extboard/ExtBoard.h
 ../mspi-linux/Mspi.h
-/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/Mspi.h
+/home/jodzik/projects/finish/wash-machine-main/mspi-linux/Mspi.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 ../rgb332/rgb332.h
-/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
+/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
 vector
 -
 string
@@ -30,11 +30,11 @@ string
 stdint.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
+/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.h
 ../rgb332/rgb332.h
-/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
+/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 string
 -
 stdint.h
@@ -42,7 +42,7 @@ stdint.h
 vector
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
+/home/jodzik/projects/finish/wash-machine-main/general-tools/general_tools.h
 stdlib.h
 -
 stdint.h
@@ -52,13 +52,13 @@ string.h
 stdio.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 string
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 algorithm
 -
 cstddef
@@ -410,13 +410,13 @@ vector
 string_view
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/LedMatrix.h
+/home/jodzik/projects/finish/wash-machine-main/ledmatrix-linux/LedMatrix.h
 ../mb-ascii-linux/MbAsciiMaster.h
-/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
+/home/jodzik/projects/finish/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
 ../rgb332/rgb332.h
-/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
+/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
 ../font-linux/Font.h
-/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
+/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.h
 stdint.h
 -
 vector
@@ -424,11 +424,11 @@ vector
 string
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/Logger.h
+/home/jodzik/projects/finish/wash-machine-main/logger-linux/Logger.h
 string
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
+/home/jodzik/projects/finish/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
 stdint.h
 -
 vector
@@ -438,7 +438,7 @@ string
 termios.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/Mspi.h
+/home/jodzik/projects/finish/wash-machine-main/mspi-linux/Mspi.h
 iostream
 -
 string
@@ -454,29 +454,29 @@ atomic
 mutex
 -
 ../general-tools/general_tools.h
-/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
+/home/jodzik/projects/finish/wash-machine-main/general-tools/general_tools.h
 
-/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.h
+/home/jodzik/projects/finish/wash-machine-main/qrscaner-linux/qrscaner.h
 
-/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
+/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
 stdint.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/timer/Timer.h
+/home/jodzik/projects/finish/wash-machine-main/timer/Timer.h
 signal.h
 -
 time.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.cpp
+/home/jodzik/projects/finish/wash-machine-main/utils/bonus.cpp
 bonus.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.h
+/home/jodzik/projects/finish/wash-machine-main/utils/bonus.h
 render.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/render.h
+/home/jodzik/projects/finish/wash-machine-main/utils/render.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 string
 -
 vector
@@ -486,41 +486,53 @@ time.h
 unistd.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.h
+/home/jodzik/projects/finish/wash-machine-main/utils/bonus.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 string
 -
 stdint.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/button_driver.h
+/home/jodzik/projects/finish/wash-machine-main/utils/button_driver.cpp
+button_driver.h
+/home/jodzik/projects/finish/wash-machine-main/utils/button_driver.h
+../extboard/ExtBoard.h
+/home/jodzik/projects/finish/wash-machine-main/extboard/ExtBoard.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 stdint.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/render.cpp
-render.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/render.h
+/home/jodzik/projects/finish/wash-machine-main/utils/button_driver.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
+stdint.h
+-
+
+/home/jodzik/projects/finish/wash-machine-main/utils/render.cpp
+render.h
+/home/jodzik/projects/finish/wash-machine-main/utils/render.h
+../json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
+../jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 ../ledmatrix-linux/LedMatrix.h
-/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/LedMatrix.h
+/home/jodzik/projects/finish/wash-machine-main/ledmatrix-linux/LedMatrix.h
 ../rgb332/rgb332.h
-/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
+/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
 ../font-linux/Font.h
-/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
+/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.h
 ../BMP.h
-/home/elpi/workspace/sm-sys/wash-machine-main/BMP.h
+/home/jodzik/projects/finish/wash-machine-main/BMP.h
 ../logger-linux/Logger.h
-/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/Logger.h
+/home/jodzik/projects/finish/wash-machine-main/logger-linux/Logger.h
 stdint.h
 -
 vector
@@ -542,35 +554,35 @@ locale
 unistd.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/render.h
+/home/jodzik/projects/finish/wash-machine-main/utils/render.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 stdint.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/utils.cpp
+/home/jodzik/projects/finish/wash-machine-main/utils/utils.cpp
 utils.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/utils.h
+/home/jodzik/projects/finish/wash-machine-main/utils/utils.h
 ../extboard/ExtBoard.h
-/home/elpi/workspace/sm-sys/wash-machine-main/extboard/ExtBoard.h
+/home/jodzik/projects/finish/wash-machine-main/extboard/ExtBoard.h
 ../general-tools/general_tools.h
-/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
+/home/jodzik/projects/finish/wash-machine-main/general-tools/general_tools.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 ../logger-linux/Logger.h
-/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/Logger.h
+/home/jodzik/projects/finish/wash-machine-main/logger-linux/Logger.h
 ../qrscaner-linux/qrscaner.h
-/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.h
+/home/jodzik/projects/finish/wash-machine-main/qrscaner-linux/qrscaner.h
 ../timer/Timer.h
-/home/elpi/workspace/sm-sys/wash-machine-main/timer/Timer.h
+/home/jodzik/projects/finish/wash-machine-main/timer/Timer.h
 render.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/render.h
+/home/jodzik/projects/finish/wash-machine-main/utils/render.h
 button_driver.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/button_driver.h
+/home/jodzik/projects/finish/wash-machine-main/utils/button_driver.h
 bonus.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.h
+/home/jodzik/projects/finish/wash-machine-main/utils/bonus.h
 sstream
 -
 unistd.h
@@ -588,13 +600,13 @@ vector
 stdexcept
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/utils.h
+/home/jodzik/projects/finish/wash-machine-main/utils/utils.h
 button_driver.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/button_driver.h
+/home/jodzik/projects/finish/wash-machine-main/utils/button_driver.h
 render.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/render.h
+/home/jodzik/projects/finish/wash-machine-main/utils/render.h
 bonus.h
-/home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.h
+/home/jodzik/projects/finish/wash-machine-main/utils/bonus.h
 stdint.h
 -
 string

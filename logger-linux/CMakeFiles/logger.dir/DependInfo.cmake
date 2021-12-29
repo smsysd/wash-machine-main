@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/Logger.cpp" "/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/CMakeFiles/logger.dir/Logger.cpp.o"
+  "/home/jodzik/projects/finish/wash-machine-main/logger-linux/Logger.cpp" "/home/jodzik/projects/finish/wash-machine-main/logger-linux/CMakeFiles/logger.dir/Logger.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

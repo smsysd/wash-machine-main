@@ -1,2 +1,2 @@
-/usr/bin/ar qc libjparser.a CMakeFiles/jparser.dir/JParser.cpp.o
+/usr/bin/ar qc libjparser.a  CMakeFiles/jparser.dir/JParser.cpp.o
 /usr/bin/ranlib libjparser.a

@@ -1,2 +1,2 @@
-/usr/bin/ar qc librgb332.a CMakeFiles/rgb332.dir/rgb332.c.o
+/usr/bin/ar qc librgb332.a  CMakeFiles/rgb332.dir/rgb332.c.o
 /usr/bin/ranlib librgb332.a

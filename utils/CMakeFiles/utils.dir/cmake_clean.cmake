@@ -1,10 +1,10 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/utils.dir/utils.cpp.o"
   "CMakeFiles/utils.dir/bonus.cpp.o"
   "CMakeFiles/utils.dir/button_driver.cpp.o"
   "CMakeFiles/utils.dir/render.cpp.o"
-  "CMakeFiles/utils.dir/utils.cpp.o"
-  "libutils.a"
   "libutils.pdb"
+  "libutils.a"
 )
 
 # Per-language clean rules from dependency scanning.
