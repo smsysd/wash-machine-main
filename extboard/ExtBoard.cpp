@@ -66,7 +66,7 @@ void registerOnEffectEndHandler(void (*handler)(int iEffect)) {
 
 }
 
-void registerOnCardReadHandler(void (*handler)(const char* uid)) {
+void registerOnCardReadHandler(void (*handler)(uint64_t cardid)) {
 
 }
 

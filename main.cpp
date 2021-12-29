@@ -17,6 +17,8 @@
 
 using namespace std;
 using namespace utils;
+using namespace button_driver;
+using namespace bonus;
 using json = nlohmann::json;
 
 enum class Mode {
@@ -26,19 +28,19 @@ enum class Mode {
 };
 
 Mode mode = Mode::GIVE_MONEY;
-bonus::CardInfo card;
-bool isCardRead = false;
+CardInfo card;
+bool isBonusBegin = false;
 
 void onCashAppeared();
 void onCashRunout();
-void onButtonPushed(ButtonType type, int iButton);
+void onButtonPushed(Button& button);
 void onCard(const char* uid);
 void onQr(const char* qr);
 void onServiceEnd();
 
 int main(int argc, char const *argv[]) {
 
-	init(onCashAppeared, onCashRunout, onButtonPushed, onCard, onServiceEnd);
+	init(onCashAppeared, onCashRunout, onButtonPushed, onQr, onCard, onServiceEnd);
 	printLogoFrame();
 	setGiveMoneyMode();
 	
@@ -55,37 +57,74 @@ void onCashAppeared() {
 }
 
 void onCashRunout() {
-	isCardRead = false;
+	isBonusBegin = false;
 	setGiveMoneyMode();
 	mode = Mode::GIVE_MONEY;
 }
 
-void onButtonPushed(ButtonType type, int iButton) {
+void onButtonPushed(Button& button) {
 	if (mode == Mode::PROGRAM) {
-		switch (type) {
-		case button_driver::ButtonType::END:
-			if (isCardRead) {
-				isCardRead = false;
-				accrueRemainBonuses(card.uid);
+		switch (button.type) {
+		case Button::END:
+			if (isBonusBegin) {
+				isBonusBegin = false;
+				accrueRemainBonusesAndClose();
 			}
 			setGiveMoneyMode();
 			mode = Mode::GIVE_MONEY;
 			break;
-		case button_driver::ButtonType::PROGRAM:
-			setProgram(getProgramByButton(iButton));
+		case Button::PROGRAM:
+			setProgram(button.prog);
+			break;
+		}
+	} else
+	if (mode == Mode::SERVICE) {
+		switch (button.type) {
+		case Button::END:
+			setGiveMoneyMode();
+			mode = Mode::GIVE_MONEY;
+			break;
+		case Button::PROGRAM:
+			setServiceProgram(button.serviceProg);
 			break;
 		}
 	}
 }
 
-void onCard(const char* cardid) {
+void onQr(const char* qr) {
+	if (isBonusBegin) {
+		// TODO (if another qr ??)
+		writeOffBonuses();
+	} else {
+		bool rc = startBonuses(card, qr);
+		if (!rc) {
+			printErrorFrame(ErrorFrame::BONUS_ERROR);
+			return;
+		}
+		isBonusBegin = true;
+		if (card.type == CardInfo::BONUS_ORG || card.type == CardInfo::BONUS_PERS) {
+			rc = writeOffBonuses();
+			if (!rc) {
+				printErrorFrame(ErrorFrame::BONUS_ERROR);
+				return;
+			}
+		} else
+		if (card.type == CardInfo::SERVICE) {
+			setServiceMode(card.id);
+		} else {
+			printErrorFrame(ErrorFrame::UNKNOWN_CARD);
+		}
+	}
+}
+
+void onCard(uint64_t cardid) {
 	card = getCardInfo(cardid); 
 	if (card.type == bonus::CardInfo::SERVICE) {
 		setServiceMode(card.uid);
 	} else
 	if (card.type == bonus::CardInfo::BONUS) {
 		if (writeOffBonuses(card.uid)) {
-			isCardRead = true;
+			isBonusBegin = true;
 		}
 	} else
 	if (card.type == bonus::CardInfo::UNKNOWN) {

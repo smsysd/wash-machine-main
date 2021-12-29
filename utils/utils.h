@@ -15,7 +15,6 @@
 using namespace std;
 using namespace std::chrono;
 namespace bd = button_driver;
-using ButtonType = bd::ButtonType;
 using CardInfo = bonus::CardInfo;
 
 namespace utils {
@@ -32,27 +31,32 @@ struct Program {
 	steady_clock::duration duration;
 };
 
+enum class ErrorFrame {
+	UNKNOWN_CARD,
+	BONUS_ERROR,
+	INTERNAL_ERROR
+};
+
 void init(
 	void (*onCashAppeared)(),
 	void (*onCashRunout)(),
-	void (*onButtonPushed)(ButtonType type, int iButton),
-	void (*onCard)(const char* cardid),
+	void (*onButtonPushed)(bd::Button& button),
+	void (*onQr)(const char* qr),
+	void (*onCard)(uint64_t cardid),
 	void (*onServiceEnd)());
 
 void setGiveMoneyMode();
-void setServiceMode(const char* uid);
-void setProgram(int iProg);
-void setServiceProgram(int iProg);
+void setServiceMode(uint64_t cardid);
+void setProgram(int id);
+void setServiceProgram(int id);
 
-bool writeOffBonuses(const char* uid);
-void accrueRemainBonuses(const char* uid);
-
-CardInfo getCardInfo(const char* qrOrCardid); // additionaly check local storage service cards
-int getProgramByButton(int iButton);
-int getServiceProgramByButton(int iButton);
+bool startBonuses(CardInfo& cardInfo, const char* qr);
+bool writeOffBonuses();
+void accrueRemainBonusesAndClose();
+bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid);
 
 void printLogoFrame();
-void printUnknownCardFrame();
+void printErrorFrame(ErrorFrame ef);
 
 }
 

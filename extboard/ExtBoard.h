@@ -39,7 +39,7 @@ namespace extboard {
 	/* Event handlers registration */
 	void registerOnButtonPushedHandler(void (*handler)(int iButton));
 	void registerOnEffectEndHandler(void (*handler)(int iEffect));
-	void registerOnCardReadHandler(void (*handler)(const char* uid));
+	void registerOnCardReadHandler(void (*handler)(uint64_t cardid));
 	void registerOnCashAddedHandler(void (*handler)(double nCash));
 	void registerOnObjectCloserHandler(void (*handler)());
 }

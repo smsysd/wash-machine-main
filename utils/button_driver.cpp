@@ -10,7 +10,7 @@ using json = nlohmann::json;
 
 namespace button_driver {
 
-void init(json& buttons, void (*onButtonPushed)(ButtonType type, int iButton)) {
+void init(json& buttons, void (*onButtonPushed)(Button& button)) {
 	
 }
 

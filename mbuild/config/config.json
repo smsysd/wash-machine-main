@@ -6,8 +6,13 @@
 	"programs": [
 		{"id": 0, "name": "pause", "frame": 0, "bonus-frame": 1, "relay-group": 0, "free-use-time": 10}
 	],
+
 	"service-programs": [
 		{"id": 0, "name": "pause", "frame": 0, "relay-group": 0}
+	],
+
+	"cards": [
+		{"id": 123, "type": "service"}
 	],
 
 	"logo-frame": 0

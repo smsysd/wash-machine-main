@@ -27,8 +27,6 @@ namespace utils {
 namespace {
 	void (*_onCashAppeared)();
 	void (*_onCashRunout)();
-	void (*_onButtonPushed)(bd::ButtonType type, int iButton);
-	void (*_onCard)(const char* cardid);
 	void (*_onServiceEnd)();
 
 	JParser* _hwconfig = nullptr;
@@ -43,6 +41,7 @@ namespace {
 
 	vector<Program> _programs;
 	vector<Program> _servicePrograms;
+	vector<CardInfo> _cards;
 	int _currentProgram = -1;
 	int _logoFrame = -1;
 	int _unknownCardFrame = -1;
@@ -73,14 +72,13 @@ namespace {
 void init(
 	void (*onCashAppeared)(),
 	void (*onCashRunout)(),
-	void (*onButtonPushed)(bd::ButtonType type, int iButton),
-	void (*onCard)(const char* cardid),
+	void (*onButtonPushed)(bd::Button& button),
+	void (*onQr)(const char* qr),
+	void (*onCard)(uint64_t cardid),
 	void (*onServiceEnd)())
 {
 	_onCashAppeared = onCashAppeared;
 	_onCashRunout = onCashRunout;
-	_onButtonPushed = onButtonPushed;
-	_onCard = onCard;
 	_onServiceEnd = onServiceEnd;
 
 	cout << "init general-tools.." << endl;
@@ -147,7 +145,7 @@ void init(
 	// button
 	try {
 		cout << "init button driver.." << endl;
-		bd::init(buttonsCnf, _onButtonPushed);
+		bd::init(buttonsCnf, onButtonPushed);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init button driver: " + string(e.what()));
 		throw runtime_error("fail to init button driver: " + string(e.what()));
@@ -181,7 +179,7 @@ void init(
 		int height = JParser::getf(qrscnf, "height", "qr-scaner");
 		char cdriver[256] = {0};
 		strcpy(cdriver, driver.c_str());
-		int rc = qrscaner_init(cdriver, width, height, _onCard);
+		int rc = qrscaner_init(cdriver, width, height, onQr);
 		if (rc == 0) {
 			qrscaner_start();
 		} else {
@@ -240,11 +238,33 @@ void init(
 		throw runtime_error("fail to fill programs: " + string(e.what()));
 	}
 
+	// fill cards
+	try {
+		cout << "fill cards.." << endl;
+		json& cards = _config->get("cards");
+		for (int i = 0; i < cards.size(); i++) {
+			json& jp = cards[i];
+			CardInfo sp;
+			sp.id = JParser::getf(jp, "id", "card at [" + to_string(i) + "]");
+			string ct = JParser::getf(jp, "type", "card at [" + to_string(i) + "]");
+			if (ct == "service") {
+				sp.type = CardInfo::SERVICE;
+			} else
+			if (ct == "bonus") {
+				sp.type = CardInfo::BONUS_PERS;
+			} else {
+				sp.type = CardInfo::UNKNOWN;
+			}
+			_cards.push_back(sp);
+		}
+	} catch (exception& e) {
+		_log->log(Logger::Type::WARNING, "LOCAL CARDS", "fail to fill cards: " + string(e.what()));
+	}
 
 	// extboard callbacks
 	cout << "register exboard callbacks.." << endl;
 	extboard::registerOnCashAddedHandler(_onCashAdd);
-	extboard::registerOnCardReadHandler(_onCard);
+	extboard::registerOnCardReadHandler(onCard);
 
 	cout << "register genereal handler.." << endl;
 	callHandler(_handler, NULL, 500, 0);
@@ -281,36 +301,28 @@ void setServiceProgram(int iProg) {
 	cout << "service program '" << _servicePrograms[iProg].name << "' set" << endl;
 }
 
-int getProgramByButton(int iButton) {
-	return -1;
-}
-
-int getServiceProgramByButton(int iButton) {
-	return -1;
-}
-
-bool writeOffBonuses(const char* uid) {
-	cout << "try write off bonuses.." << endl;
+bool startBonuses(CardInfo& cardInfo, const char* qr) {
 	return false;
 }
 
-void accrueRemainBonuses(const char* uid) {
-	cout << "accrue bonuses.." << endl;
+bool writeOffBonuses() {
+	return false;
 }
 
-// additionaly check local storage service cards
-CardInfo getCardInfo(const char* qrOrCardid) {
-	CardInfo ci;
-	ci.type = CardInfo::BONUS;
-	return ci;
+void accrueRemainBonusesAndClose() {
+
+}
+
+bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid) {
+
 }
 
 void printLogoFrame() {
 	render::showFrame(_logoFrame);
 }
 
-void printUnknownCardFrame() {
-	render::showFrame(_unknownCardFrame);
+void printErrorFrame(ErrorFrame ef) {
+	
 }
 
 }
