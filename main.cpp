@@ -28,7 +28,8 @@ enum class Mode {
 };
 
 Mode mode = Mode::GIVE_MONEY;
-CardInfo card;
+CardInfo bonusCard;
+CardInfo rfidCard;
 bool isBonusBegin = false;
 
 void onCashAppeared();
@@ -57,7 +58,10 @@ void onCashAppeared() {
 }
 
 void onCashRunout() {
-	isBonusBegin = false;
+	if (isBonusBegin) {
+		isBonusBegin = false;
+		accrueRemainBonusesAndClose();
+	}
 	setGiveMoneyMode();
 	mode = Mode::GIVE_MONEY;
 }
@@ -93,24 +97,24 @@ void onButtonPushed(Button& button) {
 
 void onQr(const char* qr) {
 	if (isBonusBegin) {
-		// TODO (if another qr ??)
+		// TODO (if another qr ?? (if old client ??))
 		writeOffBonuses();
 	} else {
-		bool rc = startBonuses(card, qr);
+		bool rc = startBonuses(bonusCard, qr);
 		if (!rc) {
 			printErrorFrame(ErrorFrame::BONUS_ERROR);
 			return;
 		}
 		isBonusBegin = true;
-		if (card.type == CardInfo::BONUS_ORG || card.type == CardInfo::BONUS_PERS) {
+		if (bonusCard.type == CardInfo::BONUS_ORG || bonusCard.type == CardInfo::BONUS_PERS) {
 			rc = writeOffBonuses();
 			if (!rc) {
 				printErrorFrame(ErrorFrame::BONUS_ERROR);
 				return;
 			}
 		} else
-		if (card.type == CardInfo::SERVICE) {
-			setServiceMode(card.id);
+		if (bonusCard.type == CardInfo::SERVICE) {
+			setServiceMode(bonusCard.id);
 		} else {
 			printErrorFrame(ErrorFrame::UNKNOWN_CARD);
 		}
@@ -118,17 +122,20 @@ void onQr(const char* qr) {
 }
 
 void onCard(uint64_t cardid) {
-	card = getCardInfo(cardid); 
-	if (card.type == bonus::CardInfo::SERVICE) {
-		setServiceMode(card.uid);
+	bool rc = getLocalCardInfo(rfidCard, cardid);
+	if (!rc) {
+		printErrorFrame(ErrorFrame::UNKNOWN_CARD);
+		return;
+	}
+
+	if (rfidCard.type == CardInfo::SERVICE) {
+		setServiceMode(rfidCard.id);
 	} else
-	if (card.type == bonus::CardInfo::BONUS) {
-		if (writeOffBonuses(card.uid)) {
-			isBonusBegin = true;
-		}
+	if (rfidCard.type == CardInfo::BONUS_ORG || rfidCard.type == CardInfo::BONUS_PERS) {
+		// may be rfid bonus card
 	} else
-	if (card.type == bonus::CardInfo::UNKNOWN) {
-		printUnknownCardFrame();
+	if (rfidCard.type == CardInfo::UNKNOWN) {
+		printErrorFrame(ErrorFrame::UNKNOWN_CARD);
 	}
 }
 
