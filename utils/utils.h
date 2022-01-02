@@ -19,22 +19,41 @@ using CardInfo = bonus::CardInfo;
 
 namespace utils {
 
+enum class Mode {
+	INIT,
+	GIVE_MONEY,
+	PROGRAM,
+	SERVICE
+};
+
 struct Program {
 	int id;
 	string name;
 	int frame;
+	int bonusFrame;
 	int relayGroup;
 	double rate;
 	int freeUseTimeSec;
-	int remainFreeUseTimeSec;
-	time_point<steady_clock> tBegin;
-	steady_clock::duration duration;
+	int useTimeSec;
+	double spendMoney;
+	int effect;
 };
 
-enum class ErrorFrame {
-	UNKNOWN_CARD,
-	BONUS_ERROR,
-	INTERNAL_ERROR
+struct Session {
+	enum Type {
+		CLIENT,
+		SERVICE
+	};
+	Type type;
+	double k;
+	time_t tBegin;
+	time_t tEnd;
+	uint64_t cardid;
+	bool isBegin;
+	double totalSpent;
+	double depositedMoney;
+	double writeoffBonuses;
+	double acrueBonuses;
 };
 
 void init(
@@ -50,13 +69,16 @@ void setServiceMode(uint64_t cardid);
 void setProgram(int id);
 void setServiceProgram(int id);
 
+/* Session for monitoring - setup bonus and session default values  */
+void beginSession(Session::Type type, uint64_t id);
+void dropSession();
+
 bool startBonuses(CardInfo& cardInfo, const char* qr);
 bool writeOffBonuses();
 void accrueRemainBonusesAndClose();
 bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid);
 
-void printLogoFrame();
-void printErrorFrame(ErrorFrame ef);
+Mode cmode();
 
 }
 

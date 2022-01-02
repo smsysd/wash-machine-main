@@ -20,15 +20,16 @@ namespace extboard {
 		SUB = 0x02
 	};
 
-	enum class DisplayStringMode {
-		DEFAULT = 0x00,
-		CENTER = 0x01
+	enum class SpecEffect {
+		GIVE_MONEY_EFFECT,
+		SERVICE_EFFECT
 	};
 
 	void init(json& extboard, json& performingUnits, json& relaysGroups, json& buttons, json& leds, json& effects);
 	
 	/* Light control */
 	void startLightEffect(int id, LightEffectType type);
+	void startLightEffect(SpecEffect effect, LightEffectType type);
 	void resetLightEffect(LightEffectType type);
 
 	/* Performing functions */

@@ -17,6 +17,7 @@
 #include <codecvt>
 #include <locale>
 #include <unistd.h>
+#include <time.h>
 
 using namespace std;
 
@@ -48,16 +49,31 @@ namespace {
 		vector<Var> vars;
 	};
 
-	thread* _lmth = nullptr;
+	thread* _genth = nullptr;
 	LedMatrix* _lm;
 	vector<MFont> _fonts;
 	vector<Block> _blocks;
 	vector<Var> _vars;
+	vector<Frame> _lmframes;
 	int defFont;
 	uint8_t defColor;
 	uint8_t defX;
 	uint8_t defY;
 	LedMatrix::Mode defMode;
+	
+	Frame* _currentRenderingFrame = nullptr;
+	Frame* _renderingFrame = nullptr;
+	time_t _tOffTempFrame = 0;
+	int _redrawBorehole = 100;
+	int _handlerDelay = 10000;
+	bool _pushedRedraw = false;
+	
+	int _giveMoneyFrame = -1;
+	int _bonusGiveMoneyFrame = -1;
+	int _logoFrame = -1;
+	int _unknownCardFrame = -1;
+	int _bonusErrorFrame = -1;
+	int _internalErrorFrame = -1;
 
 	int _parse(wstring& s, int b, Frame& f);
 	int _parseCtrl(wstring& s, int b, Frame& f);
@@ -76,9 +92,74 @@ namespace {
 		return converterX.to_bytes(wstr);
 	}
 
-	void _lmhandler() {
+	void _lmredraw() {
+		// setup default to frame options
+		_lm->setOpt(_currentRenderingFrame->mode, _currentRenderingFrame->font, _currentRenderingFrame->color);
+		
+		// inject variables
+		wstring ss = _currentRenderingFrame->format;
+		for (int i = 0; i < _vars.size(); i++) {
+			size_t vp = ss.find(L"$" + _vars[i].name);
+			if (vp != string::npos) {
+				wstring vsv;
+				if (_vars[i].type == VarType::FLOAT) {
+					vsv = to_wstring(*((const double*)_vars[i].var));
+				} else 
+				if (_vars[i].type == VarType::INT) {
+					vsv = to_wstring(*((const int*)_vars[i].var));
+				} else
+				if (_vars[i].type == VarType::STRING) {
+					string s(((const char*)_vars[i].var));
+					vsv = _s2ws(s);
+				}
+				ss = ss.replace(vp, _vars[i].name.length() + 1, vsv);
+			}
+		}
+		_lm->writeString(ss);
+	}
 
-		usleep(10000);
+	void _redraw() {
+		if (_lm != nullptr) {
+			_lmredraw();
+		} else {
+			throw runtime_error ("std redraw still not supported");
+		}
+	}
+
+	void _handler() {
+		int i = 0;
+		while (true) {
+			try {
+				if (_tOffTempFrame > 0 && time(NULL) > _tOffTempFrame) {
+					_tOffTempFrame = 0;
+					_currentRenderingFrame = _renderingFrame;
+					_redraw();
+					i = _redrawBorehole + 1;
+					_pushedRedraw = false;
+				}
+
+				if (i % _redrawBorehole == 0 || _pushedRedraw) {
+					_redraw();
+				}
+				usleep(_handlerDelay);
+				i++;
+			} catch (exception& e) {
+				cout << "[WARNING][RENDER]|HANDLER| " << e.what() << endl;
+			}
+		}
+	}
+
+	Frame* _getFrame(int id) {
+		if (_lm != nullptr) {
+			for (int i = 0; i < _lmframes.size(); i++) {
+				if (_lmframes[i].id == id) {
+					return & _lmframes[i];
+				}
+			}
+			throw runtime_error("ledmatrix frame '" + to_string(id) + "' not found");
+		} else {
+			throw runtime_error("std frames still not supported");
+		}
 	}
 
 	Var& _getVar(wstring name) {
@@ -161,8 +242,16 @@ void regVar(const char* var, wstring name) {
 	_vars.push_back(_var);
 }
 
-void init(json& displaycnf, json& frames, json& option, json& bg, json& fonts) {
+void init(json& displaycnf, json& frames, json& specFrames, json& option, json& bg, json& fonts) {
+	// get necessary config fields
 	string dt = JParser::getf(displaycnf, "type", "display");
+	_giveMoneyFrame = JParser::getf(specFrames, "give-money-frame", "spec-frames");
+	_bonusGiveMoneyFrame = JParser::getf(specFrames, "bonus-give-money-frame", "spec-frames");
+	_bonusErrorFrame = JParser::getf(specFrames, "bonus-error-frame", "spec-frames");
+	_unknownCardFrame = JParser::getf(specFrames, "unknown-card-frame", "spec-frames");
+	_internalErrorFrame = JParser::getf(specFrames, "internal-error-frame", "spec-frames");
+	_logoFrame = JParser::getf(specFrames, "logo-frame", "spec-frames");
+
 	if (dt == "ledmatrix") {
 		// init hardware
 		int addr = JParser::getf(displaycnf, "address", "display");
@@ -295,19 +384,62 @@ void init(json& displaycnf, json& frames, json& option, json& bg, json& fonts) {
 			}
 		}
 
-		// start handler
-		_lmth = new thread(_lmhandler);
-
 	} else
 	if (dt == "std") {
 		throw runtime_error("'std' display type still not supported");
 	} else {
 		throw runtime_error("unknown display type");
 	}
+
+	_genth = new thread(_handler);
 }
 
-void showFrame(int iFrame) {
+void showFrame(SpecFrame frame) {
+	int f = -1;
+	
+	switch (frame) {
+	case SpecFrame::LOGO: f = _logoFrame;
+	case SpecFrame::UNKNOWN_CARD: f = _unknownCardFrame;
+	case SpecFrame::BONUS_ERROR: f = _bonusErrorFrame;
+	case SpecFrame::INTERNAL_ERROR: f = _internalErrorFrame;
+	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame;
+	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame;
+	}
 
+	showFrame(f);
+}
+
+void showFrame(int idFrame) {
+	Frame* f = _getFrame(idFrame);
+	_currentRenderingFrame = f;
+	_renderingFrame = f;
+	_redraw();
+}
+
+void showTempFrame(SpecFrame frame, int tSec) {
+	int f = -1;
+	
+	switch (frame) {
+	case SpecFrame::LOGO: f = _logoFrame;
+	case SpecFrame::UNKNOWN_CARD: f = _unknownCardFrame;
+	case SpecFrame::BONUS_ERROR: f = _bonusErrorFrame;
+	case SpecFrame::INTERNAL_ERROR: f = _internalErrorFrame;
+	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame;
+	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame;
+	}
+
+	showTempFrame(f, tSec);
+}
+
+void showTempFrame(int idFrame, int tSec) {
+	Frame* f = _getFrame(idFrame);
+	_tOffTempFrame += time(NULL) + tSec;
+	_currentRenderingFrame = f;
+	_redraw();
+}
+
+void redraw() {
+	_pushedRedraw = true;
 }
 
 }

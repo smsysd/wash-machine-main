@@ -19,15 +19,12 @@ using namespace std;
 using namespace utils;
 using namespace button_driver;
 using namespace bonus;
+using namespace render;
 using json = nlohmann::json;
 
-enum class Mode {
-	GIVE_MONEY,
-	PROGRAM,
-	SERVICE
-};
+const int tErrorFrame = 4;
+const int tLogoFrame = 3;
 
-Mode mode = Mode::GIVE_MONEY;
 CardInfo bonusCard;
 CardInfo rfidCard;
 bool isBonusBegin = false;
@@ -42,7 +39,7 @@ void onServiceEnd();
 int main(int argc, char const *argv[]) {
 
 	init(onCashAppeared, onCashRunout, onButtonPushed, onQr, onCard, onServiceEnd);
-	printLogoFrame();
+	showTempFrame(SpecFrame::LOGO, tLogoFrame);
 	setGiveMoneyMode();
 	
 	while (true) {
@@ -53,7 +50,6 @@ int main(int argc, char const *argv[]) {
 }
 
 void onCashAppeared() {
-	mode = Mode::PROGRAM;
 	setProgram(0);
 }
 
@@ -63,11 +59,10 @@ void onCashRunout() {
 		accrueRemainBonusesAndClose();
 	}
 	setGiveMoneyMode();
-	mode = Mode::GIVE_MONEY;
 }
 
 void onButtonPushed(Button& button) {
-	if (mode == Mode::PROGRAM) {
+	if (cmode() == Mode::PROGRAM) {
 		switch (button.type) {
 		case Button::END:
 			if (isBonusBegin) {
@@ -75,18 +70,16 @@ void onButtonPushed(Button& button) {
 				accrueRemainBonusesAndClose();
 			}
 			setGiveMoneyMode();
-			mode = Mode::GIVE_MONEY;
 			break;
 		case Button::PROGRAM:
 			setProgram(button.prog);
 			break;
 		}
 	} else
-	if (mode == Mode::SERVICE) {
+	if (cmode() == Mode::SERVICE) {
 		switch (button.type) {
 		case Button::END:
 			setGiveMoneyMode();
-			mode = Mode::GIVE_MONEY;
 			break;
 		case Button::PROGRAM:
 			setServiceProgram(button.serviceProg);
@@ -102,21 +95,21 @@ void onQr(const char* qr) {
 	} else {
 		bool rc = startBonuses(bonusCard, qr);
 		if (!rc) {
-			printErrorFrame(ErrorFrame::BONUS_ERROR);
+			showTempFrame(SpecFrame::BONUS_ERROR, tErrorFrame);
 			return;
 		}
 		isBonusBegin = true;
 		if (bonusCard.type == CardInfo::BONUS_ORG || bonusCard.type == CardInfo::BONUS_PERS) {
 			rc = writeOffBonuses();
 			if (!rc) {
-				printErrorFrame(ErrorFrame::BONUS_ERROR);
+				showTempFrame(SpecFrame::BONUS_ERROR, tErrorFrame);
 				return;
 			}
 		} else
 		if (bonusCard.type == CardInfo::SERVICE) {
 			setServiceMode(bonusCard.id);
 		} else {
-			printErrorFrame(ErrorFrame::UNKNOWN_CARD);
+			showTempFrame(SpecFrame::UNKNOWN_CARD, tErrorFrame);
 		}
 	}
 }
@@ -124,7 +117,7 @@ void onQr(const char* qr) {
 void onCard(uint64_t cardid) {
 	bool rc = getLocalCardInfo(rfidCard, cardid);
 	if (!rc) {
-		printErrorFrame(ErrorFrame::UNKNOWN_CARD);
+		showTempFrame(SpecFrame::UNKNOWN_CARD, tErrorFrame);
 		return;
 	}
 
@@ -135,11 +128,10 @@ void onCard(uint64_t cardid) {
 		// may be rfid bonus card
 	} else
 	if (rfidCard.type == CardInfo::UNKNOWN) {
-		printErrorFrame(ErrorFrame::UNKNOWN_CARD);
+		showTempFrame(SpecFrame::UNKNOWN_CARD, tErrorFrame);
 	}
 }
 
 void onServiceEnd() {
 	setGiveMoneyMode();
-	mode = Mode::GIVE_MONEY;
 }

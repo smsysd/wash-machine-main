@@ -31,13 +31,11 @@ struct CardInfo {
 	double count;
 };
 
-void init(json& bonusSysCnf, json& promotions, json& programs);
+void init(json& bonusSysCnf, json& promotions);
 CardInfo open(const char* access);
-double writeoff(double desired);
+double writeoff();
 void close(double acrue);
-double getRate(int idProgram);
 double getCoef();
-int getProgramFrame(int idProgram);
 
 }
 

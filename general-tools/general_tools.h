@@ -23,7 +23,7 @@ extern "C" {
 
 #define GTP					GTP_LINUX
 
-#define MAX_CALL_HANDLES			10
+#define MAX_CALL_HANDLES			100
 
 typedef enum ReturnCode {
 	OK				=	-1,

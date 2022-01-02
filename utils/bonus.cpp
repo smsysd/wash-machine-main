@@ -28,14 +28,6 @@ namespace {
 		return elems;
 	}
 
-	struct Program {
-		int id;
-		string name;
-		int defFrame;
-		int bonusFrame;
-		double rate;
-	};
-
 	class TimeInterval {
 	public:
 		TimeInterval() {
@@ -169,22 +161,12 @@ namespace {
 		}
 	};
 
-	vector<Program> _programs;
 	vector<Promotion> _promotions;
 	int _bonus = 0;
 	Type _type;
 	string _cert;
 	char _access[256];
-
-	Program& _getProgram(int id) {
-		for (int i = 0; i < _programs.size(); i++) {
-			if (_programs[i].id == id) {
-				return _programs[i];
-			}
-		}
-
-		throw runtime_error("program at '" + to_string(id) + "' not found");
-	}
+	double _desiredWriteoff = 0;
 
 	json _japi(string cmd) {
 		char buf[4096] = {0};
@@ -217,7 +199,7 @@ namespace {
 	}
 }
 
-void init(json& bonusSysCnf, json& promotions, json& programs) {
+void init(json& bonusSysCnf, json& promotions) {
 	// link with render
 	render::regVar(&_bonus, L"bonus");
 	
@@ -235,17 +217,8 @@ void init(json& bonusSysCnf, json& promotions, json& programs) {
 		throw runtime_error("unknown bonus system type '" + bt + "'");
 	}
 
-	// fill programs
-	for (int i = 0; i < programs.size(); i++) {
-		json& jp = programs[i];
-		Program sp;
-		sp.id = JParser::getf(jp, "id", "program at [" + to_string(i) + "]");
-		sp.name = JParser::getf(jp, "name", "program at [" + to_string(i) + "]");
-		sp.defFrame = JParser::getf(jp, "frame", "program at [" + to_string(i) + "]");
-		sp.bonusFrame = JParser::getf(jp, "bonus-frame", "program at [" + to_string(i) + "]");
-
-		_programs.push_back(sp);
-	}
+	_desiredWriteoff = JParser::getf(bonusSysCnf, "bonus-writeoff", "bonus-system");
+	_desiredWriteoff = JParser::getf(bonusSysCnf, "give-money", "bonus-system");
 
 	// fill promotions
 	for (int i = 0; i < promotions.size(); i++) {
@@ -331,18 +304,13 @@ CardInfo open(const char* access) {
 	return ci;
 }
 
-double writeoff(double desired) {
-	json res = _japi("writeoff " + to_string(desired));
+double writeoff() {
+	json res = _japi("writeoff " + to_string(_desiredWriteoff));
 	return JParser::getf(res, "count", "server response");
 }
 
 void close(double acrue) {
 	_japi("close " + to_string(acrue));
-}
-
-double getRate(int idProgram) {
-	Program& p = _getProgram(idProgram);
-	return p.rate;
 }
 
 double getCoef() {
@@ -364,16 +332,6 @@ double getCoef() {
 		}
 		return k;
 	}
-}
-
-int getProgramFrame(int idProgram) {
-	Program& p = _getProgram(idProgram);
-	for (int i = 0; i < _promotions.size(); i++) {
-		if (_promotions[i].isActive()) {
-			return p.bonusFrame;
-		}
-	}
-	return p.defFrame;
 }
 
 }

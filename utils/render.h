@@ -10,6 +10,14 @@
 using namespace std;
 
 namespace render {
+	enum class SpecFrame {
+		LOGO,
+		UNKNOWN_CARD,
+		BONUS_ERROR,
+		INTERNAL_ERROR,
+		GIVE_MONEY,
+		GIVE_MONEY_BONUS
+	};
 	enum DisplayType {
 		LEDMATRIX,
 		STD
@@ -24,8 +32,13 @@ namespace render {
 	void regVar(const double* var, wstring name);
 	void regVar(const char* var, wstring name);
 
-	void init(json& displaycnf, json& frames, json& option, json& bg, json& fonts);
-	void showFrame(int iFrame);
+	void init(json& displaycnf, json& frames, json& specFrames, json& option, json& bg, json& fonts);
+	void showFrame(SpecFrame frame);
+	void showFrame(int idFrame);
+	void showTempFrame(SpecFrame frame, int tSec);
+	void showTempFrame(int idFrame, int tSec);
+
+	void redraw();
 }
 
 #endif

@@ -1,5 +1,13 @@
 #include "ExtBoard.h"
 #include "../mspi-linux/Mspi.h"
+#include "../json.h"
+#include "../jparser-linux/JParser.h"
+
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+#include <unistd.h>
+#include <time.h>
 
 using namespace std;
 using json = nlohmann::json;
@@ -29,6 +37,10 @@ namespace {
 		uint8_t nRepeats;
 		LightInstruction instructions[508];
 	};
+
+	vector<LightEffect> _effects;
+	int _giveMoneyEffect = -1;
+	int _serviceEffect = -1;
 }
 
 void init(json& extboard, json& performingUnits, json& relaysGroups, json& buttons, json& leds, json& effects) {
@@ -38,6 +50,15 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& butto
 /* Light control */
 void startLightEffect(int id, LightEffectType type) {
 
+}
+
+void startLightEffect(SpecEffect effect, LightEffectType type) {
+	int id = -1;
+	switch (effect) {
+	case SpecEffect::GIVE_MONEY_EFFECT: id = _giveMoneyEffect; break;
+	case SpecEffect::SERVICE_EFFECT: id = _serviceEffect; break;
+	}
+	startLightEffect(id, type);
 }
 
 void resetLightEffect(LightEffectType type) {
