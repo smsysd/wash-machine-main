@@ -47,6 +47,14 @@
 	},
 
 	"leds": [
-		{"id": 0, "type": "123"}
+		{"id": 0, "type": "bm", "index": 1},
+		{"id": 1, "type": "lp", "index": 1},
+		{"id": 2, "type": "eb", "index": 1},
+		{"id": 3, "type": "bm", "index": 2},
+		{"id": 4, "type": "lp", "index": 2},
+		{"id": 5, "type": "eb", "index": 2},
+		{"id": 6, "type": "bm", "index": 3},
+		{"id": 7, "type": "lp", "index": 3},
+		{"id": 8, "type": "eb", "index": 3}
 	]
 }

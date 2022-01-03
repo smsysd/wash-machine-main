@@ -135,6 +135,17 @@ namespace {
 		}
 	};
 
+	struct Led {
+		enum Type {
+			LEDPANEL,
+			BUTTONMODULE,
+			EXTBOARD
+		};
+		int id;
+		Type type;
+		uint8_t i;
+	};
+
 	Mspi* _mspi = nullptr;
 	vector<LightEffect> _effects;
 	vector<PerformerUnit> _performersu;
