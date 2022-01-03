@@ -25,7 +25,7 @@ namespace extboard {
 		SERVICE_EFFECT
 	};
 
-	void init(json& extboard, json& performingUnits, json& relaysGroups, json& buttons, json& leds, json& effects);
+	void init(json& extboard, json& performingUnits, json& relaysGroups, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& releiveInstructions);
 	
 	/* Light control */
 	void startLightEffect(int id, LightEffectType type);

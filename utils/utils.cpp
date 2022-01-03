@@ -219,6 +219,9 @@ void init(
 		json& extBoardCnf = _hwconfig->get("ext-board");
 		json& relaysGroups = _config->get("relays-groups");
 		json& performingUnitsCnf = _hwconfig->get("performing-units");
+		json& rangeFinder = _hwconfig->get("range-finder");
+		json& tempSens = _hwconfig->get("temp-sens");
+		json& relIns = _hwconfig->get("releive-instructions");
 		json ledsCnf;
 		try {
 			ledsCnf = _hwconfig->get("leds");
@@ -238,7 +241,7 @@ void init(
 				_log->log(Logger::Type::WARNING, "UTILS INIT", "fail get load effects: " + string(e.what()));
 			}
 		}
-		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, buttonsCnf, ledsCnf, effects);
+		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, buttonsCnf, rangeFinder, tempSens, ledsCnf, effects, relIns);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));

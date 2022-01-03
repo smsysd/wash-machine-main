@@ -1,7 +1,15 @@
 {
-	"buttons": [
-
-	],
+	"buttons": {
+		"extboard": {
+			"active-levels": 0,
+			"used-mask": 255
+		},
+		"modules": [
+			{"address": 48, "active-levels": 0, "used-mask": 255},
+			{"address": 48, "active-levels": 0, "used-mask": 255},
+			{"address": 48, "active-levels": 0, "used-mask": 255}
+		]
+	},
 
 	"ext-board": {
 
@@ -11,11 +19,25 @@
 
 	],
 
+	"releive-instructions": [
+		{"set": [42, 255]},
+		{"delay": 1000},
+		{"set": [42, 0]},
+		{"delay": 1000},
+		{"set": [42, 255]},
+		{"delay": 1000},
+		{"set": [42, 0]}
+	],
+
 	"display": {
 		"type": "ledmatrix",
 		"address": 8,
 		"dir-pin": -1,
 		"driver": "/dev/ttyUSB0"
+	},
+
+	"range-finder": {
+		"closer-range": 40
 	},
 
 	"qr-scaner": {
