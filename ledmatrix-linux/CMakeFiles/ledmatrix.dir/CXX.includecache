@@ -6,15 +6,15 @@
 
 #IncludeRegexTransform: 
 
-/home/jodzik/projects/finish/wash-machine-main/crc/crc.h
+/home/elpi/workspace/sm-sys/wash-machine-main/crc/crc.h
 stdint.h
 -
 
-/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.h
+/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
 ../rgb332/rgb332.h
-/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
+/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
 ../jparser-linux/JParser.h
-/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
+/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
 string
 -
 stdint.h
@@ -22,13 +22,13 @@ stdint.h
 vector
 -
 
-/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
+/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
 ../json.h
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 string
 -
 
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 algorithm
 -
 cstddef
@@ -380,15 +380,15 @@ vector
 string_view
 -
 
-/home/jodzik/projects/finish/wash-machine-main/ledmatrix-linux/LedMatrix.cpp
+/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/LedMatrix.cpp
 LedMatrix.h
-/home/jodzik/projects/finish/wash-machine-main/ledmatrix-linux/LedMatrix.h
+/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/LedMatrix.h
 ../font-linux/Font.h
-/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.h
+/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
 ../rgb332/rgb332.h
-/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
+/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
 ../crc/crc.h
-/home/jodzik/projects/finish/wash-machine-main/crc/crc.h
+/home/elpi/workspace/sm-sys/wash-machine-main/crc/crc.h
 stdint.h
 -
 vector
@@ -410,13 +410,13 @@ unistd.h
 iconv.h
 -
 
-/home/jodzik/projects/finish/wash-machine-main/ledmatrix-linux/LedMatrix.h
+/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/LedMatrix.h
 ../mb-ascii-linux/MbAsciiMaster.h
-/home/jodzik/projects/finish/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
+/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
 ../rgb332/rgb332.h
-/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
+/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
 ../font-linux/Font.h
-/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.h
+/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
 stdint.h
 -
 vector
@@ -424,7 +424,7 @@ vector
 string
 -
 
-/home/jodzik/projects/finish/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
+/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
 stdint.h
 -
 vector
@@ -434,7 +434,7 @@ string
 termios.h
 -
 
-/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
+/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
 stdint.h
 -
 

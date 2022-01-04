@@ -222,6 +222,7 @@ void init(
 		json& rangeFinder = _hwconfig->get("range-finder");
 		json& tempSens = _hwconfig->get("temp-sens");
 		json& relIns = _hwconfig->get("releive-instructions");
+		json& payment = _hwconfig->get("payment");
 		json ledsCnf;
 		try {
 			ledsCnf = _hwconfig->get("leds");
@@ -241,7 +242,7 @@ void init(
 				_log->log(Logger::Type::WARNING, "UTILS INIT", "fail get load effects: " + string(e.what()));
 			}
 		}
-		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, buttonsCnf, rangeFinder, tempSens, ledsCnf, effects, relIns);
+		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttonsCnf, rangeFinder, tempSens, ledsCnf, effects, relIns);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));
@@ -366,7 +367,7 @@ void init(
 
 	// extboard callbacks
 	cout << "register exboard callbacks.." << endl;
-	extboard::registerOnCashAddedHandler(_onCashAdd);
+	extboard::registerOnMoneyAddedHandler(_onCashAdd);
 	extboard::registerOnCardReadHandler(onCard);
 
 	cout << "register genereal handler.." << endl;

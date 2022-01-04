@@ -6,19 +6,39 @@
 
 #IncludeRegexTransform: 
 
-/home/jodzik/projects/finish/wash-machine-main/extboard/ExtBoard.cpp
+/home/elpi/workspace/sm-sys/wash-machine-main/extboard/ExtBoard.cpp
 ExtBoard.h
-/home/jodzik/projects/finish/wash-machine-main/extboard/ExtBoard.h
+/home/elpi/workspace/sm-sys/wash-machine-main/extboard/ExtBoard.h
 ../mspi-linux/Mspi.h
-/home/jodzik/projects/finish/wash-machine-main/mspi-linux/Mspi.h
-
-/home/jodzik/projects/finish/wash-machine-main/extboard/ExtBoard.h
-../mspi-linux/Mspi.h
-/home/jodzik/projects/finish/wash-machine-main/mspi-linux/Mspi.h
+/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/Mspi.h
 ../json.h
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+../jparser-linux/JParser.h
+/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+stdlib.h
+-
+string.h
+-
+iostream
+-
+vector
+-
+stdexcept
+-
+unistd.h
+-
+time.h
+-
+stdio.h
+-
+
+/home/elpi/workspace/sm-sys/wash-machine-main/extboard/ExtBoard.h
+../mspi-linux/Mspi.h
+/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/Mspi.h
+../json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 ../rgb332/rgb332.h
-/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
+/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
 vector
 -
 string
@@ -26,7 +46,7 @@ string
 stdint.h
 -
 
-/home/jodzik/projects/finish/wash-machine-main/general-tools/general_tools.h
+/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
 stdlib.h
 -
 stdint.h
@@ -36,7 +56,13 @@ string.h
 stdio.h
 -
 
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+../json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+string
+-
+
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 algorithm
 -
 cstddef
@@ -388,7 +414,7 @@ vector
 string_view
 -
 
-/home/jodzik/projects/finish/wash-machine-main/mspi-linux/Mspi.h
+/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/Mspi.h
 iostream
 -
 string
@@ -404,9 +430,9 @@ atomic
 mutex
 -
 ../general-tools/general_tools.h
-/home/jodzik/projects/finish/wash-machine-main/general-tools/general_tools.h
+/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
 
-/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
+/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
 stdint.h
 -
 

@@ -32,7 +32,7 @@ bool isBonusBegin = false;
 void onCashAppeared();
 void onCashRunout();
 void onButtonPushed(Button& button);
-void onCard(const char* uid);
+void onCard(uint64_t cardid);
 void onQr(const char* qr);
 void onServiceEnd();
 

@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/logger.dir/Logger.cpp.o"
-  "liblogger.pdb"
   "liblogger.a"
+  "liblogger.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/qrscaner.dir/qrscaner.c.o"
-  "libqrscaner.pdb"
   "libqrscaner.a"
+  "libqrscaner.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -4,10 +4,10 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/jodzik/projects/finish/wash-machine-main/crc/crc16.c" "/home/jodzik/projects/finish/wash-machine-main/crc/CMakeFiles/crc.dir/crc16.c.o"
-  "/home/jodzik/projects/finish/wash-machine-main/crc/crc32.c" "/home/jodzik/projects/finish/wash-machine-main/crc/CMakeFiles/crc.dir/crc32.c.o"
-  "/home/jodzik/projects/finish/wash-machine-main/crc/crc8.c" "/home/jodzik/projects/finish/wash-machine-main/crc/CMakeFiles/crc.dir/crc8.c.o"
-  "/home/jodzik/projects/finish/wash-machine-main/crc/lrc8.c" "/home/jodzik/projects/finish/wash-machine-main/crc/CMakeFiles/crc.dir/lrc8.c.o"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/crc/crc16.c" "/home/elpi/workspace/sm-sys/wash-machine-main/crc/CMakeFiles/crc.dir/crc16.c.o"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/crc/crc32.c" "/home/elpi/workspace/sm-sys/wash-machine-main/crc/CMakeFiles/crc.dir/crc32.c.o"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/crc/crc8.c" "/home/elpi/workspace/sm-sys/wash-machine-main/crc/CMakeFiles/crc.dir/crc8.c.o"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/crc/lrc8.c" "/home/elpi/workspace/sm-sys/wash-machine-main/crc/CMakeFiles/crc.dir/lrc8.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

@@ -158,7 +158,7 @@ namespace {
 			if (activeLevels != rv.activeLevels) {
 				return true;
 			}
-			if (usedMask != rv.usedMask) {
+			if (io != rv.io) {
 				return true;
 			}
 			return false;
@@ -197,7 +197,7 @@ namespace {
 	int _giveMoneyEffect = -1;
 	int _serviceEffect = -1;
 
-	void (*_onButton)(int id);
+	void (*_onButton)(int iButton);
 	void (*_onCard)(uint64_t id);
 	void (*_onMoney)(double nMoney);
 	void (*_onCloser)(bool state);
@@ -480,15 +480,72 @@ namespace {
 		}
 	}
 
-	void _int(int reason) {
-		if (reason == (int)IntReason::BUTTON && _onButton != nullptr) {
+	double _injectMoney(Payment& pm, uint16_t val) {
+		if (pm.mode == Payment::NOT_USE) {
+			return 0;
+		} else
+		if (pm.mode == Payment::COUNTER) {
+			return (double)val * pm.rate;
+		} else
+		if (pm.mode == Payment::BILL_CODE) {
+			if (val > 31) {
+				cout << "!!! BILL CODE ERROR !!!" << endl;
+			}
+			return pm.billcodes[val];
+		} else {
+			return 0;
+		}
+	}
 
+	double _injectMoney(uint8_t* buf) {
+		uint16_t ncash = _collectn(buf, 2);
+		uint16_t nterm = _collectn(&buf[2], 2);
+		uint16_t ncoin = _collectn(&buf[4], 2);
+		double money = 0;
+		if (ncash > 0) {
+			money += _injectMoney(_cash, ncash);
+		}
+		if (nterm > 0) {
+			money += _injectMoney(_terminal, nterm);
+		}
+		if (ncoin > 0) {
+			money += _injectMoney(_coin, ncoin);
+		}
+		return money;
+	}
+
+	void _int(int reason) {
+		uint8_t buf[32] = {0};
+		if (reason == (int)IntReason::BUTTON && _onButton != nullptr) {
+			_mspi->read((int)Addr::BUTTONS, buf, 9);
+			buf[0] &= ~(_buttoneb.io);
+			for (int i = 0; i < 8; i++) {
+				if (buf[0] & (1 << i)) {
+					_onButton(i);
+				}
+			}
+			for (int i = 0; i < 8; i++) {
+				if (i < _buttonms.size()) {
+					buf[i] &= ~_buttonms[i].io;
+					for (int j = 0; j < 8; j++) {
+						if (buf[i] & (1 << j)) {
+							_onButton(8 + i*8 + j);
+						}
+					}
+				}
+			}
 		} else
 		if (reason == (int)IntReason::CARD && _onCard != nullptr) {
-
+			_mspi->read((int)Addr::RFID_CARD, buf, 8);
+			uint64_t cid = _collectn(buf, 8);
+			_onCard(cid);
 		} else
 		if (reason == (int)IntReason::MONEY && _onMoney != nullptr) {
-			
+			_mspi->read((int)Addr::PAYMENT, buf, 6);
+			double money = _injectMoney(buf);
+			if (money > 0) {
+				_onMoney(money);
+			}
 		} else
 		if (reason == (int)IntReason::OBJ_CLOSER && _onCloser != nullptr) {
 			_onCloser(true);
@@ -530,11 +587,11 @@ namespace {
 		_mspi->write((int)Addr::PAYMENT_OPT, buf, 3);
 
 		memset(buf, 0, 26);
-		buf[0] = _buttoneb.usedMask;
+		buf[0] = _buttoneb.io;
 		buf[1] = _buttoneb.activeLevels;
 		for (int i = 0; i < _buttonms.size(); i++) {
 			buf[2 + i*3] = _buttonms[i].addr;
-			buf[2 + i*3 + 1] = _buttonms[i].usedMask;
+			buf[2 + i*3 + 1] = _buttonms[i].io;
 			buf[2 + i*3 + 2] = _buttonms[i].activeLevels;
 		}
 		_mspi->write((int)Addr::BUTTONS_OPT, buf, 26);
@@ -551,8 +608,6 @@ namespace {
 		memset(buf, 0, _nReleiveInstructions * 2);
 		memcpy(buf, _releiveInstructions, _nReleiveInstructions * 2);
 		_mspi->write((int)Addr::RELEIVE_INS, buf, _nReleiveInstructions * 2);
-
-		_mspi->write((int)Addr::BM_IO_OPT, _buttonms_io, 8);
 
 		_mspi->cmd((int)Cmd::SAVE, 0);
 		try {
@@ -650,7 +705,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	json& bseb = JParser::getf(buttons, "extboard", "buttons");
 	_buttoneb.addr = 0;
 	_buttoneb.activeLevels = JParser::getf(bseb, "active-levels", "buttons extborad");
-	_buttoneb.usedMask = JParser::getf(bseb, "used-mask", "buttons extborad");
+	_buttoneb.io = JParser::getf(bseb, "used-mask", "buttons extborad");
 	json& bsms = JParser::getf(buttons, "modules", "buttons");
 	if (bsms.size() > 8) {
 		throw runtime_error("buttons modules must be 8 or less");
@@ -660,7 +715,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			ButtonModule bm;
 			bm.addr = JParser::getf(bsms[i], "address", "");
 			bm.activeLevels = JParser::getf(bsms[i], "active-levels", "");
-			bm.usedMask = JParser::getf(bsms[i], "used-mask", "");
+			bm.io = JParser::getf(bsms[i], "io-mask", "");
 			_buttonms.push_back(bm);
 		} catch (exception& e) {
 			throw runtime_error("fail load '" + to_string(i) + "' buttons module: " + string(e.what()));
@@ -828,11 +883,11 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	
 	_mspi->read((int)Addr::BUTTONS_OPT, buf, 26);
 	ebbs.addr = 0;
-	ebbs.usedMask = buf[0];
+	ebbs.io = buf[0];
 	ebbs.activeLevels = buf[1];
 	for (int i = 0; i < 8; i++) {
 		ebbms[i].addr = buf[2 + i*3];
-		ebbms[i].usedMask = buf[2 + i*3 + 1];
+		ebbms[i].io = buf[2 + i*3 + 1];
 		ebbms[i].activeLevels = buf[2 + i*3 + 2];
 	}
 

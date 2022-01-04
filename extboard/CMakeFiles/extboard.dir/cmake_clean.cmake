@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/extboard.dir/ExtBoard.cpp.o"
-  "libextboard.pdb"
   "libextboard.a"
+  "libextboard.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

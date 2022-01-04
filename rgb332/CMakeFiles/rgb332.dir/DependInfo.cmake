@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.c" "/home/jodzik/projects/finish/wash-machine-main/rgb332/CMakeFiles/rgb332.dir/rgb332.c.o"
+  "/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.c" "/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/CMakeFiles/rgb332.dir/rgb332.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

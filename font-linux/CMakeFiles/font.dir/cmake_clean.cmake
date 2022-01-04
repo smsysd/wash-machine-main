@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/font.dir/Font.cpp.o"
-  "libfont.pdb"
   "libfont.a"
+  "libfont.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

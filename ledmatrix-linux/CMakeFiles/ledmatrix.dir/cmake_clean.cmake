@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/ledmatrix.dir/LedMatrix.cpp.o"
-  "libledmatrix.pdb"
   "libledmatrix.a"
+  "libledmatrix.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

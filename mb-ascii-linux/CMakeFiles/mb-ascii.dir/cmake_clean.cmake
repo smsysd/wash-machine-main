@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/mb-ascii.dir/MbAsciiMaster.cpp.o"
-  "libmb-ascii.pdb"
   "libmb-ascii.a"
+  "libmb-ascii.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

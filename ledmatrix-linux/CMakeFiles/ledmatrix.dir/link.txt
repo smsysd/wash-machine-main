@@ -1,2 +1,2 @@
-/usr/bin/ar qc libledmatrix.a  CMakeFiles/ledmatrix.dir/LedMatrix.cpp.o
+/usr/bin/ar qc libledmatrix.a CMakeFiles/ledmatrix.dir/LedMatrix.cpp.o
 /usr/bin/ranlib libledmatrix.a

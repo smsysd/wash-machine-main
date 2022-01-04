@@ -11,6 +11,14 @@
 		{"id": 0, "name": "pause", "frame": 0, "relay-group": 0}
 	],
 
+	"buttons": [
+		{"id": 0, "type": "extboard", "index": 0, "purpose": "end"},
+		{"id": 1, "type": "extboard", "index": 1, "purpose": "program", "program": 0, "service-program": 0},
+		{"id": 2, "type": "extboard", "index": 2, "purpose": "program", "program": 1, "service-program": 1},
+		{"id": 3, "type": "extboard", "index": 3, "purpose": "program", "program": 2, "service-program": 2},
+		{"id": 4, "type": "extboard", "index": 4, "purpose": "program", "program": 3, "service-program": 3}
+	],
+
 	"cards": [
 		{"id": 123, "type": "service"}
 	],

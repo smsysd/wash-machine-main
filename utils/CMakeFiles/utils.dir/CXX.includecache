@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
+/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
 ../json.h
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 string
 -
 
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 algorithm
 -
 cstddef
@@ -364,16 +364,20 @@ vector
 string_view
 -
 
-/home/jodzik/projects/finish/wash-machine-main/utils/bonus.cpp
+/home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.cpp
 bonus.h
-/home/jodzik/projects/finish/wash-machine-main/utils/bonus.h
+/home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.h
 render.h
-/home/jodzik/projects/finish/wash-machine-main/utils/render.h
+/home/elpi/workspace/sm-sys/wash-machine-main/utils/render.h
 ../json.h
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 ../jparser-linux/JParser.h
-/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
+/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+stdio.h
+-
 string
+-
+string.h
 -
 vector
 -
@@ -384,21 +388,21 @@ unistd.h
 sstream
 -
 
-/home/jodzik/projects/finish/wash-machine-main/utils/bonus.h
+/home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.h
 ../json.h
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 ../jparser-linux/JParser.h
-/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
+/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
 string
 -
 stdint.h
 -
 
-/home/jodzik/projects/finish/wash-machine-main/utils/render.h
+/home/elpi/workspace/sm-sys/wash-machine-main/utils/render.h
 ../json.h
-/home/jodzik/projects/finish/wash-machine-main/json.h
+/home/elpi/workspace/sm-sys/wash-machine-main/json.h
 ../jparser-linux/JParser.h
-/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
+/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
 stdint.h
 -
 

@@ -168,9 +168,9 @@ namespace {
 	char _access[256];
 	double _desiredWriteoff = 0;
 
-	json _japi(string cmd) {
+	json _japi(string ucmd) {
 		char buf[4096] = {0};
-		string cmd  = "python3 ./utils/point_api.py " + _cert + " " + string(_access) + " " + cmd;
+		string cmd  = "python3 ./utils/point_api.py " + _cert + " " + string(_access) + " " + ucmd;
 		FILE* pp = popen(cmd.c_str(), "r");
 		if (pp == NULL) {
 			throw runtime_error("fail to open pipe to 'point_api.py'");

@@ -5,9 +5,9 @@
 			"used-mask": 255
 		},
 		"modules": [
-			{"address": 48, "active-levels": 0, "used-mask": 255},
-			{"address": 48, "active-levels": 0, "used-mask": 255},
-			{"address": 48, "active-levels": 0, "used-mask": 255}
+			{"address": 48, "active-levels": 0, "io-mask": 255},
+			{"address": 48, "active-levels": 0, "io-mask": 255},
+			{"address": 48, "active-levels": 0, "io-mask": 255}
 		]
 	},
 

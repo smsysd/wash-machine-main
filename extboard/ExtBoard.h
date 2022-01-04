@@ -38,7 +38,7 @@ namespace extboard {
 	void setRelaysState(int address, int states);
 
 	/* Event handlers registration */
-	void registerOnButtonPushedHandler(void (*handler)(int id));
+	void registerOnButtonPushedHandler(void (*handler)(int iButton));
 	void registerOnCardReadHandler(void (*handler)(uint64_t cardid));
 	void registerOnMoneyAddedHandler(void (*handler)(double nMoney));
 	void registerOnObjectCloserHandler(void (*handler)(bool state));

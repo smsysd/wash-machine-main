@@ -1,2 +1,2 @@
-/usr/bin/ar qc libmspi.a  CMakeFiles/mspi.dir/Mspi.cpp.o
+/usr/bin/ar qc libmspi.a CMakeFiles/mspi.dir/Mspi.cpp.o
 /usr/bin/ranlib libmspi.a

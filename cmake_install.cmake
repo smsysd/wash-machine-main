@@ -1,4 +1,4 @@
-# Install script for directory: /home/jodzik/projects/finish/wash-machine-main
+# Install script for directory: /home/elpi/workspace/sm-sys/wash-machine-main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,21 +37,26 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
+# Set default install directory permissions.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+endif()
+
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/jodzik/projects/finish/wash-machine-main/crc/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/rgb332/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/general-tools/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/jparser-linux/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/logger-linux/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/font-linux/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/mspi-linux/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/extboard/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/qrscaner-linux/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/timer/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/ledmatrix-linux/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/mb-ascii-linux/cmake_install.cmake")
-  include("/home/jodzik/projects/finish/wash-machine-main/utils/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/crc/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/logger-linux/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/mspi-linux/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/extboard/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/timer/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/utils/cmake_install.cmake")
 
 endif()
 
@@ -63,5 +68,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/jodzik/projects/finish/wash-machine-main/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/elpi/workspace/sm-sys/wash-machine-main/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

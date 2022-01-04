@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/home/jodzik/projects/finish/wash-machine-main/general-tools/general_tools.c
+/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.c
 general_tools.h
-/home/jodzik/projects/finish/wash-machine-main/general-tools/general_tools.h
+/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
 stdlib.h
 -
 stdint.h
@@ -18,13 +18,13 @@ string.h
 stdio.h
 -
 main.h
-/home/jodzik/projects/finish/wash-machine-main/general-tools/main.h
+/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/main.h
 unistd.h
 -
 pthread.h
 -
 
-/home/jodzik/projects/finish/wash-machine-main/general-tools/general_tools.h
+/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
 stdlib.h
 -
 stdint.h
