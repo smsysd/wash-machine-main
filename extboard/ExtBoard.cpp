@@ -3,6 +3,8 @@
 #include "../json.h"
 #include "../jparser-linux/JParser.h"
 
+#include <stdlib.h>
+#include <string.h>
 #include <iostream>
 #include <vector>
 #include <stdexcept>
@@ -38,7 +40,8 @@ namespace {
 		DIRECT_SET = 0xD0,
 		SET_GROUP = 0xD2,
 		PERFORMERS_OPT = 0xE0,
-		COUNTERS = 0x100,
+		PAYMENT = 0x100,
+		PAYMENT_OPT = 0x106,
 		BUTTONS_OPT = 0x110,
 		BUTTONS = 0x130,
 		TEMPSENS_OPT = 0x140,
@@ -92,6 +95,17 @@ namespace {
 		uint8_t data[1024];
 	};
 
+	struct Payment {
+		enum Mode {
+			NOT_USE = 0x00,
+			COUNTER = 0x01,
+			BILL_CODE = 0x02
+		};
+		Mode mode;
+		double rate;
+		double billcodes[32];
+	};
+
 	struct PerformerUnit {
 		uint8_t addr;
 		uint8_t normalStates;
@@ -135,7 +149,7 @@ namespace {
 	struct ButtonModule {
 		uint8_t addr;
 		uint8_t activeLevels;
-		uint8_t usedMask;
+		uint8_t io;
 
 		bool operator!=(const ButtonModule& rv) {
 			if (addr != rv.addr) {
@@ -171,6 +185,10 @@ namespace {
 	vector<RelaysGroup> _rgroups;
 	vector<ButtonModule> _buttonms;
 	ButtonModule _buttoneb;
+	uint8_t _buttonms_io[8] = {0};
+	Payment _cash;
+	Payment _coin;
+	Payment _terminal;
 	uint8_t _releiveInstructions[128];
 	uint8_t _nReleiveInstructions;
 	int _closerRange = -1;
@@ -433,6 +451,35 @@ namespace {
 		}
 	}
 
+	void _loadPayment(json& src, Payment& dst, string name) {
+		string mode = JParser::getf(src, "mode", "payment " + name);
+		if (mode == "not-use") {
+			dst.mode = Payment::NOT_USE;
+		} else
+		if (mode == "counter") {
+			dst.mode = Payment::COUNTER;
+			dst.rate = JParser::getf(src, "rate", "payment " + name);
+		} else
+		if (mode == "bill-code") {
+			dst.mode = Payment::BILL_CODE;
+			json& bcs = JParser::getf(src, "bill-codes", "payment " + name);
+			for (int i = 0; i < bcs.size(); i++) {
+				try {
+					int bc = bcs[i][0];
+					int bn = bcs[i][1];
+					if (bc < 1 || bc > 31) {
+						throw runtime_error("incorrect bill code");
+					}
+					dst.billcodes[bc] = bn;
+				} catch (exception& e) {
+					throw runtime_error("fail load '" + to_string(i) + "' bill code for " + name + ": " + string(e.what()));
+				}
+			}
+		} else {
+			throw runtime_error("unknown payment mode '" + mode + "' for cash");
+		}
+	}
+
 	void _int(int reason) {
 		if (reason == (int)IntReason::BUTTON && _onButton != nullptr) {
 
@@ -476,6 +523,12 @@ namespace {
 		}
 		_mspi->write((int)Addr::RELAY_GROUPS, buf, 192);
 
+		memset(buf, 0, 6);
+		buf[0] = (uint8_t)_cash.mode;
+		buf[1] = (uint8_t)_coin.mode;
+		buf[2] = (uint8_t)_terminal.mode;
+		_mspi->write((int)Addr::PAYMENT_OPT, buf, 3);
+
 		memset(buf, 0, 26);
 		buf[0] = _buttoneb.usedMask;
 		buf[1] = _buttoneb.activeLevels;
@@ -499,6 +552,8 @@ namespace {
 		memcpy(buf, _releiveInstructions, _nReleiveInstructions * 2);
 		_mspi->write((int)Addr::RELEIVE_INS, buf, _nReleiveInstructions * 2);
 
+		_mspi->write((int)Addr::BM_IO_OPT, _buttonms_io, 8);
+
 		_mspi->cmd((int)Cmd::SAVE, 0);
 		try {
 			_mspi->cmd((int)Cmd::RESET, 0);
@@ -509,7 +564,7 @@ namespace {
 	}
 }
 
-void init(json& extboard, json& performingUnits, json& relaysGroups, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& releiveInstructions) {
+void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& releiveInstructions) {
 	start:
 
 	// get hw extboard config
@@ -583,6 +638,14 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& butto
 		}
 	}
 	
+	cout << "load payment hardware config.." << endl;
+	json& cash = JParser::getf(payment, "cash", "payment");
+	_loadPayment(cash, _cash, "cash");
+	json& coin = JParser::getf(payment, "coin", "payment");
+	_loadPayment(coin, _coin, "coin");
+	json& terminal = JParser::getf(payment, "terminal", "payment");
+	_loadPayment(terminal, _terminal, "terminal");
+
 	cout << "load buttons hardware config.." << endl;
 	json& bseb = JParser::getf(buttons, "extboard", "buttons");
 	_buttoneb.addr = 0;
@@ -728,6 +791,9 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& butto
 	cout << "get extboard options.." << endl;
 	vector<PerformerUnit> ebpus(4);
 	vector<RelaysGroup> ebrgs(24);
+	Payment ebpmcash;
+	Payment ebpmcoin;
+	Payment ebpmterm;
 	vector<ButtonModule> ebbms(8);
 	ButtonModule ebbs;
 	uint8_t ebclr;
@@ -754,6 +820,11 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& butto
 			ebrgs[i].state[j] = buf[i*8 + j*2  +1];
 		}
 	}
+
+	_mspi->read((int)Addr::PAYMENT_OPT, buf, 3);
+	ebpmcash.mode = (Payment::Mode)buf[0];
+	ebpmcoin.mode = (Payment::Mode)buf[1];
+	ebpmterm.mode = (Payment::Mode)buf[2];
 	
 	_mspi->read((int)Addr::BUTTONS_OPT, buf, 26);
 	ebbs.addr = 0;
@@ -796,6 +867,11 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& butto
 			_uploadAllOptions();
 			goto start;
 		}
+	}
+	if (ebpmcash.mode != _cash.mode || ebpmcoin.mode != _coin.mode || ebpmterm.mode != _terminal.mode) {
+			cout << "find differences in payment options" << endl;
+			_uploadAllOptions();
+			goto start;
 	}
 
 	if (_buttoneb != ebbs) {

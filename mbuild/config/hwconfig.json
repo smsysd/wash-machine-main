@@ -40,6 +40,27 @@
 		"closer-range": 40
 	},
 
+	"payment": {
+		"cash": {
+			"mode": "bill-code",
+			"bill-codes": [
+				[2, 50],
+				[3, 100],
+				[4, 200],
+				[5, 500],
+				[6, 1000]
+			]
+		},
+		"coin": {
+			"mode": "counter",
+			"rate": 1
+		},
+		"terminal": {
+			"mode": "counter",
+			"rate": 10
+		}
+	},
+
 	"qr-scaner": {
 		"width": 1980,
 		"height": 1080,
