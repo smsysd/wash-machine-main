@@ -31,7 +31,7 @@ bool isBonusBegin = false;
 
 void onCashAppeared();
 void onCashRunout();
-void onButtonPushed(Button& button);
+void onButtonPushed(const Button& button);
 void onCard(uint64_t cardid);
 void onQr(const char* qr);
 void onServiceEnd();
@@ -61,27 +61,27 @@ void onCashRunout() {
 	setGiveMoneyMode();
 }
 
-void onButtonPushed(Button& button) {
+void onButtonPushed(const Button& button) {
 	if (cmode() == Mode::PROGRAM) {
-		switch (button.type) {
-		case Button::END:
+		switch (button.purpose) {
+		case Button::Purpose::END:
 			if (isBonusBegin) {
 				isBonusBegin = false;
 				accrueRemainBonusesAndClose();
 			}
 			setGiveMoneyMode();
 			break;
-		case Button::PROGRAM:
+		case Button::Purpose::PROGRAM:
 			setProgram(button.prog);
 			break;
 		}
 	} else
 	if (cmode() == Mode::SERVICE) {
-		switch (button.type) {
-		case Button::END:
+		switch (button.purpose) {
+		case Button::Purpose::END:
 			setGiveMoneyMode();
 			break;
-		case Button::PROGRAM:
+		case Button::Purpose::PROGRAM:
 			setServiceProgram(button.serviceProg);
 			break;
 		}

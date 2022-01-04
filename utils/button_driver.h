@@ -13,17 +13,23 @@ using json = nlohmann::json;
 namespace button_driver {
 
 struct Button {
-	enum Type {
+	enum class Purpose {
 		PROGRAM,
 		END
 	};
+	enum class Type {
+		EXTBOARD,
+		TOUCH
+	};
+	Purpose purpose;
 	Type type;
 	int id;
+	int index;
 	int prog;
 	int serviceProg;
 };
 
-void init(json& buttons, void (*onButtonPushed)(Button& button));
+void init(json& buttons, void (*onButtonPushed)(const Button& button));
 
 }
 

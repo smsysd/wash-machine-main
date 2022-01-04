@@ -59,7 +59,7 @@ struct Session {
 void init(
 	void (*onCashAppeared)(),
 	void (*onCashRunout)(),
-	void (*onButtonPushed)(bd::Button& button),
+	void (*onButtonPushed)(const bd::Button& button),
 	void (*onQr)(const char* qr),
 	void (*onCard)(uint64_t cardid),
 	void (*onServiceEnd)());

@@ -162,7 +162,7 @@ Mode cmode() {
 void init(
 	void (*onCashAppeared)(),
 	void (*onCashRunout)(),
-	void (*onButtonPushed)(bd::Button& button),
+	void (*onButtonPushed)(const bd::Button& button),
 	void (*onQr)(const char* qr),
 	void (*onCard)(uint64_t cardid),
 	void (*onServiceEnd)())
@@ -189,17 +189,6 @@ void init(
 		throw runtime_error("fail to load necessary config files: " + string(e.what()));
 	}
 
-	json buttonsCnf;
-	json displayCnf;
-
-	try {
-		buttonsCnf = _hwconfig->get("buttons");
-		displayCnf = _hwconfig->get("display");
-	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "CONFIG", "fail to get config: " + string(e.what()));
-		throw runtime_error("fail to get config: " + string(e.what()));
-	}
-
 	// get necessary config fields..
 	cout << "get necessary config fields.." << endl;
 
@@ -219,6 +208,7 @@ void init(
 		json& extBoardCnf = _hwconfig->get("ext-board");
 		json& relaysGroups = _config->get("relays-groups");
 		json& performingUnitsCnf = _hwconfig->get("performing-units");
+		json& buttons = _hwconfig->get("buttons");
 		json& rangeFinder = _hwconfig->get("range-finder");
 		json& tempSens = _hwconfig->get("temp-sens");
 		json& relIns = _hwconfig->get("releive-instructions");
@@ -242,7 +232,7 @@ void init(
 				_log->log(Logger::Type::WARNING, "UTILS INIT", "fail get load effects: " + string(e.what()));
 			}
 		}
-		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttonsCnf, rangeFinder, tempSens, ledsCnf, effects, relIns);
+		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, relIns);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));
@@ -251,7 +241,8 @@ void init(
 	// button
 	try {
 		cout << "init button driver.." << endl;
-		bd::init(buttonsCnf, onButtonPushed);
+		json& buttons = _config->get("buttons");
+		bd::init(buttons, onButtonPushed);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init button driver: " + string(e.what()));
 		throw runtime_error("fail to init button driver: " + string(e.what()));
@@ -261,11 +252,12 @@ void init(
 	try {
 		cout << "init render module.." << endl;
 		_frames = new JParser("./config/frames.json");
+		json& display = _hwconfig->get("display");
 		json& sf = _frames->get("spec-frames");
 		json& go = _frames->get("general-option");
 		json& bg = _frames->get("backgrounds");
 		json& fonts = _frames->get("fonts");
-		render::init(displayCnf, _frames->get("frames"), sf, go, bg, fonts);
+		render::init(display, _frames->get("frames"), sf, go, bg, fonts);
 		render::regVar(&_nMoney, L"money");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
