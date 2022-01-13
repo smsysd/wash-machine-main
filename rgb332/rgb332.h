@@ -34,6 +34,8 @@ void rgb332_injectG(uint8_t* color, uint8_t g);
 void rgb332_injectB(uint8_t* color, uint8_t b);
 
 uint32_t rgb332_toRGB888(uint8_t color);
+uint8_t rgb332_toRGB111(uint8_t color);
+uint8_t rgb332_fromRGB888(uint8_t r, uint8_t g, uint8_t b);
 
 #ifdef __cplusplus
 }

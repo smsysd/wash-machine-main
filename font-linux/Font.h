@@ -18,7 +18,7 @@ public:
 
     RGB332 getGliph(int c);
     vector<int> getCharCodes();
-    vector<int> getStringDimensions(string);
+    vector<int> getStringDimensions(wstring);
 	int getMaxHeight();
 private:
 

@@ -25,9 +25,9 @@ public:
     virtual ~LedMatrix();
 
     void setOpt(Mode mode, int font, int color);
-    void writeString(char* str);
-	void writeString(wstring str);
-	void writePrepareBlock(int iBlock);
+    void writeString(const char* str);
+	void writeString(const char* str, const char* encode);
+	void writePrepareBlock(int iBlock, bool sw = true);
     void writeBlock(int x, int y, RGB332& bitmap);
 
 	void switchBuffer();
@@ -38,12 +38,13 @@ public:
 
     void setBright(float bright);
 
-	void prepareFont(Font& font, int iFont);
+	void prepareFont(Font& font, int iFont, const char* encode);
 	void prepareBlock(RGB332 bitmap, int iBlock);
+	void prepareBlock(string pathToImg, int iBlock);
 
 private:
 	enum class WIA {
-		PROJECT = 0x0000,
+		PROJECT = 0x8001,
 		SUB_64x32 = 0x01
 	};
 
@@ -58,7 +59,7 @@ private:
 		BLOCK = 0x20,
 		BRIGHT = 0x30,
 		LOAD_FONT = 0x100,
-		LOAD_CHAR = 0x106,
+		LOAD_CHAR = 0x105,
 		LOAD_BLOCK = 0x200,
 		LOAD_PIXELS = 0x205,
 		CHECK_FONTS = 0x400,
@@ -82,14 +83,14 @@ private:
 	int _toLarge;
 
     void _cmd(Cmd cmd, int timeout);
-	void _loadFont(Font& font, int iFont);
+	void _loadFont(Font& font, int iFont, const char* encode);
 	void _loadBlock(RGB332& bitmap, int iBlock);
 
 	uint32_t _hash(Font& font);
 	uint32_t _hash(RGB332 bitmap);
 
-	uint8_t _toCP866(int utf);
-	int _gliphToBitmap(RGB332 gliph, int* bitmap, int nBitmap);
+	uint8_t _toCP866(int utf, const char* encode);
+	void _gliphToBitmap(RGB332 gliph, int* bitmap);
 
 	void _assertFont(int iFont);
 	void _assertBlock(int iBlock);

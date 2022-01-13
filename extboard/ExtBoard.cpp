@@ -19,15 +19,29 @@ namespace extboard {
 
 namespace {
 
+	enum class Status {
+		ERROR = 0x00,
+		NOT_INIT = 0x01,
+		INIT_SELF = 0x02,
+		LOAD_OPT = 0x03,
+		INIT_EXTDEV = 0x05,
+		WORK = 0x06
+	};
+
+	enum class ErrorCode {
+		NONE = 0x00,
+		NO_PERFORMER = 0x02,
+		NO_BUTTON_MODULE = 0x03,
+		INTERNAL = 0x06
+	};
+
 	enum class LightCmd {
-		WRITE0_BM = 0x02,
-		WRITE1_BM = 0x01,
-		WRITE0_LP = 0x04,
-		WRITE1_LP = 0x03,
-		WRITE0_IL = 0x06,
-		WRITE1_IL = 0x05,
-		DELAY = 0x0A,
-		NODELAY = 0x0B
+		WRITE_BM = 0x01,
+		WRITE_LP = 0x03,
+		WRITE_IL = 0x05,
+		DELAY = 0x07,
+		END = 0x00,
+		NODELAY_BIT = 0x80
 	};
 	
 	enum class Addr {
@@ -38,7 +52,6 @@ namespace {
 		INTREASON = 0x07,
 		RELAY_GROUPS = 0x10,
 		DIRECT_SET = 0xD0,
-		SET_GROUP = 0xD2,
 		PERFORMERS_OPT = 0xE0,
 		PAYMENT = 0x100,
 		PAYMENT_OPT = 0x106,
@@ -53,17 +66,16 @@ namespace {
 		EFFECT = 0x200,
 		RELEIVE_INS = 0x800,
 		PERFORMERS_INFO = 0x1000,
-		BUTTONS_INFO = 0x1060
+		BUTTONS_INFO = 0x1060,
+		ERROR_DESC = 0x1100
 	};
 
 	enum class Cmd {
 		RESET = 0x00,
-		SAVE = 0x08,
+		END_OPT = 0x0A,
 		RELIEVE_PRESSURE = 0x10,
-		OPEN_FLAP = 0x11,
-		CLOSE_FLAP = 0x12,
-		RESET_MAIN_EFFECT = 0x20,
-		RESET_SUB_EFFECT = 0x21,
+		FLAP = 0x12,
+		RESET_EFFECT = 0x20,
 		APPLAY_RGROUP = 0x30
 	};
 
@@ -76,12 +88,13 @@ namespace {
 		MONEY = 0x06,
 		OBJ_CLOSER = 0x07,
 		OBJ_WASTE = 0x08,
-		EFFECTEND = 0x09
+		EFFECTEND = 0x09,
+		LOR = 0x0A
 	};
 
 	struct LightInstruction {
 		uint8_t cmd;
-		uint8_t data;
+		uint8_t data[4];
 	};
 
 	struct LightEffect {
@@ -91,8 +104,8 @@ namespace {
 		uint8_t needReset;
 		uint8_t nResetInstructions;
 		uint16_t nTotalInstructions;
-		LightInstruction instructions[508];
-		uint8_t data[1024];
+		LightInstruction instructions[256];
+		uint8_t data[1288];
 	};
 
 	struct Payment {
@@ -312,139 +325,110 @@ namespace {
 
 		if (!setf && !resetf) {
 			int delay = ins["delay"];
-			delay /= 5;
-			if (delay > 4095) {
-				delay = 4095;
+			if (delay > 65535) {
+				delay = 65535;
 			}
 			LightInstruction li;
-			li.cmd = 0x0A << 4;
-			li.cmd |= (delay >> 8) & 0x0F;
-			li.data = (uint8_t)delay;
+			li.cmd = (uint8_t)LightCmd::DELAY;
+			li.data[0] = delay >> 8;
+			li.data[1] = delay & 0xFF;
 			iv.push_back(li);
 		} else {
-			vector<Led> lps(8);
-			vector<Led> ebs(8);
-			vector<Led> lpr(8);
-			vector<Led> ebr(8);
-			vector<Led> bms(8);
-			vector<Led> bmr(8);
+			vector<Led> lp(8);
+			vector<Led> eb(8);
+			vector<Led> bm(8);
+			// sort leds by commands (on extboard, on button module, on ledpanel)
 			for (int i = 0; i < leds.size(); i++) {
 				if (leds[i].type == Led::LEDPANEL) {
-					if (leds[i].state) {
-						lps.push_back(leds[i]);
-					} else {
-						lpr.push_back(leds[i]);
-					}
+					lp.push_back(leds[i]);
 				} else
 				if (leds[i].type == Led::EXTBOARD) {
-					if (leds[i].state) {
-						ebs.push_back(leds[i]);
-					} else {
-						ebr.push_back(leds[i]);
-					}
+					eb.push_back(leds[i]);
 				} else
 				if (leds[i].type == Led::BUTTONMODULE) {
-					if (leds[i].state) {
-						bms.push_back(leds[i]);
-					} else {
-						bmr.push_back(leds[i]);
-					}
+					bm.push_back(leds[i]);
 				} else {
 					throw runtime_error("undefined led type");
 				}
 			}
+
+			// create instructions
 			vector<LightInstruction> aiv(4);
-			if (lps.size() > 0) {
+			// insert set/reset bits in lp instructions
+			if (lp.size() > 0) {
 				LightInstruction li;
-				li.cmd = 0x03 << 4;
-				int bits = 0;
-				for (int i = 0; i < lps.size(); i++) {
-					bits |= 1 << lps[i].i;
+				li.cmd = (uint8_t)LightCmd::WRITE_LP;
+				int setbits = 0;
+				int resetbits = 0;
+				for (int i = 0; i < lp.size(); i++) {
+					if (lp[i].state) {
+						setbits |= 1 << lp[i].i;
+					} else {
+						resetbits |= 1 << lp[i].i;
+					}
 				}
-				li.cmd |= (bits >> 8) & 0x0F; 
-				li.data = (uint8_t)bits;
+				li.data[0] = resetbits >> 8;
+				li.data[1] = resetbits & 0xFF;
+				li.data[2] = setbits >> 8;
+				li.data[3] = setbits & 0xFF;				
 				aiv.push_back(li);
 			}
-			if (lpr.size() > 0) {
+			// insert set/reset bits in eb instructions
+			if (eb.size() > 0) {
 				LightInstruction li;
-				li.cmd = 0x04 << 4;
-				int bits = 0;
-				for (int i = 0; i < lps.size(); i++) {
-					bits |= 1 << lps[i].i;
-				}
-				li.cmd |= (bits >> 8) & 0x0F; 
-				li.data = (uint8_t)bits;
-				aiv.push_back(li);
-			}
-			if (ebs.size() > 0) {
-				LightInstruction li;
-				li.cmd = 0x05 << 4;
-				int bits = 0;
-				for (int i = 0; i < lps.size(); i++) {
-					bits |= 1 << lps[i].i;
-				}
-				li.cmd |= (bits >> 8) & 0x0F; 
-				li.data = (uint8_t)bits;
-				aiv.push_back(li);
-			}
-			if (ebr.size() > 0) {
-				LightInstruction li;
-				li.cmd = 0x06 << 4;
-				int bits = 0;
-				for (int i = 0; i < lps.size(); i++) {
-					bits |= 1 << lps[i].i;
-				}
-				li.cmd |= (bits >> 8) & 0x0F; 
-				li.data = (uint8_t)bits;
+				li.cmd = (uint8_t)LightCmd::WRITE_IL;
+				int setbits = 0;
+				int resetbits = 0;
+				for (int i = 0; i < eb.size(); i++) {
+					if (eb[i].state) {
+						setbits |= 1 << eb[i].i;
+					} else {
+						resetbits |= 1 << eb[i].i;
+					}
+				} 
+				li.data[0] = resetbits;
+				li.data[1] = setbits;
 				aiv.push_back(li);
 			}
 
-			vector<uint8_t> bmsi(4);
+			// sort leds by bm index
+			vector<vector<Led>> bms(8);
+			for (int i = 0; i < bm.size(); i++) {
+				uint8_t bmi = _get_bmi(bm[i].addr);
+				bms[bmi].push_back(bm[i]);
+			}
+			
+			// handle all bms
 			for (int i = 0; i < bms.size(); i++) {
-				uint8_t bmi = _get_bmi(bms[i].addr);
-				if (!_is_contain(bmsi, bmi)) {
-					bmsi.push_back(bmi);
-				}
-			}
-			for (int i = 0; i < bmsi.size(); i++) {
-				LightInstruction li;
-				li.cmd = (0x01 << 4) | ((bmsi[i]) & 0x0F);
-				li.data = 0;
-				for (int j = 0; j < bms.size(); j++) {
-					if (bms[j].addr == _buttonms[bmsi[i]].addr) {
-						li.data |= 1 << bms[j].i;
+				if (bms[i].size() > 0) {
+					LightInstruction li;
+					li.cmd = (uint8_t)LightCmd::WRITE_BM;
+					int setbits = 0;
+					int resetbits = 0;
+					// insert set/reset bits in bm instructions
+					for (int j = 0; j < bms[i].size(); j++) {
+						if (bms[i][j].state) {
+							setbits |= 1 << bms[i][j].i;
+						} else {
+							resetbits |= 1 << bms[i][j].i;
+						}
 					}
-				}
-				aiv.push_back(li);
-			}
-			vector<uint8_t> bmri(4);
-			for (int i = 0; i < bmr.size(); i++) {
-				uint8_t bmi = _get_bmi(bmr[i].addr);
-				if (!_is_contain(bmri, bmi)) {
-					bmri.push_back(bmi);
+					li.data[0] = resetbits;
+					li.data[1] = setbits;
+					aiv.push_back(li);
 				}
 			}
-			for (int i = 0; i < bmri.size(); i++) {
-				LightInstruction li;
-				li.cmd = (0x01 << 4) | ((bmri[i]) & 0x0F);
-				li.data = 0;
-				for (int j = 0; j < bmr.size(); j++) {
-					if (bmr[j].addr == _buttonms[bmri[i]].addr) {
-						li.data |= 1 << bmr[j].i;
-					}
-				}
-				aiv.push_back(li);
+
+			if (aiv.size() > 32) {
+				throw runtime_error("too many once time instructions");
 			}
 
 			if (aiv.size() > 1) {
-				if (aiv.size() > 32) {
-					throw runtime_error("too many once time instructions");
+				for (int i = 0; i < aiv.size() - 1; i++) {
+					aiv[i].cmd |= (uint8_t)LightCmd::NODELAY_BIT;
 				}
-				LightInstruction li;
-				li.cmd = 0x0B << 4;
-				li.data = aiv.size();
-				iv.push_back(li);
 			}
+
 			for (int i = 0; i < aiv.size(); i++) {
 				iv.push_back(aiv[i]);
 			}
@@ -608,40 +592,42 @@ namespace {
 		memset(buf, 0, _nReleiveInstructions * 2);
 		memcpy(buf, _releiveInstructions, _nReleiveInstructions * 2);
 		_mspi->write((int)Addr::RELEIVE_INS, buf, _nReleiveInstructions * 2);
+	}
 
-		_mspi->cmd((int)Cmd::SAVE, 0);
+	void _getErrorAndThrow(string when) {
+		uint8_t buf[128];
+		memset(buf, 0, sizeof(buf));
+		
 		try {
-			_mspi->cmd((int)Cmd::RESET, 0);
+			_mspi->read((int)Addr::ERROR_DESC, buf, 64);
 		} catch (exception& e) {
-
+			throw runtime_error("fail " + when + ", and fail read error description");
 		}
-		usleep(100000);
+		
+		if (buf[0] == (uint8_t)ErrorCode::INTERNAL) {
+			throw runtime_error("fail " + when + ": " + string((char*)buf));
+		} else
+		if (buf[0] == (uint8_t)ErrorCode::NONE) {
+			throw runtime_error("fail " + when + ": NONE ERROR");
+		} else
+		if (buf[0] == (uint8_t)ErrorCode::NO_BUTTON_MODULE) {
+			throw runtime_error("fail " + when + ": no button module at addr " + to_string((int)buf[1]));
+		} else
+		if (buf[0] == (uint8_t)ErrorCode::NO_PERFORMER) {
+			throw runtime_error("fail " + when + ": no performer unit at addr " + to_string((int)buf[1]));
+		}
+
+		throw runtime_error("fail " + when + ": unknown error");
 	}
 }
 
 void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& releiveInstructions) {
-	start:
-
 	// get hw extboard config
 	cout << "load hardware extboard config.." << endl;
 	string driver = JParser::getf(extboard, "driver", "extboard");
 	int speed = JParser::getf(extboard, "speed", "extboard");
 	int csPin = JParser::getf(extboard, "cs-pin", "extboard");
 	int intPin = JParser::getf(extboard, "int-pin", "extboard");
-
-	// create mspi connection
-	cout << "create MSPI connection.." << endl;
-	_mspi = new Mspi(driver, speed, csPin, intPin, _int);
-	uint8_t buf[1024];
-	_mspi->read((int)Addr::WIA, buf, 3);
-	_mspi->read((int)Addr::VERSION, &buf[3], 2);
-	cout << "extboard connected, WIA_PRJ: " << (buf[0] << 8 | buf[1]) << ", WIA_SUB: " << buf[2] << ", VERSION: [" << buf[3] << ", " << buf[4] << "]" << endl;
-	while (true) {
-		_mspi->read((int)Addr::STATUS, buf, 1);
-		if (buf[0] > 1) {
-			break;
-		}
-	}
 
 	cout << "load performing units config.." << endl;
 	for (int i = 0; i < performingUnits.size(); i++) {
@@ -797,6 +783,10 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			for (int j = 0; j < ins.size(); j++) {
 				_appendLightIns(iv, ins[j]);
 			}
+			LightInstruction eli;
+			eli.cmd = (uint8_t)LightCmd::END;
+			iv.push_back(eli);
+
 			bool needRst = JParser::getf(effects[i], "need-reset", "");
 			if (needRst) {
 				ef.needReset = 1;
@@ -804,15 +794,16 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 				for (int j = 0; j < rstIns.size(); j++) {
 					_appendLightIns(rstiv, rstIns[j]);
 				}
-				if (rstiv.size() > 255) {
+				if (rstiv.size() > 64) {
 					throw runtime_error("too many reset-instructions");
 				}
+				rstiv.push_back(eli);
 				ef.nResetInstructions = rstiv.size();
 			} else {
 				ef.needReset = 0;
 				ef.nResetInstructions = 0;
 			}
-			if (iv.size() + rstiv.size() > 508) {
+			if (iv.size() + rstiv.size() > 256) {
 				throw runtime_error("too many total instructions");
 			}
 			for (int j = 0; j < rstiv.size(); j++) {
@@ -822,15 +813,18 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 				ef.instructions[j + rstiv.size()] = iv[j];
 			}
 			ef.nTotalInstructions = iv.size() + rstiv.size();
-			memset(ef.data, 0, 1024);
+			memset(ef.data, 0, 1288);
 			ef.data[1] = (uint8_t)(ef.delay >> 8);
 			ef.data[2] = (uint8_t)(ef.delay);
 			ef.data[3] = ef.nRepeats;
 			ef.data[4] = ef.needReset;
 			ef.data[5] = ef.nResetInstructions;
 			for (int j = 0; j < ef.nTotalInstructions; j++) {
-				ef.data[8 + j*2] = ef.instructions[j].cmd;
-				ef.data[8 + j*2 + 1] = ef.instructions[j].data;
+				ef.data[8 + j*5] = ef.instructions[j].cmd;
+				ef.data[8 + j*5 + 1] = ef.instructions[j].data[0];
+				ef.data[8 + j*5 + 2] = ef.instructions[j].data[1];
+				ef.data[8 + j*5 + 3] = ef.instructions[j].data[2];
+				ef.data[8 + j*5 + 4] = ef.instructions[j].data[3];
 			}
 			_effects.push_back(ef);
 			cout << "effect '" << ef.id << "' loaded: " << "nTI - " << ef.nTotalInstructions << " nRI - " << ef.nResetInstructions;
@@ -843,167 +837,97 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		}
 	}
 
-	cout << "get extboard options.." << endl;
-	vector<PerformerUnit> ebpus(4);
-	vector<RelaysGroup> ebrgs(24);
-	Payment ebpmcash;
-	Payment ebpmcoin;
-	Payment ebpmterm;
-	vector<ButtonModule> ebbms(8);
-	ButtonModule ebbs;
-	uint8_t ebclr;
-	uint64_t ebts1a;
-	uint64_t ebts2a;
-	uint8_t rvis[128] = {0};
+	// create mspi connection
+	cout << "create MSPI connection.." << endl;
+	_mspi = new Mspi(driver, speed, csPin, intPin, _int);
 	
-	_mspi->read((int)Addr::PERFORMERS_OPT, buf, 32);
-	for (int i = 0; i < 4; i++) {
-		ebpus[i].addr = buf[i*8];
-		ebpus[i].normalStates = buf[i*8 + 1];
-		ebpus[i].dependencies[0] = buf[i*8 + 2];
-		ebpus[i].dependencies[1] = buf[i*8 + 3];
-		ebpus[i].dependencies[2] = buf[i*8 + 4];
-		ebpus[i].dependencies[3] = buf[i*8 + 5];
-		ebpus[i].dependencies[4] = buf[i*8 + 6];
-		ebpus[i].dependencies[5] = buf[i*8 + 7];
-	}
-
-	_mspi->read((int)Addr::RELAY_GROUPS, buf, 192);
-	for (int i = 0; i < 24; i++) {
-		for (int j = 0; j < 4; j++) {
-			ebrgs[i].addr[j] = buf[i*8 + j*2];
-			ebrgs[i].state[j] = buf[i*8 + j*2  +1];
+	// connect to extboard
+	cout << "connect to extboard.." << endl;
+	uint8_t buf[1024];
+	int tries = 0;
+	try {
+		_mspi->cmd((int)Cmd::RESET, 0);
+		usleep(100000);
+		_mspi->read((int)Addr::WIA, buf, 3);
+		_mspi->read((int)Addr::VERSION, &buf[3], 2);
+	} catch (exception& e) {
+		usleep(100000);
+		tries++;
+		if (tries >= 10) {
+			throw runtime_error("fail to connect");
 		}
 	}
 
-	_mspi->read((int)Addr::PAYMENT_OPT, buf, 3);
-	ebpmcash.mode = (Payment::Mode)buf[0];
-	ebpmcoin.mode = (Payment::Mode)buf[1];
-	ebpmterm.mode = (Payment::Mode)buf[2];
+	cout << "extboard connected, WIA_PRJ: " << (buf[0] << 8 | buf[1]) << ", WIA_SUB: " << buf[2] << ", VERSION: [" << buf[3] << ", " << buf[4] << "]" << endl;
 	
-	_mspi->read((int)Addr::BUTTONS_OPT, buf, 26);
-	ebbs.addr = 0;
-	ebbs.io = buf[0];
-	ebbs.activeLevels = buf[1];
-	for (int i = 0; i < 8; i++) {
-		ebbms[i].addr = buf[2 + i*3];
-		ebbms[i].io = buf[2 + i*3 + 1];
-		ebbms[i].activeLevels = buf[2 + i*3 + 2];
-	}
-
-	_mspi->read((int)Addr::RANGEFINDER_OPT, buf, 1);
-	ebclr = buf[0];
-
-	_mspi->read((int)Addr::TEMPSENS_OPT, buf, 16);
-	ebts1a = _collectn(buf, 8);
-	ebts2a = _collectn(&buf[8], 8);
-
-	_mspi->read((int)Addr::RELEIVE_INS, rvis, 128);
-
-	cout << "compare extboard options.." << endl;
-	for (int i = 0; i < _performersu.size(); i++) {
-		if (_performersu[i] != ebpus[i]) {
-			cout << "find differences in performer units options" << endl;
-			_uploadAllOptions();
-			goto start;
-		}
-	}
-	for (int i = _performersu.size(); i < 4; i++) {
-		if (ebpus[i].addr != 0) {
-			cout << "find differences in performer units options" << endl;
-			_uploadAllOptions();
-			goto start;
+	// wait for extboard self init
+	cout << "wait for extboard self init.." << endl;
+	int timeout = 0;
+	while (true) {
+		usleep(10000);
+		_mspi->read((int)Addr::STATUS, buf, 1);
+		if (buf[0] == (uint8_t)Status::LOAD_OPT) {
+			cout << "self init complete" << endl;
+			break;
+		} else
+		if (buf[0] == (uint8_t)Status::INIT_SELF) {
+			timeout++;
+			if (timeout > 500) { // ~5 seconds
+				throw ("fail self init: timeout");
+			}
+		} else
+		if (buf[0] == (uint8_t)Status::ERROR) {
+			_getErrorAndThrow("self init");
+		} else {
+			throw runtime_error("fail self init: incorrect status " + to_string((int)buf[0]));
 		}
 	}
 
-	for (int i = 0; i < _rgroups.size(); i++) {
-		if (_rgroups[i] != ebrgs[i]) {
-			cout << "find differences in relays groups options" << endl;
-			_uploadAllOptions();
-			goto start;
+	cout << "upload options.." << endl;
+	_uploadAllOptions();
+	cout << "upload options success" << endl;
+	cout << "init external devices.." << endl;
+	_mspi->cmd((int)Cmd::END_OPT, 0);
+	usleep(10000);
+	while (true) {
+		usleep(100000);
+		_mspi->read((int)Addr::STATUS, buf, 1);
+		if (buf[0] == (uint8_t)Status::WORK) {
+			cout << "external devices init complete" << endl;
+			break;
+		} else
+		if (buf[0] == (uint8_t)Status::INIT_EXTDEV) {
+			timeout++;
+			if (timeout > 200) { // ~20 seconds
+				throw ("fail to init external devices: timeout");
+			}
+		} else if (buf[0] == (uint8_t)Status::ERROR) {
+			_getErrorAndThrow("init external devices");
+		} else {
+			throw runtime_error("fail to init external devices: incorrect status " + to_string((int)buf[0]));
 		}
 	}
-	if (ebpmcash.mode != _cash.mode || ebpmcoin.mode != _coin.mode || ebpmterm.mode != _terminal.mode) {
-			cout << "find differences in payment options" << endl;
-			_uploadAllOptions();
-			goto start;
-	}
-
-	if (_buttoneb != ebbs) {
-		cout << "find differences in buttons options" << endl;
-		_uploadAllOptions();
-		goto start;
-	}
-	for (int i = 0; i < _buttonms.size(); i++) {
-		if (_buttonms[i] != ebbms[i]) {
-			cout << "find differences in buttons options" << endl;
-			_uploadAllOptions();
-			goto start;
-		}
-	}
-	for (int i = _buttonms.size(); i < 8; i++) {
-		if (ebbms[i].addr != 0) {
-			cout << "find differences in buttons options" << endl;
-			_uploadAllOptions();
-			goto start;
-		}
-	}
-
-	if (_closerRange != ebclr) {
-		cout << "find differences in range finder options" << endl;
-		_uploadAllOptions();
-		goto start;
-	}
-
-	if (_tempSens1Addr != ebts1a || _tempSens2Addr != ebts2a) {
-		cout << "find differences in temp sens options" << endl;
-		_uploadAllOptions();
-		goto start;
-	}
-
-	if (memcmp(_releiveInstructions, rvis, 128) != 0) {
-		cout << "find differences in releive pressure instructions" << endl;
-		_uploadAllOptions();
-		goto start;
-	}
-
-	cout << "compare success - no differences" << endl;
+	cout << "external device init complete" << endl;
 }
 
 /* Light control */
-void startLightEffect(int id, LightEffectType type) {
+void startLightEffect(int id, int index) {
 	LightEffect* ef = _getEffect(id);
-	if (type == LightEffectType::MAIN) {
-		_mspi->cmd((int)Cmd::RESET_MAIN_EFFECT, 0);
-		ef->data[0] = 0x01;
-	} else 
-	if (type == LightEffectType::SUB) {
-		_mspi->cmd((int)Cmd::RESET_SUB_EFFECT, 0);
-		ef->data[0] = 0x02;
-	} else {
-		throw runtime_error("undefined LightEffectType");
-	}
-	_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*2);
+	ef->data[0] = index;
+	_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*5);
 }
 
-void startLightEffect(SpecEffect effect, LightEffectType type) {
+void startLightEffect(SpecEffect effect, int index) {
 	int id = -1;
 	switch (effect) {
 	case SpecEffect::GIVE_MONEY_EFFECT: id = _giveMoneyEffect; break;
 	case SpecEffect::SERVICE_EFFECT: id = _serviceEffect; break;
 	}
-	startLightEffect(id, type);
+	startLightEffect(id, index);
 }
 
-void resetLightEffect(LightEffectType type) {
-	if (type == LightEffectType::MAIN) {
-		_mspi->cmd((int)Cmd::RESET_MAIN_EFFECT, 0);
-	} else 
-	if (type == LightEffectType::SUB) {
-		_mspi->cmd((int)Cmd::RESET_SUB_EFFECT, 0);
-	} else {
-		throw runtime_error("undefined LightEffectType");
-	}
+void resetLightEffect(int index) {
+	_mspi->cmd((int)Cmd::RESET_EFFECT, index);
 }
 
 /* Performing functions */

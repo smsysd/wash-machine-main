@@ -68,10 +68,8 @@ int Font::getMaxHeight() {
 	return h;
 }
 
-vector<int> Font::getStringDimensions(string s) {
+vector<int> Font::getStringDimensions(wstring ws) {
 	vector<int> dv;
-	wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-	wstring ws = converter.from_bytes(s.c_str());
 	int width = 0;
 	int height = 0;
 
@@ -106,25 +104,22 @@ void Font::_loadJsonFont(string file, string index) {
 		f.read(buffer,length);
 		buffer[length] = 0;
 		f.close();
+		cout << "buffer filled, parsing.." << endl;
 
 		json data;
 		try {
 			data = json::parse(buffer);
+			cout << "json parsing success" << endl;
 		} catch (exception& e) {
 			delete[] buffer;
 			throw runtime_error("fail to general parse json format");
 		}
 		delete[] buffer;
 
-		if (data[index] == nullptr) {
-			throw runtime_error("index not found");
-		}
-
-		if (data[index]["symbols"] == nullptr) {
-			throw runtime_error("symbols not found");
-		}
-
-		json s = data[index]["symbols"];
+		json f = JParser::getf(data, index, "font file");
+		json s = JParser::getf(f, "symbols", index);
+		
+		cout << "load symbols.." << endl;
 		for (int i = 0; i < s.size(); i++) {
 			Gliph cb;
 			string str = s[i]["name"].get<string>();
@@ -136,14 +131,13 @@ void Font::_loadJsonFont(string file, string index) {
 				throw runtime_error("fail to load char '" + str +  "' code");
 			}
 			try {
-				cb.bitmap = _extractJsonBitmap(s[i]["bitmap"]);
+				cb.bitmap = _extractJsonBitmap(JParser::getf(s[i], "bitmap", str));
 			} catch (exception& e) {
 				throw runtime_error("fail to load char '" + str +  "' bitmap: " + string(e.what()));
 			}
 			_gliphs.push_back(cb);
 		}
 		cout << "[Font] loaded " << _gliphs.size() << " symbols from json" << endl;
-
 	} else {
 		throw runtime_error("cannot open font file");
 	}
@@ -175,8 +169,11 @@ RGB332 Font::_extractJsonBitmap(json& bitmap) {
 	}
 
 	RGB332 bm = rgb332_create(width, height);
+	if (bm.data == NULL) {
+		throw runtime_error("no memory");
+	}
 	rgb332_fill(bm, 0x00);
-	for (int i = 0; i < height; i++) {
+	for (int i = 0; i < data.size(); i++) {
 		for (int j = 0; j < data[i].size(); j++) {
 			rgb332_set(bm, j, i, data[i][j]);
 		}

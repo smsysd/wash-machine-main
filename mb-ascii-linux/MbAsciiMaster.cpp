@@ -95,14 +95,20 @@ void MbAsciiMaster::rwrite(int addr, int raddr, const int* regs, int nRegs, int 
 	lrcb[3] = (uint8_t)(nRegs);
 	lrcb[4] = nRegs * 2;
 	for (int i = 0; i < nRegs; i++) {
-		lrcb[5 + i*2] = (uint8_t)(regs[i] >> 8);
-		lrcb[6 + i*2] = (uint8_t)(regs[i]);
+		lrcb[5 + i*2] = (regs[i] >> 8) & 0xFF;
+		lrcb[6 + i*2] = regs[i] & 0xFF;
 	}
 	sprintf(buff, ":%02X%02X%04X%04X%02X", addr, 0x10, raddr, nRegs, nRegs * 2);
 	for (int i = 0; i < nRegs; i++) {
 		sprintf(&buff[15 + i*4], "%04X", regs[i]);
 	}
-	sprintf(&buff[15 + nRegs*4], "%02X\r\n", lrc8(lrcb, 5 + nRegs*2));
+	sprintf(&buff[15 + nRegs*4], "%02X\r\n\0", lrc8(lrcb, 5 + nRegs*2));
+
+	// for (int i = 0; i < 5 + nRegs*2; i++) {
+	// 	printf("%02X ", lrcb[i]);
+	// }
+	// cout << endl << "buf: " << buff << endl;
+	
 	if (_dir > 0) {
 		digitalWrite(_dir, HIGH);
 	}

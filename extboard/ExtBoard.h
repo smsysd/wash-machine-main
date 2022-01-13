@@ -15,11 +15,6 @@ using json = nlohmann::json;
 
 namespace extboard {
 
-	enum class LightEffectType {
-		MAIN = 0x01,
-		SUB = 0x02
-	};
-
 	enum class SpecEffect {
 		GIVE_MONEY_EFFECT,
 		SERVICE_EFFECT
@@ -28,9 +23,9 @@ namespace extboard {
 	void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& releiveInstructions);
 	
 	/* Light control */
-	void startLightEffect(int id, LightEffectType type);
-	void startLightEffect(SpecEffect effect, LightEffectType type);
-	void resetLightEffect(LightEffectType type);
+	void startLightEffect(int id, int index);
+	void startLightEffect(SpecEffect effect, int index);
+	void resetLightEffect(int index);
 
 	/* Performing functions */
 	void relievePressure();

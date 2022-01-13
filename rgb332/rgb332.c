@@ -135,7 +135,7 @@ void rgb332_fill(RGB332 bitmap, uint8_t color) {
 	uint32_t size;
 	uint32_t i;
 
-	if (bitmap.data = NULL) {
+	if (bitmap.data == NULL) {
 		return;
 	}
 	size = bitmap.width * bitmap.height;
@@ -198,6 +198,25 @@ uint32_t rgb332_toRGB888(uint8_t color) {
     result |= (b * 85);
 
     return result;
+}
+
+uint8_t rgb332_toRGB111(uint8_t color) {
+	uint8_t result = 0;
+	if (color & 0b00000011) {
+		result |= 0b001;
+	}
+	if (color & 0b00011100) {
+		result |= 0b010;
+	}
+	if (color & 0b11100000) {
+		result |= 0b100;
+	}
+
+	return result;
+}
+
+uint8_t rgb332_fromRGB888(uint8_t r, uint8_t g, uint8_t b) {
+	return rgb332_formColor(r/32, g/32, b/32);
 }
 
 #ifdef _cplusplus
