@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,14 +99,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux/CMakeFiles /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux/ledmatrix-linux//CMakeFiles/progress.marks
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux/CMakeFiles 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles /home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux//CMakeFiles/progress.marks
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/clean
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 ledmatrix-linux/CMakeFiles/ledmatrix.dir/rule:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/CMakeFiles/ledmatrix.dir/rule
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ledmatrix-linux/CMakeFiles/ledmatrix.dir/rule
 .PHONY : ledmatrix-linux/CMakeFiles/ledmatrix.dir/rule
 
 # Convenience name for target.
@@ -141,7 +141,7 @@ ledmatrix: ledmatrix-linux/CMakeFiles/ledmatrix.dir/rule
 
 # fast build rule for target.
 ledmatrix/fast:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/build
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/build
 .PHONY : ledmatrix/fast
 
 LedMatrix.o: LedMatrix.cpp.o
@@ -150,7 +150,7 @@ LedMatrix.o: LedMatrix.cpp.o
 
 # target to build an object file
 LedMatrix.cpp.o:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/LedMatrix.cpp.o
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/LedMatrix.cpp.o
 .PHONY : LedMatrix.cpp.o
 
 LedMatrix.i: LedMatrix.cpp.i
@@ -159,7 +159,7 @@ LedMatrix.i: LedMatrix.cpp.i
 
 # target to preprocess a source file
 LedMatrix.cpp.i:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/LedMatrix.cpp.i
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/LedMatrix.cpp.i
 .PHONY : LedMatrix.cpp.i
 
 LedMatrix.s: LedMatrix.cpp.s
@@ -168,7 +168,7 @@ LedMatrix.s: LedMatrix.cpp.s
 
 # target to generate assembly for a file
 LedMatrix.cpp.s:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/LedMatrix.cpp.s
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f ledmatrix-linux/CMakeFiles/ledmatrix.dir/build.make ledmatrix-linux/CMakeFiles/ledmatrix.dir/LedMatrix.cpp.s
 .PHONY : LedMatrix.cpp.s
 
 # Help Target
@@ -194,6 +194,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

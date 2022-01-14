@@ -373,7 +373,7 @@ void init(
 
 void setGiveMoneyMode() {
 	try {
-		extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, extboard::LightEffectType::MAIN);
+		extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, 0);
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to start effect: " + string(e.what()));
 	}
@@ -392,7 +392,7 @@ void setGiveMoneyMode() {
 
 void setServiceMode(uint64_t cardid) {
 	try {
-		extboard::startLightEffect(extboard::SpecEffect::SERVICE_EFFECT, extboard::LightEffectType::MAIN);
+		extboard::startLightEffect(extboard::SpecEffect::SERVICE_EFFECT, 0);
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to start effect: " + string(e.what()));
 	}
@@ -411,7 +411,7 @@ void setProgram(int id) {
 	}
 
 	try {
-		extboard::startLightEffect(p->effect, extboard::LightEffectType::MAIN);
+		extboard::startLightEffect(p->effect, 0);
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to start effect: " + string(e.what()));
 	}
@@ -447,7 +447,7 @@ void setServiceProgram(int id) {
 	}
 
 	try {
-		extboard::startLightEffect(p->effect, extboard::LightEffectType::MAIN);
+		extboard::startLightEffect(p->effect, 0);
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to start effect: " + string(e.what()));
 	}

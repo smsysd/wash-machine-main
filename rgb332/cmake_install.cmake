@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux/rgb332
+# Install script for directory: /home/elpi/workspace/sm-sys/wash-machine-main/rgb332
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

@@ -26,14 +26,6 @@ namespace render {
 DisplayType displayType = DisplayType::STD;
 
 namespace {
-	struct MFont {
-		Font font;
-		int id;
-	};
-	struct Block {
-		RGB332 data;
-		int id;
-	};
 	struct Var {
 		const void* var;
 		VarType type;
@@ -51,8 +43,6 @@ namespace {
 
 	thread* _genth = nullptr;
 	LedMatrix* _lm;
-	vector<MFont> _fonts;
-	vector<Block> _blocks;
 	vector<Var> _vars;
 	vector<Frame> _lmframes;
 	int defFont;
@@ -115,7 +105,8 @@ namespace {
 				ss = ss.replace(vp, _vars[i].name.length() + 1, vsv);
 			}
 		}
-		_lm->writeString(ss);
+		string css = _ws2s(ss);
+		_lm->writeString(css.c_str(), "UTF-16");
 	}
 
 	void _redraw() {
@@ -244,6 +235,7 @@ void regVar(const char* var, wstring name) {
 
 void init(json& displaycnf, json& frames, json& specFrames, json& option, json& bg, json& fonts) {
 	// get necessary config fields
+	cout << "get necessary config fields.." << endl;
 	string dt = JParser::getf(displaycnf, "type", "display");
 	_giveMoneyFrame = JParser::getf(specFrames, "give-money-frame", "spec-frames");
 	_bonusGiveMoneyFrame = JParser::getf(specFrames, "bonus-give-money-frame", "spec-frames");
@@ -253,69 +245,9 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 	_logoFrame = JParser::getf(specFrames, "logo-frame", "spec-frames");
 
 	if (dt == "ledmatrix") {
-		// init hardware
-		int addr = JParser::getf(displaycnf, "address", "display");
-		int dp = JParser::getf(displaycnf, "dir-pin", "display");
-		string driver = JParser::getf(displaycnf, "driver", "display");
-
-		try {
-			_lm = new LedMatrix(addr, driver, B9600, dp);
-		} catch (exception& e) {
-			throw runtime_error("fail to hardware init: fail init display: " + string(e.what()));
-		}
-
-		// prepare fonts
-		for (int i = 0; i < fonts.size(); i++) {
-			try {
-				string name = JParser::getf(fonts[i], "name", "fonts[" + to_string(i) + "]");
-				string ind = JParser::getf(fonts[i], "index", "fonts[" + to_string(i) + "]");
-				int id = JParser::getf(fonts[i], "id", "fonts[" + to_string(i) + "]");
-				Font font("./config/fonts/" + name, ind);
-				_lm->prepareFont(font, id);
-				MFont mf = {font, id};
-				_fonts.push_back(mf);
-			} catch (exception& e) {
-				throw runtime_error("fail to prepare font: " + string(e.what()));
-			}
-		}
-
-		// prepare blocks
-		for (int i = 0; i < bg.size(); i++) {
-			try {
-				string name = JParser::getf(fonts[i], "name", "bg[" + to_string(i) + "]");
-				int id = JParser::getf(fonts[i], "id", "bg[" + to_string(i) + "]");
-				BMP bmp(name.c_str());
-				int w = bmp.bmp_info_header.width;
-				int h = bmp.bmp_info_header.height;
-				if (bmp.bmp_info_header.bit_count != 24) {
-					throw runtime_error("bg[" + to_string(i) + "] image must be 24-bit encoded");
-				}
-				RGB332 data = rgb332_create(w, h);
-				for (int ih = 0; ih < h; ih++) {
-					for (int iw = 0; iw < w; iw++) {
-						int ip = ih * w * 3 + iw * 3;
-						uint8_t r = bmp.data.at(ip);
-						uint8_t g = bmp.data.at(ip + 1);
-						uint8_t b = bmp.data.at(ip + 2);
-						rgb332_set(data, iw, ih, rgb332_formColor(r, g, b));
-					}
-				}
-				_lm->prepareBlock(data, id);
-				Block block = {data, id};
-				_blocks.push_back(block);
-			} catch (exception& e) {
-				throw runtime_error("fail to prepare block: " + string(e.what()));
-			}
-		}
-
-		try {
-			_lm->reset();
-			_lm->clear();
-		} catch (exception& e) {
-			throw runtime_error("fail to reset display");
-		}
-
+		cout << "display type is 'ledmatrix'" << endl;
 		// parse general options
+		cout << "parse general options.." << endl;
 		defFont = JParser::getf(option, "default-font", "general-option");
 		defColor = JParser::getf(option, "default-color", "general-option");
 		json& defCursor = JParser::getf(option, "default-cursor", "general-option");
@@ -332,6 +264,7 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 		}
 
 		// load frames
+		cout << "load frames.." << endl;
 		for (int i = 0; i < frames.size(); i++) {
 			try {
 				Frame f;
@@ -384,11 +317,71 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 			}
 		}
 
+		// init hardware
+		cout << "init hardware" << endl;
+		int addr = JParser::getf(displaycnf, "address", "display");
+		int dp = JParser::getf(displaycnf, "dir-pin", "display");
+		string driver = JParser::getf(displaycnf, "driver", "display");
+		int brn = JParser::getf(displaycnf, "baud-rate", "display");
+		int br;
+		if (brn == 2400) {
+			br = B2400;
+		} else
+		if (brn == 9600) {
+			br = B9600;
+		} else
+		if (brn == 38400) {
+			br = B38400;
+		} else
+		if (brn == 115200) {
+			br = B115200;
+		} else {
+			throw runtime_error("baud-rate '" + to_string(brn) + "' not supported, choose from 2400, 9600, 38400, 115200");
+		}
+
+		try {
+			_lm = new LedMatrix(addr, driver, br, dp);
+		} catch (exception& e) {
+			throw runtime_error("fail to hardware init: " + string(e.what()));
+		}
+
+		// prepare fonts
+		cout << "prepare fonts.." << endl;
+		for (int i = 0; i < fonts.size(); i++) {
+			try {
+				string name = JParser::getf(fonts[i], "name", "fonts[" + to_string(i) + "]");
+				string ind = JParser::getf(fonts[i], "index", "fonts[" + to_string(i) + "]");
+				int id = JParser::getf(fonts[i], "id", "fonts[" + to_string(i) + "]");
+				Font font("./config/fonts/" + name, ind);
+				_lm->prepareFont(font, id, "UTF-16");
+			} catch (exception& e) {
+				throw runtime_error("fail to prepare font: " + string(e.what()));
+			}
+		}
+
+		// prepare blocks
+		cout << "prepre blocks.." << endl;
+		for (int i = 0; i < bg.size(); i++) {
+			try {
+				string name = JParser::getf(fonts[i], "name", "bg[" + to_string(i) + "]");
+				int id = JParser::getf(fonts[i], "id", "bg[" + to_string(i) + "]");
+				_lm->prepareBlock("./config/img/" + name, id);
+			} catch (exception& e) {
+				throw runtime_error("fail to prepare block: " + string(e.what()));
+			}
+		}
+		cout << "reset and clear display.." << endl;
+		try {
+			_lm->reset();
+			_lm->clear();
+		} catch (exception& e) {
+			throw runtime_error("fail to reset display: " + string(e.what()));
+		}
 	} else
 	if (dt == "std") {
 		throw runtime_error("'std' display type still not supported");
 	} else {
-		throw runtime_error("unknown display type");
+		throw runtime_error("unknown display type '" + dt + "'");
 	}
 
 	_genth = new thread(_handler);

@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,14 +99,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux/CMakeFiles /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux/font-linux//CMakeFiles/progress.marks
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux/CMakeFiles 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles /home/elpi/workspace/sm-sys/wash-machine-main/font-linux//CMakeFiles/progress.marks
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/clean
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/preinstall
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 font-linux/CMakeFiles/font.dir/rule:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/CMakeFiles/font.dir/rule
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 font-linux/CMakeFiles/font.dir/rule
 .PHONY : font-linux/CMakeFiles/font.dir/rule
 
 # Convenience name for target.
@@ -141,7 +141,7 @@ font: font-linux/CMakeFiles/font.dir/rule
 
 # fast build rule for target.
 font/fast:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f font-linux/CMakeFiles/font.dir/build.make font-linux/CMakeFiles/font.dir/build
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f font-linux/CMakeFiles/font.dir/build.make font-linux/CMakeFiles/font.dir/build
 .PHONY : font/fast
 
 Font.o: Font.cpp.o
@@ -150,7 +150,7 @@ Font.o: Font.cpp.o
 
 # target to build an object file
 Font.cpp.o:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f font-linux/CMakeFiles/font.dir/build.make font-linux/CMakeFiles/font.dir/Font.cpp.o
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f font-linux/CMakeFiles/font.dir/build.make font-linux/CMakeFiles/font.dir/Font.cpp.o
 .PHONY : Font.cpp.o
 
 Font.i: Font.cpp.i
@@ -159,7 +159,7 @@ Font.i: Font.cpp.i
 
 # target to preprocess a source file
 Font.cpp.i:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f font-linux/CMakeFiles/font.dir/build.make font-linux/CMakeFiles/font.dir/Font.cpp.i
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f font-linux/CMakeFiles/font.dir/build.make font-linux/CMakeFiles/font.dir/Font.cpp.i
 .PHONY : Font.cpp.i
 
 Font.s: Font.cpp.s
@@ -168,7 +168,7 @@ Font.s: Font.cpp.s
 
 # target to generate assembly for a file
 Font.cpp.s:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(MAKE) $(MAKESILENT) -f font-linux/CMakeFiles/font.dir/build.make font-linux/CMakeFiles/font.dir/Font.cpp.s
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f font-linux/CMakeFiles/font.dir/build.make font-linux/CMakeFiles/font.dir/Font.cpp.s
 .PHONY : Font.cpp.s
 
 # Help Target
@@ -194,6 +194,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/elpi/workspace/sm-sys-gen/ledmatrix/ledmatrix-linux && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
