@@ -37,6 +37,7 @@ namespace extboard {
 	void registerOnCardReadHandler(void (*handler)(uint64_t cardid));
 	void registerOnMoneyAddedHandler(void (*handler)(double nMoney));
 	void registerOnObjectCloserHandler(void (*handler)(bool state));
+	void registerOnErrorHandler(void (*handler)(string text));
 }
 
 #endif

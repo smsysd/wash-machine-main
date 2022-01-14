@@ -81,7 +81,7 @@ namespace {
 
 	enum class IntReason {
 		BOOTLOADER = 0x01,
-		INIT = 0x02,
+		WAIT_OPT = 0x02,
 		ERROR = 0x03,
 		BUTTON = 0x04,
 		CARD = 0x05,
@@ -209,11 +209,13 @@ namespace {
 	uint64_t _tempSens2Addr = 0;
 	int _giveMoneyEffect = -1;
 	int _serviceEffect = -1;
+	bool _isInit = false;
 
 	void (*_onButton)(int iButton);
 	void (*_onCard)(uint64_t id);
 	void (*_onMoney)(double nMoney);
 	void (*_onCloser)(bool state);
+	void (*_onError)(string text);
 
 	uint64_t _collectn(uint8_t* src, int nb) {
 		uint64_t val = 0;
@@ -498,48 +500,6 @@ namespace {
 		return money;
 	}
 
-	void _int(int reason) {
-		uint8_t buf[32] = {0};
-		if (reason == (int)IntReason::BUTTON && _onButton != nullptr) {
-			_mspi->read((int)Addr::BUTTONS, buf, 9);
-			buf[0] &= ~(_buttoneb.io);
-			for (int i = 0; i < 8; i++) {
-				if (buf[0] & (1 << i)) {
-					_onButton(i);
-				}
-			}
-			for (int i = 0; i < 8; i++) {
-				if (i < _buttonms.size()) {
-					buf[i] &= ~_buttonms[i].io;
-					for (int j = 0; j < 8; j++) {
-						if (buf[i] & (1 << j)) {
-							_onButton(8 + i*8 + j);
-						}
-					}
-				}
-			}
-		} else
-		if (reason == (int)IntReason::CARD && _onCard != nullptr) {
-			_mspi->read((int)Addr::RFID_CARD, buf, 8);
-			uint64_t cid = _collectn(buf, 8);
-			_onCard(cid);
-		} else
-		if (reason == (int)IntReason::MONEY && _onMoney != nullptr) {
-			_mspi->read((int)Addr::PAYMENT, buf, 6);
-			double money = _injectMoney(buf);
-			if (money > 0) {
-				_onMoney(money);
-			}
-		} else
-		if (reason == (int)IntReason::OBJ_CLOSER && _onCloser != nullptr) {
-			_onCloser(true);
-		} else
-		if (reason == (int)IntReason::OBJ_WASTE && _onCloser != nullptr) {
-			_onCloser(false);
-		}
-
-	}
-	
 	void _uploadAllOptions() {
 		uint8_t buf[256];
 		memset(buf, 0, 32);
@@ -618,6 +578,87 @@ namespace {
 		}
 
 		throw runtime_error("fail " + when + ": unknown error");
+	}
+
+	void _int(int reason) {
+		if (!_isInit) {
+			return;
+		}
+		uint8_t buf[32] = {0};
+		if (reason == (int)IntReason::WAIT_OPT) {
+			_isInit = false;
+			cout << "extboard was reset during operations - reinit" << endl;
+			cout << "upload options.." << endl;
+			_uploadAllOptions();
+			cout << "init external devices.." << endl;
+			_mspi->cmd((int)Cmd::END_OPT, 0);
+			usleep(10000);
+			int timeout = 0;
+			while (true) {
+				usleep(100000);
+				_mspi->read((int)Addr::STATUS, buf, 1);
+				if (buf[0] == (uint8_t)Status::WORK) {
+					break;
+				} else
+				if (buf[0] == (uint8_t)Status::INIT_EXTDEV) {
+					timeout++;
+					if (timeout > 200) { // ~20 seconds
+						throw ("fail to init external devices: timeout");
+					}
+				} else if (buf[0] == (uint8_t)Status::ERROR) {
+					_getErrorAndThrow("init external devices");
+				} else {
+					throw runtime_error("fail to init external devices: incorrect status " + to_string((int)buf[0]));
+				}
+			}
+		} else
+		if (reason == (int)IntReason::BUTTON && _onButton != nullptr) {
+			_mspi->read((int)Addr::BUTTONS, buf, 9);
+			buf[0] &= ~(_buttoneb.io);
+			for (int i = 0; i < 8; i++) {
+				if (buf[0] & (1 << i)) {
+					_onButton(i);
+				}
+			}
+			for (int i = 0; i < 8; i++) {
+				if (i < _buttonms.size()) {
+					buf[i] &= ~_buttonms[i].io;
+					for (int j = 0; j < 8; j++) {
+						if (buf[i] & (1 << j)) {
+							_onButton(8 + i*8 + j);
+						}
+					}
+				}
+			}
+		} else
+		if (reason == (int)IntReason::CARD && _onCard != nullptr) {
+			_mspi->read((int)Addr::RFID_CARD, buf, 8);
+			uint64_t cid = _collectn(buf, 8);
+			_onCard(cid);
+		} else
+		if (reason == (int)IntReason::MONEY && _onMoney != nullptr) {
+			_mspi->read((int)Addr::PAYMENT, buf, 6);
+			double money = _injectMoney(buf);
+			if (money > 0) {
+				_onMoney(money);
+			}
+		} else
+		if (reason == (int)IntReason::OBJ_CLOSER && _onCloser != nullptr) {
+			_onCloser(true);
+		} else
+		if (reason == (int)IntReason::OBJ_WASTE && _onCloser != nullptr) {
+			_onCloser(false);
+		}
+	}
+
+	ReturnCode _handler(uint16_t id, void* arg) {
+		try {
+
+		} catch (exception& e) {
+			_onError(string(e.what()));
+		}
+
+		return OK;
 	}
 }
 
@@ -867,7 +908,6 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		usleep(10000);
 		_mspi->read((int)Addr::STATUS, buf, 1);
 		if (buf[0] == (uint8_t)Status::LOAD_OPT) {
-			cout << "self init complete" << endl;
 			break;
 		} else
 		if (buf[0] == (uint8_t)Status::INIT_SELF) {
@@ -885,15 +925,14 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 
 	cout << "upload options.." << endl;
 	_uploadAllOptions();
-	cout << "upload options success" << endl;
 	cout << "init external devices.." << endl;
 	_mspi->cmd((int)Cmd::END_OPT, 0);
 	usleep(10000);
+	timeout = 0;
 	while (true) {
 		usleep(100000);
 		_mspi->read((int)Addr::STATUS, buf, 1);
 		if (buf[0] == (uint8_t)Status::WORK) {
-			cout << "external devices init complete" << endl;
 			break;
 		} else
 		if (buf[0] == (uint8_t)Status::INIT_EXTDEV) {
@@ -907,7 +946,13 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			throw runtime_error("fail to init external devices: incorrect status " + to_string((int)buf[0]));
 		}
 	}
-	cout << "external device init complete" << endl;
+
+	cout << "start handler.." << endl;
+	int rc = callHandler(_handler, NULL, 2000, 0);
+	if (rc < 0) {
+		throw runtime_error("fail start handler: " + to_string(rc));
+	}
+	_isInit = true;
 }
 
 /* Light control */
@@ -959,6 +1004,10 @@ void registerOnMoneyAddedHandler(void (*handler)(double nMoney)) {
 
 void registerOnObjectCloserHandler(void (*handler)(bool state)) {
 	_onCloser = handler;
+}
+
+void registerOnErrorHandler(void (*handler)(string text)) {
+	_onError = handler;
 }
 
 }
