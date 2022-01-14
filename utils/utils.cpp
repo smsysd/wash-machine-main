@@ -198,8 +198,8 @@ void init(
 	try {
 		_tServiceMode = _config->get("service-time");
 	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "CONFIG", "no field 'service-time' - set as infinity");
-		throw runtime_error("no field 'service-time' - set as infinity");
+		_log->log(Logger::Type::INFO, "CONFIG", "no field 'service-time' - set as infinity");
+		_tServiceMode = -1;
 	}
 
 	// extboard
@@ -234,7 +234,7 @@ void init(
 		}
 		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, relIns);
 	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init expander board: " + string(e.what()));
+		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));
 	}
 

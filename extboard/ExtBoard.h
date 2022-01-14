@@ -19,15 +19,20 @@ namespace extboard {
 		GIVE_MONEY_EFFECT,
 		SERVICE_EFFECT
 	};
+	enum class ErrorType {
+		DISCONNECT_EXTBOARD,
+		DISCONNECT_EXTDEV,
+		INTERNAL
+	};
 
 	void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& releiveInstructions);
 	
-	/* Light control */
+	/* Light control no exceptions */
 	void startLightEffect(int id, int index);
 	void startLightEffect(SpecEffect effect, int index);
 	void resetLightEffect(int index);
 
-	/* Performing functions */
+	/* Performing functions no exceptions */
 	void relievePressure();
 	void setRelayGroup(int iGroup);
 	void setRelaysState(int address, int states);
@@ -37,7 +42,7 @@ namespace extboard {
 	void registerOnCardReadHandler(void (*handler)(uint64_t cardid));
 	void registerOnMoneyAddedHandler(void (*handler)(double nMoney));
 	void registerOnObjectCloserHandler(void (*handler)(bool state));
-	void registerOnErrorHandler(void (*handler)(string text));
+	void registerOnErrorHandler(void (*handler)(ErrorType et, string text));
 }
 
 #endif

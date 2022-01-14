@@ -2,6 +2,7 @@
 #include "../mspi-linux/Mspi.h"
 #include "../json.h"
 #include "../jparser-linux/JParser.h"
+#include "../general-tools/general_tools.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdio.h>
+#include <pthread.h>
+#include <mutex>
 
 using namespace std;
 using json = nlohmann::json;
@@ -191,6 +194,19 @@ namespace {
 		bool state;
 	};
 
+	enum class HandleType {
+		START_EFFECT = 1,	// data: effect_id effect_index
+		RESET_EFFECT,		// data: effect_index
+		RELEIVE_PRESSURE,	// data: none
+		SET_RELAY_GROUP,	// data: group_id 
+		DIRECT_SET_RELAYS	// data: addr, states
+	};
+
+	struct Handle {
+		HandleType type;
+		uint8_t data[8];
+	};
+
 	Mspi* _mspi = nullptr;
 	vector<Led> _leds;
 	vector<LightEffect> _effects;
@@ -210,12 +226,16 @@ namespace {
 	int _giveMoneyEffect = -1;
 	int _serviceEffect = -1;
 	bool _isInit = false;
+	pthread_t _thread_id;
+	Fifo _operations;
+	int _currentRelayGroupId = -1;
+	mutex _mutex;
 
 	void (*_onButton)(int iButton);
 	void (*_onCard)(uint64_t id);
 	void (*_onMoney)(double nMoney);
 	void (*_onCloser)(bool state);
-	void (*_onError)(string text);
+	void (*_onError)(ErrorType et, string text);
 
 	uint64_t _collectn(uint8_t* src, int nb) {
 		uint64_t val = 0;
@@ -500,6 +520,32 @@ namespace {
 		return money;
 	}
 
+	void _getErrorAndThrow(string when) {
+		uint8_t buf[128];
+		memset(buf, 0, sizeof(buf));
+		
+		try {
+			_mspi->read((int)Addr::ERROR_DESC, buf, 64);
+		} catch (exception& e) {
+			throw runtime_error("fail " + when + ", and fail read error description");
+		}
+		
+		if (buf[0] == (uint8_t)ErrorCode::INTERNAL) {
+			throw runtime_error("fail " + when + ": " + string((char*)&buf[1]));
+		} else
+		if (buf[0] == (uint8_t)ErrorCode::NONE) {
+			throw runtime_error("fail " + when + ": NONE ERROR");
+		} else
+		if (buf[0] == (uint8_t)ErrorCode::NO_BUTTON_MODULE) {
+			throw runtime_error("fail " + when + ": no button module at addr " + to_string((int)buf[1]));
+		} else
+		if (buf[0] == (uint8_t)ErrorCode::NO_PERFORMER) {
+			throw runtime_error("fail " + when + ": no performer unit at addr " + to_string((int)buf[1]));
+		}
+
+		throw runtime_error("fail " + when + ": unknown error");
+	}
+
 	void _uploadAllOptions() {
 		uint8_t buf[256];
 		memset(buf, 0, 32);
@@ -552,95 +598,135 @@ namespace {
 		memset(buf, 0, _nReleiveInstructions * 2);
 		memcpy(buf, _releiveInstructions, _nReleiveInstructions * 2);
 		_mspi->write((int)Addr::RELEIVE_INS, buf, _nReleiveInstructions * 2);
+		_mspi->cmd((int)Cmd::END_OPT, 0);
 	}
 
-	void _getErrorAndThrow(string when) {
-		uint8_t buf[128];
-		memset(buf, 0, sizeof(buf));
-		
-		try {
-			_mspi->read((int)Addr::ERROR_DESC, buf, 64);
-		} catch (exception& e) {
-			throw runtime_error("fail " + when + ", and fail read error description");
+	void _initExtdev() {
+		uint8_t buf[4];
+		int timeout = 0;
+		while (true) {
+			usleep(100000);
+			_mspi->read((int)Addr::STATUS, buf, 1);
+			if (buf[0] == (uint8_t)Status::WORK) {
+				break;
+			} else
+			if (buf[0] == (uint8_t)Status::INIT_EXTDEV) {
+				timeout++;
+				if (timeout > 200) { // ~20 seconds
+					throw ("fail to init external devices: timeout");
+				}
+			} else if (buf[0] == (uint8_t)Status::ERROR) {
+				_getErrorAndThrow("init external devices");
+			} else {
+				throw runtime_error("fail to init external devices: incorrect status " + to_string((int)buf[0]));
+			}
 		}
-		
-		if (buf[0] == (uint8_t)ErrorCode::INTERNAL) {
-			throw runtime_error("fail " + when + ": " + string((char*)buf));
-		} else
-		if (buf[0] == (uint8_t)ErrorCode::NONE) {
-			throw runtime_error("fail " + when + ": NONE ERROR");
-		} else
-		if (buf[0] == (uint8_t)ErrorCode::NO_BUTTON_MODULE) {
-			throw runtime_error("fail " + when + ": no button module at addr " + to_string((int)buf[1]));
-		} else
-		if (buf[0] == (uint8_t)ErrorCode::NO_PERFORMER) {
-			throw runtime_error("fail " + when + ": no performer unit at addr " + to_string((int)buf[1]));
-		}
-
-		throw runtime_error("fail " + when + ": unknown error");
 	}
 
 	void _int(int reason) {
+		static int suspicion = 0;
 		if (!_isInit) {
 			return;
 		}
+		_mutex.lock();
 		uint8_t buf[32] = {0};
+		if (reason == (int)IntReason::ERROR) {
+			uint8_t buf[128];
+			memset(buf, 0, sizeof(buf));
+			try {
+				_mspi->read((int)Addr::ERROR_DESC, buf, 64);
+				suspicion = 0;
+				if (buf[0] == (uint8_t)ErrorCode::INTERNAL) {
+					_mutex.unlock();
+					_onError(ErrorType::INTERNAL, string((char*)&buf[1]));
+					return;
+				} else
+				if (buf[0] == (uint8_t)ErrorCode::NONE) {
+					_mutex.unlock();
+					_onError(ErrorType::INTERNAL, "NONE");
+					return;
+				} else
+				if (buf[0] == (uint8_t)ErrorCode::NO_BUTTON_MODULE) {
+					_mutex.unlock();
+					_onError(ErrorType::DISCONNECT_EXTDEV, "NO BM " + to_string((int)buf[1]));
+					return;
+				} else
+				if (buf[0] == (uint8_t)ErrorCode::NO_PERFORMER) {
+					_mutex.unlock();
+					_onError(ErrorType::DISCONNECT_EXTDEV, "NO PERF " + to_string((int)buf[1]));
+					return;
+				} else {
+					_mutex.unlock();
+					_onError(ErrorType::INTERNAL, "UNKNOWN");
+					return;
+				}
+
+			} catch (exception& e) {
+				suspicion++;
+			}
+		} else
 		if (reason == (int)IntReason::WAIT_OPT) {
 			_isInit = false;
-			cout << "extboard was reset during operations - reinit" << endl;
-			cout << "upload options.." << endl;
-			_uploadAllOptions();
-			cout << "init external devices.." << endl;
-			_mspi->cmd((int)Cmd::END_OPT, 0);
-			usleep(10000);
-			int timeout = 0;
-			while (true) {
-				usleep(100000);
-				_mspi->read((int)Addr::STATUS, buf, 1);
-				if (buf[0] == (uint8_t)Status::WORK) {
-					break;
-				} else
-				if (buf[0] == (uint8_t)Status::INIT_EXTDEV) {
-					timeout++;
-					if (timeout > 200) { // ~20 seconds
-						throw ("fail to init external devices: timeout");
-					}
-				} else if (buf[0] == (uint8_t)Status::ERROR) {
-					_getErrorAndThrow("init external devices");
-				} else {
-					throw runtime_error("fail to init external devices: incorrect status " + to_string((int)buf[0]));
-				}
+			try {
+				cout << "extboard was reset during operations - reinit" << endl;
+				cout << "upload options.." << endl;
+				_uploadAllOptions();
+				cout << "init external devices.." << endl;
+				usleep(10000);
+				_initExtdev();
+				suspicion = 0;
+			} catch (exception& e) {
+				cout << "fail to reinit: " << e.what() << endl;
+				suspicion++;
 			}
 		} else
 		if (reason == (int)IntReason::BUTTON && _onButton != nullptr) {
-			_mspi->read((int)Addr::BUTTONS, buf, 9);
-			buf[0] &= ~(_buttoneb.io);
-			for (int i = 0; i < 8; i++) {
-				if (buf[0] & (1 << i)) {
-					_onButton(i);
+			try {
+				_mspi->read((int)Addr::BUTTONS, buf, 9);
+				suspicion = 0;
+				buf[0] &= ~(_buttoneb.io);
+				for (int i = 0; i < 8; i++) {
+					if (buf[0] & (1 << i)) {
+						_onButton(i);
+					}
 				}
-			}
-			for (int i = 0; i < 8; i++) {
-				if (i < _buttonms.size()) {
-					buf[i] &= ~_buttonms[i].io;
-					for (int j = 0; j < 8; j++) {
-						if (buf[i] & (1 << j)) {
-							_onButton(8 + i*8 + j);
+				for (int i = 0; i < 8; i++) {
+					if (i < _buttonms.size()) {
+						buf[i] &= ~_buttonms[i].io;
+						for (int j = 0; j < 8; j++) {
+							if (buf[i] & (1 << j)) {
+								_onButton(8 + i*8 + j);
+							}
 						}
 					}
 				}
+			} catch (exception& e) {
+				cout << "fail to read buttons: " << e.what() << endl;
+				suspicion++;
 			}
 		} else
 		if (reason == (int)IntReason::CARD && _onCard != nullptr) {
-			_mspi->read((int)Addr::RFID_CARD, buf, 8);
-			uint64_t cid = _collectn(buf, 8);
-			_onCard(cid);
+			try {
+				_mspi->read((int)Addr::RFID_CARD, buf, 8);
+				suspicion = 0;
+				uint64_t cid = _collectn(buf, 8);
+				_onCard(cid);
+			} catch (exception& e) {
+				cout << "fail to read card: " << e.what() << endl;
+				suspicion++;
+			}
 		} else
 		if (reason == (int)IntReason::MONEY && _onMoney != nullptr) {
-			_mspi->read((int)Addr::PAYMENT, buf, 6);
-			double money = _injectMoney(buf);
-			if (money > 0) {
-				_onMoney(money);
+			try {
+				_mspi->read((int)Addr::PAYMENT, buf, 6);
+				suspicion = 0;
+				double money = _injectMoney(buf);
+				if (money > 0) {
+					_onMoney(money);
+				}
+			} catch (exception& e) {
+				cout << "fail to read money: " << e.what() << endl;
+				suspicion++;
 			}
 		} else
 		if (reason == (int)IntReason::OBJ_CLOSER && _onCloser != nullptr) {
@@ -649,16 +735,66 @@ namespace {
 		if (reason == (int)IntReason::OBJ_WASTE && _onCloser != nullptr) {
 			_onCloser(false);
 		}
+		_mutex.unlock();
+		if (suspicion > 10) {
+			_onError(ErrorType::DISCONNECT_EXTBOARD, "");
+		}
 	}
 
-	ReturnCode _handler(uint16_t id, void* arg) {
-		try {
-
-		} catch (exception& e) {
-			_onError(string(e.what()));
+	void* _handler(void* arg) {
+		uint8_t buf[2048];
+		int suspicion = 0;
+		while (true) {
+			_mutex.lock();
+			try {
+				Handle* h = (Handle*)fifo_get(&_operations);
+				if (h == nullptr) {
+					usleep(10000);
+				} else
+				if (h->type == HandleType::DIRECT_SET_RELAYS) {
+					buf[0] = h->data[0];
+					buf[1] = h->data[1];
+					_mspi->write((int)Addr::DIRECT_SET, buf, 2);
+					fifo_pop(&_operations);
+				} else
+				if (h->type == HandleType::RELEIVE_PRESSURE) {
+					_mspi->cmd((int)Cmd::RELIEVE_PRESSURE, 0);
+					while (true) {
+						usleep(100000);
+						_mspi->read((int)Addr::LOR, buf, 1);
+						if (buf[0] != (uint8_t)OKC) {
+							break;
+						}
+					}
+					fifo_pop(&_operations);
+				} else
+				if (h->type == HandleType::RESET_EFFECT) {
+					_mspi->cmd((int)Cmd::RESET_EFFECT, h->data[0]);
+					fifo_pop(&_operations);
+				} else
+				if (h->type == HandleType::SET_RELAY_GROUP) {
+					int rgi = _get_rgi(h->data[0]);
+					_mspi->cmd((int)Cmd::APPLAY_RGROUP, rgi);
+					fifo_pop(&_operations);
+				} else
+				if (h->type == HandleType::START_EFFECT) {
+					LightEffect* ef = _getEffect(h->data[0]);
+					ef->data[0] = h->data[1];
+					_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*5);
+					fifo_pop(&_operations);
+				} else {
+					fifo_pop(&_operations);
+				}
+			} catch (exception& e) {
+				cout << "fail extboard handle: " << e.what() << endl;
+				suspicion++;
+			}
+			_mutex.unlock();
+			if (suspicion > 10) {
+				_onError(ErrorType::DISCONNECT_EXTBOARD, "");
+			}
+			usleep(10000);
 		}
-
-		return OK;
 	}
 }
 
@@ -701,20 +837,21 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	cout << "load relays groups.." << endl;
 	for (int i = 0; i < relaysGroups.size(); i++) {
 		try {
-			RelaysGroup rg;
-			rg.id = JParser::getf(relaysGroups[i], "id", "");
-			json& ps = JParser::getf(relaysGroups[i], "performers", "");
+			RelaysGroup rg = {0};
+			rg.id = JParser::getf(relaysGroups[i], "id", "relay-group");
+			json& ps = JParser::getf(relaysGroups[i], "performers", "relay-group");
 			if (ps.size() > 4) {
 				throw runtime_error("performers may be 4 or less");
 			}
 			for (int j = 0; j < ps.size(); j++) {
 				try {
-					rg.addr[j] = JParser::getf(ps[j], "address", "");
-					rg.state[j] = JParser::getf(ps[j], "state", "");
+					rg.addr[j] = JParser::getf(ps[j], "address", "performer");
+					rg.state[j] = JParser::getf(ps[j], "state", "performer");
 				} catch (exception& e) {
 					throw runtime_error("fail load '" + to_string(j) + "' performer: " + string(e.what()));
 				}
 			}
+			_rgroups.push_back(rg);
 		} catch (exception& e) {
 			throw runtime_error("fail load '" + to_string(i) + "' relay group: " + string(e.what()));
 		}
@@ -799,12 +936,14 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			if (lt == "bm") {
 				led.type = Led::BUTTONMODULE;
 				led.addr = JParser::getf(leds[i], "address", "");
+				cout << "bm.";
 			} else
 			if (lt == "eb") {
 				led.type = Led::EXTBOARD;
 			} else {
 				throw runtime_error("unknown type '" + lt + "', must be 'lp', 'bm' or 'eb'");
 			}
+			cout << "load led " << i << ", type " << led.type << ", index " << led.i << "id " << led.id << ", addr " << led.addr << endl;
 			_leds.push_back(led);
 		} catch (exception& e) {
 			throw runtime_error("fail to load '" + to_string(i) + "' led: " + string(e.what()));
@@ -926,40 +1065,21 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	cout << "upload options.." << endl;
 	_uploadAllOptions();
 	cout << "init external devices.." << endl;
-	_mspi->cmd((int)Cmd::END_OPT, 0);
 	usleep(10000);
-	timeout = 0;
-	while (true) {
-		usleep(100000);
-		_mspi->read((int)Addr::STATUS, buf, 1);
-		if (buf[0] == (uint8_t)Status::WORK) {
-			break;
-		} else
-		if (buf[0] == (uint8_t)Status::INIT_EXTDEV) {
-			timeout++;
-			if (timeout > 200) { // ~20 seconds
-				throw ("fail to init external devices: timeout");
-			}
-		} else if (buf[0] == (uint8_t)Status::ERROR) {
-			_getErrorAndThrow("init external devices");
-		} else {
-			throw runtime_error("fail to init external devices: incorrect status " + to_string((int)buf[0]));
-		}
-	}
-
+	_initExtdev();
 	cout << "start handler.." << endl;
-	int rc = callHandler(_handler, NULL, 2000, 0);
-	if (rc < 0) {
-		throw runtime_error("fail start handler: " + to_string(rc));
-	}
+	pthread_create(&_thread_id, NULL, _handler, NULL);
+	_operations = fifo_create(32, sizeof(Handle));
 	_isInit = true;
 }
 
 /* Light control */
 void startLightEffect(int id, int index) {
-	LightEffect* ef = _getEffect(id);
-	ef->data[0] = index;
-	_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*5);
+	Handle h;
+	h.type = HandleType::START_EFFECT;
+	h.data[0] = id;
+	h.data[1] = index;
+	fifo_put(&_operations, &h);
 }
 
 void startLightEffect(SpecEffect effect, int index) {
@@ -972,21 +1092,32 @@ void startLightEffect(SpecEffect effect, int index) {
 }
 
 void resetLightEffect(int index) {
-	_mspi->cmd((int)Cmd::RESET_EFFECT, index);
+	Handle h;
+	h.type = HandleType::RESET_EFFECT;
+	h.data[0] = index;
+	fifo_put(&_operations, &h);
 }
 
 /* Performing functions */
 void relievePressure() {
-	_mspi->cmd((int)Cmd::RELIEVE_PRESSURE, 0);
+	Handle h;
+	h.type = HandleType::RELEIVE_PRESSURE;
+	fifo_put(&_operations, &h);
 }
 
 void setRelayGroup(int id) {
-	_mspi->cmd((int)Cmd::APPLAY_RGROUP, _get_rgi(id));
+	Handle h;
+	h.type = HandleType::SET_RELAY_GROUP;
+	h.data[0] = id;
+	fifo_put(&_operations, &h);
 }
 
 void setRelaysState(int address, int states) {
-	uint8_t buf[2] = {(uint8_t)address, (uint8_t)states};
-	_mspi->write((int)Addr::DIRECT_SET, buf, 2);
+	Handle h;
+	h.type = HandleType::DIRECT_SET_RELAYS;
+	h.data[0] = address;
+	h.data[1] = states;
+	fifo_put(&_operations, &h);
 }
 
 /* Event handlers registration */
@@ -1006,7 +1137,7 @@ void registerOnObjectCloserHandler(void (*handler)(bool state)) {
 	_onCloser = handler;
 }
 
-void registerOnErrorHandler(void (*handler)(string text)) {
+void registerOnErrorHandler(void (*handler)(ErrorType et, string text)) {
 	_onError = handler;
 }
 

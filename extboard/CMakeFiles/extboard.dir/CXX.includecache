@@ -15,6 +15,8 @@ ExtBoard.h
 /home/elpi/workspace/sm-sys/wash-machine-main/json.h
 ../jparser-linux/JParser.h
 /home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+../general-tools/general_tools.h
+/home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
 stdlib.h
 -
 string.h
@@ -30,6 +32,10 @@ unistd.h
 time.h
 -
 stdio.h
+-
+pthread.h
+-
+mutex
 -
 
 /home/elpi/workspace/sm-sys/wash-machine-main/extboard/ExtBoard.h

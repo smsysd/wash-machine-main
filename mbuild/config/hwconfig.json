@@ -6,13 +6,16 @@
 		},
 		"modules": [
 			{"address": 48, "active-levels": 0, "io-mask": 255},
-			{"address": 48, "active-levels": 0, "io-mask": 255},
-			{"address": 48, "active-levels": 0, "io-mask": 255}
+			{"address": 47, "active-levels": 0, "io-mask": 255},
+			{"address": 46, "active-levels": 0, "io-mask": 255}
 		]
 	},
 
 	"ext-board": {
-
+		"driver": "/dev/spidev1.1",
+		"int-pin": 2,
+		"cs-pin": 15,
+		"speed": 4000
 	},
 
 	"performing-units": [
@@ -39,6 +42,11 @@
 	"range-finder": {
 		"closer-range": 40
 	},
+
+	"temp-sens": [
+		{"address": 123},
+		{"address": 123}
+	],
 
 	"payment": {
 		"cash": {
@@ -68,13 +76,13 @@
 	},
 
 	"leds": [
-		{"id": 0, "type": "bm", "index": 1},
+		{"id": 0, "type": "bm", "address": 48, "index": 1},
 		{"id": 1, "type": "lp", "index": 1},
 		{"id": 2, "type": "eb", "index": 1},
-		{"id": 3, "type": "bm", "index": 2},
+		{"id": 3, "type": "bm", "address": 48, "index": 2},
 		{"id": 4, "type": "lp", "index": 2},
 		{"id": 5, "type": "eb", "index": 2},
-		{"id": 6, "type": "bm", "index": 3},
+		{"id": 6, "type": "bm", "address": 48, "index": 3},
 		{"id": 7, "type": "lp", "index": 3},
 		{"id": 8, "type": "eb", "index": 3}
 	]

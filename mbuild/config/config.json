@@ -1,6 +1,11 @@
 {
 	"relays-groups": [
-		{"id": 0}
+		{
+			"id": 0,
+			"performers": [
+				{"address": 48, "state": 3}
+			]
+		}
 	],
 
 	"programs": [

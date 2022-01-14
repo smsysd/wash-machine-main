@@ -20,13 +20,33 @@
 #include <unistd.h>
 #include <pthread.h>
 
+static uint32_t _timeMs = 0;
 static pthread_t _pthread_id = 0;
 #endif
 
-static uint32_t _timeMs = 0;
 static uint32_t (*_getTimeMs)() = NULL;
 static uint32_t _nCallHandles = 0;
 static CallHandle _callHandles[MAX_CALL_HANDLES];
+
+uint64_t collectn(const void* src, uint8_t nbytes) {
+	uint64_t val = 0;
+	if (nbytes > 8) {
+		nbytes = 8;
+	}
+	for (int i = 0; i < nbytes; i++) {
+		val |= (uint64_t)((uint8_t*)src)[i] << i*8;
+	}
+	return val;
+}
+
+void distribn(void* dst, uint64_t val, uint8_t nbytes) {
+	if (nbytes > 8) {
+		nbytes = 8;
+	}
+	for (int i = 0; i < nbytes; i++) {
+		((uint8_t*)dst)[i] = (val >> (nbytes - i - 1)*8) & 0xFF;
+	}
+}
 
 // if afterIndex == -1 inserting being to end
 void *addElement(void *ptr, uint32_t sizeEl, uint32_t curLen, int32_t afterIndex){
@@ -271,19 +291,96 @@ ReturnCode addCallHandleCalls(uint16_t callHandleId, int32_t nCalls) {
 	}
 	if (_callHandles[callHandleId].isUsed == 0) {
 		return NOT_FOUND;
-	} else {
-		if (nCalls < 0) {
-			if (_callHandles[callHandleId].nCalls <= -nCalls) {
-				_callHandles[callHandleId].isUsed = 0;
-			} else {
-				_callHandles[callHandleId].nCalls += nCalls;
-			}
+	}
+	if (nCalls < 0) {
+		if (_callHandles[callHandleId].nCalls <= -nCalls) {
+			_callHandles[callHandleId].isUsed = 0;
 		} else {
 			_callHandles[callHandleId].nCalls += nCalls;
 		}
-
-		return OK;
+	} else {
+		_callHandles[callHandleId].nCalls += nCalls;
 	}
+
+	return OK;
+}
+
+ReturnCode forceCallHandle(uint16_t callHandleId) {
+	if (callHandleId >= MAX_CALL_HANDLES) {
+		return INCORRECT_ARG;
+	}
+	if (_callHandles[callHandleId].isUsed == 0) {
+		return NOT_FOUND;
+	}
+
+	_callHandles[callHandleId].timeNextCall = _getTimeMs();
+	return OK;
+}
+
+Fifo fifo_create(uint32_t maxElements, uint32_t elementSize) {
+	Fifo f;
+	f.maxElements = maxElements;
+	f.elementSize = elementSize;
+	f.nElements = 0;
+	f.elements = malloc(maxElements*elementSize);
+	if (f.elements == NULL) {
+		return f;
+	}
+	f.tempElement = malloc(elementSize);
+	if (f.tempElement == NULL) {
+		free(f.elements);
+		f.elements = NULL;
+		return f;
+	}
+	return f;
+}
+
+void fifo_delete(Fifo* f) {
+	free(f->elements);
+	free(f->tempElement);
+	f->elements = NULL;
+	f->tempElement = NULL;
+}
+
+ReturnCode fifo_put(Fifo* f, void* o) {
+	if (o == NULL) {
+		return NULL_POINTER;
+	}
+	if (f->elements == NULL || f->tempElement == NULL) {
+		return NOT_INIT;
+	}
+	if (f->nElements >= f->maxElements) {
+		return OVERFLOW;
+	}
+	memcpy(&((uint8_t*)f->elements)[f->nElements*f->elementSize], o, f->elementSize);
+	f->nElements++;
+	return OK;
+}
+
+void* fifo_get(Fifo* f) {
+	if (f->elements == NULL || f->tempElement == NULL) {
+		return NULL;
+	}
+	if (f->nElements == 0) {
+		return NULL;
+	}
+	memcpy(f->tempElement, f->elements, f->elementSize);
+	return f->tempElement;
+}
+
+void* fifo_pop(Fifo* f) {
+	if (f->elements == NULL || f->tempElement == NULL) {
+		return NULL;
+	}
+	if (f->nElements == 0) {
+		return NULL;
+	}
+	memcpy(f->tempElement, f->elements, f->elementSize);
+	if (shiftElements(f->elements, f->elementSize, f->nElements, f->maxElements, -1) != OK) {
+		return NULL;
+	}
+	f->nElements--;
+	return f->tempElement;
 }
 
 static void _callHandlerLoop() {

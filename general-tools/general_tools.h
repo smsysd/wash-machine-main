@@ -23,7 +23,7 @@ extern "C" {
 
 #define GTP					GTP_LINUX
 
-#define MAX_CALL_HANDLES			100
+#define MAX_CALL_HANDLES			20
 
 typedef enum ReturnCode {
 	OK				=	-1,
@@ -38,7 +38,9 @@ typedef enum ReturnCode {
 	OVERFLOW		=	-10,
 	NOT_FOUND		=	-11,
 	INTEGRITY_ERROR =	-12,
-	TIMEOUT			=	-13
+	TIMEOUT			=	-13,
+	OUT_OF_RANGE	=	-14,
+	NOT_INIT		=	-15
 } ReturnCode;
 
 typedef struct CallHandle {
@@ -50,6 +52,17 @@ typedef struct CallHandle {
 	uint32_t timeNextCall;
 	uint8_t isUsed;
 } CallHandle;
+
+typedef struct Fifo {
+	uint32_t maxElements;
+	uint32_t nElements;
+	uint32_t elementSize;
+	void* elements;
+	void* tempElement;
+} Fifo;
+
+uint64_t collectn(const void* src, uint8_t nbytes);
+void distribn(void* dst, uint64_t val, uint8_t nbytes);
 
 void *addElement(void *ptr, uint32_t sizeEl, uint32_t curLen, int32_t afterIndex);
 void *deleteElement(void *ptr, uint32_t sizeEl, uint32_t curLen, uint32_t deleteIndex);
@@ -73,6 +86,13 @@ ReturnCode killCallHandle(uint16_t callHandleId);
 ReturnCode setCallHandlePeriod(uint16_t callHandleId, uint32_t callPeriodMs);
 ReturnCode setCallHandleCalls(uint16_t callHandleId, uint32_t nCalls);
 ReturnCode addCallHandleCalls(uint16_t callHandleId, int32_t nCalls);
+ReturnCode forceCallHandle(uint16_t callHandleId);
+
+Fifo fifo_create(uint32_t maxElements, uint32_t elementSize);
+void fifo_delete(Fifo* f);
+ReturnCode fifo_put(Fifo* f, void* o);
+void* fifo_pop(Fifo* f);
+void* fifo_get(Fifo* f);
 
 void loop();
 
