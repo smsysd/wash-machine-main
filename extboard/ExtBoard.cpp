@@ -102,11 +102,11 @@ namespace {
 
 	struct LightEffect {
 		int id;
-		uint16_t delay;
-		uint8_t nRepeats;
-		uint8_t needReset;
-		uint8_t nResetInstructions;
-		uint16_t nTotalInstructions;
+		int delay;
+		int nRepeats;
+		bool needReset;
+		int nResetInstructions;
+		int nTotalInstructions;
 		LightInstruction instructions[256];
 		uint8_t data[1288];
 	};
@@ -123,9 +123,9 @@ namespace {
 	};
 
 	struct PerformerUnit {
-		uint8_t addr;
-		uint8_t normalStates;
-		uint8_t dependencies[6];
+		int addr;
+		int normalStates;
+		int dependencies[6];
 
 		bool operator!=(const PerformerUnit& rv) {
 			if (addr != rv.addr) {
@@ -146,8 +146,8 @@ namespace {
 
 	struct RelaysGroup {
 		int id;
-		uint8_t addr[4];
-		uint8_t state[4];
+		int addr[4];
+		int state[4];
 		
 		bool operator!=(const RelaysGroup& rv) {
 			for (int i = 0; i < 4; i++) {
@@ -163,9 +163,9 @@ namespace {
 	};
 
 	struct ButtonModule {
-		uint8_t addr;
-		uint8_t activeLevels;
-		uint8_t io;
+		int addr;
+		int activeLevels;
+		int io;
 
 		bool operator!=(const ButtonModule& rv) {
 			if (addr != rv.addr) {
@@ -189,8 +189,8 @@ namespace {
 		};
 		int id;
 		Type type;
-		uint8_t addr;
-		uint8_t i;
+		int addr;
+		int i;
 		bool state;
 	};
 
@@ -219,7 +219,7 @@ namespace {
 	Payment _coin;
 	Payment _terminal;
 	uint8_t _releiveInstructions[128];
-	uint8_t _nReleiveInstructions;
+	int _nReleiveInstructions;
 	int _closerRange = -1;
 	uint64_t _tempSens1Addr = 0;
 	uint64_t _tempSens2Addr = 0;
@@ -299,18 +299,22 @@ namespace {
 	}
 
 	void _appendLightIns(vector<LightInstruction>& iv, json& ins) {
-		vector<Led> leds(16);
+		vector<Led> leds;
 		bool setf = false;
 		bool resetf = false;
 		json set;
 		json reset;
 		try {
 			set = ins["set"];
-			setf = true;
+			if (set != nullptr) {
+				setf = true;
+			}
 		} catch (exception& e) {}
 		try {
 			reset = ins["reset"];
-			resetf = true;
+			if (reset != nullptr) {
+				resetf = true;
+			}
 		} catch (exception& e) {}
 		if (setf) {
 			if (set.is_number_integer()) {
@@ -346,6 +350,7 @@ namespace {
 		}
 
 		if (!setf && !resetf) {
+			cout << "delay" << endl;
 			int delay = ins["delay"];
 			if (delay > 65535) {
 				delay = 65535;
@@ -356,9 +361,10 @@ namespace {
 			li.data[1] = delay & 0xFF;
 			iv.push_back(li);
 		} else {
-			vector<Led> lp(8);
-			vector<Led> eb(8);
-			vector<Led> bm(8);
+			cout << "set/reset" << endl;
+			vector<Led> lp;
+			vector<Led> eb;
+			vector<Led> bm;
 			// sort leds by commands (on extboard, on button module, on ledpanel)
 			for (int i = 0; i < leds.size(); i++) {
 				if (leds[i].type == Led::LEDPANEL) {
@@ -375,7 +381,7 @@ namespace {
 			}
 
 			// create instructions
-			vector<LightInstruction> aiv(4);
+			vector<LightInstruction> aiv;
 			// insert set/reset bits in lp instructions
 			if (lp.size() > 0) {
 				LightInstruction li;
@@ -421,7 +427,7 @@ namespace {
 			}
 			
 			// handle all bms
-			for (int i = 0; i < bms.size(); i++) {
+			for (int i = 0; i < 8; i++) {
 				if (bms[i].size() > 0) {
 					LightInstruction li;
 					li.cmd = (uint8_t)LightCmd::WRITE_BM;
@@ -936,14 +942,14 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			if (lt == "bm") {
 				led.type = Led::BUTTONMODULE;
 				led.addr = JParser::getf(leds[i], "address", "");
-				cout << "bm.";
+				// cout << "bm led.addr " << led.addr;
 			} else
 			if (lt == "eb") {
 				led.type = Led::EXTBOARD;
 			} else {
 				throw runtime_error("unknown type '" + lt + "', must be 'lp', 'bm' or 'eb'");
 			}
-			cout << "load led " << i << ", type " << led.type << ", index " << led.i << "id " << led.id << ", addr " << led.addr << endl;
+			// cout << "load led " << i << ", type " << led.type << ", index " << led.i << ", id " << led.id << ", addr " << led.addr << endl;
 			_leds.push_back(led);
 		} catch (exception& e) {
 			throw runtime_error("fail to load '" + to_string(i) + "' led: " + string(e.what()));
@@ -958,16 +964,17 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			ef.delay = JParser::getf(effects[i], "delay", "");
 			ef.nRepeats = JParser::getf(effects[i], "repeats", "");
 			json& ins = JParser::getf(effects[i], "instructions", "");
-			vector<LightInstruction> iv(512);
-			vector<LightInstruction> rstiv(256);
+			vector<LightInstruction> iv;
+			vector<LightInstruction> rstiv;
 			for (int j = 0; j < ins.size(); j++) {
 				_appendLightIns(iv, ins[j]);
 			}
+			iv[iv.size()-1].cmd |= (uint8_t)LightCmd::NODELAY_BIT;
 			LightInstruction eli;
 			eli.cmd = (uint8_t)LightCmd::END;
 			iv.push_back(eli);
 
-			bool needRst = JParser::getf(effects[i], "need-reset", "");
+			bool needRst = JParser::getf(effects[i], "reset", "");
 			if (needRst) {
 				ef.needReset = 1;
 				json& rstIns = JParser::getf(effects[i], "reset-instructions", "");
@@ -977,10 +984,11 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 				if (rstiv.size() > 64) {
 					throw runtime_error("too many reset-instructions");
 				}
+				rstiv[rstiv.size()-1].cmd |= (uint8_t)LightCmd::NODELAY_BIT;
 				rstiv.push_back(eli);
 				ef.nResetInstructions = rstiv.size();
 			} else {
-				ef.needReset = 0;
+				ef.needReset = false;
 				ef.nResetInstructions = 0;
 			}
 			if (iv.size() + rstiv.size() > 256) {
@@ -989,7 +997,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			for (int j = 0; j < rstiv.size(); j++) {
 				ef.instructions[j] = rstiv[j];
 			}
-			for (int j = 0; j < rstiv.size(); j++) {
+			for (int j = 0; j < iv.size(); j++) {
 				ef.instructions[j + rstiv.size()] = iv[j];
 			}
 			ef.nTotalInstructions = iv.size() + rstiv.size();
@@ -1009,7 +1017,11 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			_effects.push_back(ef);
 			cout << "effect '" << ef.id << "' loaded: " << "nTI - " << ef.nTotalInstructions << " nRI - " << ef.nResetInstructions;
 			for (int j = 0; j < ef.nTotalInstructions; j++) {
-				printf(" |%X %X| ", ef.instructions[j].cmd, ef.instructions[j].data);
+				if (ef.instructions[j].cmd & 0x80) {
+					printf(" |%X %X %X %X %X|* ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
+				} else {
+					printf(" |%X %X %X %X %X| ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
+				}
 			}
 			cout << endl;
 		} catch (exception& e) {
