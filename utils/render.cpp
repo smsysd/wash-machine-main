@@ -237,12 +237,12 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 	// get necessary config fields
 	cout << "get necessary config fields.." << endl;
 	string dt = JParser::getf(displaycnf, "type", "display");
-	_giveMoneyFrame = JParser::getf(specFrames, "give-money-frame", "spec-frames");
-	_bonusGiveMoneyFrame = JParser::getf(specFrames, "bonus-give-money-frame", "spec-frames");
-	_bonusErrorFrame = JParser::getf(specFrames, "bonus-error-frame", "spec-frames");
-	_unknownCardFrame = JParser::getf(specFrames, "unknown-card-frame", "spec-frames");
-	_internalErrorFrame = JParser::getf(specFrames, "internal-error-frame", "spec-frames");
-	_logoFrame = JParser::getf(specFrames, "logo-frame", "spec-frames");
+	_giveMoneyFrame = JParser::getf(specFrames, "give-money", "spec-frames");
+	_bonusGiveMoneyFrame = JParser::getf(specFrames, "give-money-bonus", "spec-frames");
+	_bonusErrorFrame = JParser::getf(specFrames, "error-bonus", "spec-frames");
+	_unknownCardFrame = JParser::getf(specFrames, "unknown-card", "spec-frames");
+	_internalErrorFrame = JParser::getf(specFrames, "error-internal", "spec-frames");
+	_logoFrame = JParser::getf(specFrames, "logo", "spec-frames");
 
 	if (dt == "ledmatrix") {
 		cout << "display type is 'ledmatrix'" << endl;

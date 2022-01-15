@@ -24,6 +24,8 @@ public:
     void cmd(int cmd, int arg);
 
 	void registerCallback(int reason, void (*callback)());
+	void enableInt();
+	void disableInt();
 
 private:
     enum class OB {
@@ -56,6 +58,7 @@ private:
 	static atomic<bool> _handling;
 	static mutex _mutex;
 	static bool _needInt;
+	static bool _enableInt;
 
 	static void _interrupt();
 	static ReturnCode _handle(uint16_t id, void* arg);

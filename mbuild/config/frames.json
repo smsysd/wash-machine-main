@@ -6,6 +6,15 @@
 		"default-mode": "center"
 	},
 
+	"spec-frames": {
+		"logo": 0,
+		"give-money": 1,
+		"give-money-bonus": 2,
+		"error-bonus": 3,
+		"error-internal": 4,
+		"unknown-card": 5
+	},
+
 	"frames": [
 		{
 			"id": 0,

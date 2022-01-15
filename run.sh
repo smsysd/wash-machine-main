@@ -1,2 +1,2 @@
 cd mbuild
-./wash-machine
+sudo ./wash-machine

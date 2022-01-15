@@ -5,9 +5,9 @@
 			"used-mask": 255
 		},
 		"modules": [
-			{"address": 48, "active-levels": 0, "io-mask": 255},
-			{"address": 47, "active-levels": 0, "io-mask": 255},
-			{"address": 46, "active-levels": 0, "io-mask": 255}
+			{"address": 32, "active-levels": 0, "io-mask": 251},
+			{"address": 33, "active-levels": 0, "io-mask": 251},
+			{"address": 34, "active-levels": 0, "io-mask": 251}
 		]
 	},
 
@@ -19,7 +19,7 @@
 	},
 
 	"performing-units": [
-
+		{"address": 48, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]}
 	],
 
 	"releive-instructions": [
@@ -34,9 +34,10 @@
 
 	"display": {
 		"type": "ledmatrix",
-		"address": 8,
-		"dir-pin": -1,
-		"driver": "/dev/ttyUSB0"
+		"address": 64,
+		"dir-pin": 6,
+		"driver": "/dev/tty0",
+		"baud-rate": 9600
 	},
 
 	"range-finder": {
@@ -76,13 +77,13 @@
 	},
 
 	"leds": [
-		{"id": 0, "type": "bm", "address": 48, "index": 1},
+		{"id": 0, "type": "bm", "address": 33, "index": 2},
 		{"id": 1, "type": "lp", "index": 1},
 		{"id": 2, "type": "eb", "index": 1},
-		{"id": 3, "type": "bm", "address": 48, "index": 2},
+		{"id": 3, "type": "bm", "address": 32, "index": 2},
 		{"id": 4, "type": "lp", "index": 2},
 		{"id": 5, "type": "eb", "index": 2},
-		{"id": 6, "type": "bm", "address": 48, "index": 3},
+		{"id": 6, "type": "bm", "address": 32, "index": 3},
 		{"id": 7, "type": "lp", "index": 3},
 		{"id": 8, "type": "eb", "index": 3}
 	]

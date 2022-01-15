@@ -10,4 +10,4 @@ sudo rm -f -r ./build
 sudo rm -f CMakeCache.txt
 rsync -au ${DIR} $HOST@$IPADDR:
 
-ssh $HOST@$IPADDR "cd wash-machine-main; bash ./build.sh -c"
+ssh $HOST@$IPADDR "cd wash-machine-main; bash ./build.sh $3"

@@ -350,7 +350,6 @@ namespace {
 		}
 
 		if (!setf && !resetf) {
-			cout << "delay" << endl;
 			int delay = ins["delay"];
 			if (delay > 65535) {
 				delay = 65535;
@@ -361,7 +360,6 @@ namespace {
 			li.data[1] = delay & 0xFF;
 			iv.push_back(li);
 		} else {
-			cout << "set/reset" << endl;
 			vector<Led> lp;
 			vector<Led> eb;
 			vector<Led> bm;
@@ -604,11 +602,11 @@ namespace {
 		memset(buf, 0, _nReleiveInstructions * 2);
 		memcpy(buf, _releiveInstructions, _nReleiveInstructions * 2);
 		_mspi->write((int)Addr::RELEIVE_INS, buf, _nReleiveInstructions * 2);
-		_mspi->cmd((int)Cmd::END_OPT, 0);
 	}
 
 	void _initExtdev() {
 		uint8_t buf[4];
+		_mspi->cmd((int)Cmd::END_OPT, 0);
 		int timeout = 0;
 		while (true) {
 			usleep(100000);
@@ -1016,13 +1014,13 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			}
 			_effects.push_back(ef);
 			cout << "effect '" << ef.id << "' loaded: " << "nTI - " << ef.nTotalInstructions << " nRI - " << ef.nResetInstructions;
-			for (int j = 0; j < ef.nTotalInstructions; j++) {
-				if (ef.instructions[j].cmd & 0x80) {
-					printf(" |%X %X %X %X %X|* ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
-				} else {
-					printf(" |%X %X %X %X %X| ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
-				}
-			}
+			// for (int j = 0; j < ef.nTotalInstructions; j++) {
+			// 	if (ef.instructions[j].cmd & 0x80) {
+			// 		printf(" |%X %X %X %X %X|* ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
+			// 	} else {
+			// 		printf(" |%X %X %X %X %X| ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
+			// 	}
+			// }
 			cout << endl;
 		} catch (exception& e) {
 			throw runtime_error("fail to load '" + to_string(i) + "' effect: " + string(e.what()));
@@ -1032,6 +1030,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	// create mspi connection
 	cout << "create MSPI connection.." << endl;
 	_mspi = new Mspi(driver, speed, csPin, intPin, _int);
+	_mspi->enableInt();
 	
 	// connect to extboard
 	cout << "connect to extboard.." << endl;
@@ -1050,13 +1049,13 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		}
 	}
 
-	cout << "extboard connected, WIA_PRJ: " << (buf[0] << 8 | buf[1]) << ", WIA_SUB: " << buf[2] << ", VERSION: [" << buf[3] << ", " << buf[4] << "]" << endl;
+	cout << "extboard connected, WIA_PRJ: " << (int)(buf[0] << 8 | buf[1]) << ", WIA_SUB: " << (int)buf[2] << ", VERSION: [" << (int)buf[3] << ", " << (int)buf[4] << "]" << endl;
 	
 	// wait for extboard self init
 	cout << "wait for extboard self init.." << endl;
 	int timeout = 0;
 	while (true) {
-		usleep(10000);
+		usleep(100000);
 		_mspi->read((int)Addr::STATUS, buf, 1);
 		if (buf[0] == (uint8_t)Status::LOAD_OPT) {
 			break;

@@ -9,6 +9,7 @@
 #include "button_driver.h"
 #include "bonus.h"
 
+#include <wiringPi.h>
 #include <sstream>
 #include <unistd.h>
 #include <string.h>
@@ -173,6 +174,11 @@ void init(
 
 	cout << "init general-tools.." << endl;
 	general_tools_init();
+	int wprc = wiringPiSetup();
+	if (wprc != 0) {
+		_log->log(Logger::Type::ERROR, "INIT", "fail setup wiringPi: " + to_string(wprc));
+		throw runtime_error("fail setup wiringPi: " + to_string(wprc));
+	}
 
 	try {
 		_log = new Logger("./log.txt");
@@ -202,96 +208,6 @@ void init(
 		_tServiceMode = -1;
 	}
 
-	// extboard
-	cout << "init extboard.." << endl;
-	try {
-		json& extBoardCnf = _hwconfig->get("ext-board");
-		json& relaysGroups = _config->get("relays-groups");
-		json& performingUnitsCnf = _hwconfig->get("performing-units");
-		json& buttons = _hwconfig->get("buttons");
-		json& rangeFinder = _hwconfig->get("range-finder");
-		json& tempSens = _hwconfig->get("temp-sens");
-		json& relIns = _hwconfig->get("releive-instructions");
-		json& payment = _hwconfig->get("payment");
-		json ledsCnf;
-		try {
-			ledsCnf = _hwconfig->get("leds");
-		} catch (exception& e) {
-			_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to load leds: " + string(e.what()));
-		}
-		try {
-			_effects = new JParser("./config/effects.json");
-		} catch (exception& e) {
-			_log->log(Logger::Type::WARNING, "UTILS", "fail to load effects: " + string(e.what()));
-		}
-		json effects;
-		if (_effects != nullptr) {
-			try {
-				effects = _effects->get("effects");
-			} catch (exception& e) {
-				_log->log(Logger::Type::WARNING, "UTILS INIT", "fail get load effects: " + string(e.what()));
-			}
-		}
-		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, relIns);
-	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
-		throw runtime_error("fail to init expander board: " + string(e.what()));
-	}
-
-	// button
-	try {
-		cout << "init button driver.." << endl;
-		json& buttons = _config->get("buttons");
-		bd::init(buttons, onButtonPushed);
-	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to init button driver: " + string(e.what()));
-		throw runtime_error("fail to init button driver: " + string(e.what()));
-	}
-
-	// render
-	try {
-		cout << "init render module.." << endl;
-		_frames = new JParser("./config/frames.json");
-		json& display = _hwconfig->get("display");
-		json& sf = _frames->get("spec-frames");
-		json& go = _frames->get("general-option");
-		json& bg = _frames->get("backgrounds");
-		json& fonts = _frames->get("fonts");
-		render::init(display, _frames->get("frames"), sf, go, bg, fonts);
-		render::regVar(&_nMoney, L"money");
-	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
-		// throw runtime_error("fail to init render core: " + string(e.what()));
-	}
-
-	// qr scaner
-	try {
-		cout << "init qr scanner.." << endl;
-		json& qrscnf = _hwconfig->get("qr-scaner");
-		string driver = JParser::getf(qrscnf, "driver", "qr-scaner");
-		int width = JParser::getf(qrscnf, "width", "qr-scaner");
-		int height = JParser::getf(qrscnf, "height", "qr-scaner");
-		char cdriver[256] = {0};
-		strcpy(cdriver, driver.c_str());
-		int rc = qrscaner_init(cdriver, width, height, onQr);
-		if (rc == 0) {
-			qrscaner_start();
-		} else {
-			throw runtime_error(to_string(rc));
-		}
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to init qr-scaner: " + string(e.what()));
-	}
-
-	// bonus system
-	try {
-		cout << "init bonus system module.." << endl;
-		_bonuscnf = new JParser("./config/bonus.json");
-		bonus::init(_bonuscnf->get("bonus-sys"), _bonuscnf->get("promotions"));
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to init bonus system: " + string(e.what()));
-	}
-
 	// fill programs
 	try {
 		cout << "fill client programs.." << endl;
@@ -306,6 +222,7 @@ void init(
 			sp.freeUseTimeSec = JParser::getf(jp, "free-use-time", "program at [" + to_string(i) + "]");
 			sp.name = JParser::getf(jp, "name", "program at [" + to_string(i) + "]");
 			sp.rate = JParser::getf(jp, "rate", "program at [" + to_string(i) + "]");
+			sp.rate /= 60;
 			sp.effect = JParser::getf(jp, "effect", "program at [" + to_string(i) + "]");
 			_programs.push_back(sp);
 		}
@@ -343,6 +260,7 @@ void init(
 			CardInfo sp;
 			sp.id = JParser::getf(jp, "id", "card at [" + to_string(i) + "]");
 			string ct = JParser::getf(jp, "type", "card at [" + to_string(i) + "]");
+			sp.owner = JParser::getf(jp, "owner", "card at [" + to_string(i) + "]");
 			if (ct == "service") {
 				sp.type = CardInfo::SERVICE;
 			} else
@@ -355,6 +273,96 @@ void init(
 		}
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "LOCAL CARDS", "fail to fill cards: " + string(e.what()));
+	}
+
+	// render
+	try {
+		cout << "init render module.." << endl;
+		_frames = new JParser("./config/frames.json");
+		json& display = _hwconfig->get("display");
+		json& sf = _frames->get("spec-frames");
+		json& go = _frames->get("general-option");
+		json& bg = _frames->get("backgrounds");
+		json& fonts = _frames->get("fonts");
+		render::init(display, _frames->get("frames"), sf, go, bg, fonts);
+		render::regVar(&_nMoney, L"money");
+	} catch (exception& e) {
+		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
+		throw runtime_error("fail to init render core: " + string(e.what()));
+	}
+
+	// extboard
+	cout << "init extboard.." << endl;
+	try {
+		json& extBoardCnf = _hwconfig->get("ext-board");
+		json& relaysGroups = _config->get("relays-groups");
+		json& performingUnitsCnf = _hwconfig->get("performing-units");
+		json& buttons = _hwconfig->get("buttons");
+		json& rangeFinder = _hwconfig->get("range-finder");
+		json& tempSens = _hwconfig->get("temp-sens");
+		json& relIns = _hwconfig->get("releive-instructions");
+		json& payment = _hwconfig->get("payment");
+		json ledsCnf;
+		try {
+			ledsCnf = _hwconfig->get("leds");
+		} catch (exception& e) {
+			_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to load leds: " + string(e.what()));
+		}
+		try {
+			_effects = new JParser("./config/effects.json");
+		} catch (exception& e) {
+			_log->log(Logger::Type::WARNING, "UTILS", "fail to load effects: " + string(e.what()));
+		}
+		json effects;
+		if (_effects != nullptr) {
+			try {
+				effects = _effects->get("effects");
+			} catch (exception& e) {
+				_log->log(Logger::Type::WARNING, "CONFIG", "fail get load effects: " + string(e.what()));
+			}
+		}
+		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, relIns);
+	} catch (exception& e) {
+		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
+		throw runtime_error("fail to init expander board: " + string(e.what()));
+	}
+
+	// button
+	try {
+		cout << "init button driver.." << endl;
+		json& buttons = _config->get("buttons");
+		bd::init(buttons, onButtonPushed);
+	} catch (exception& e) {
+		_log->log(Logger::Type::ERROR, "INIT", "fail to init button driver: " + string(e.what()));
+		throw runtime_error("fail to init button driver: " + string(e.what()));
+	}
+
+	// qr scaner
+	try {
+		cout << "init qr scanner.." << endl;
+		json& qrscnf = _hwconfig->get("qr-scaner");
+		string driver = JParser::getf(qrscnf, "driver", "qr-scaner");
+		int width = JParser::getf(qrscnf, "width", "qr-scaner");
+		int height = JParser::getf(qrscnf, "height", "qr-scaner");
+		char cdriver[256] = {0};
+		strcpy(cdriver, driver.c_str());
+		int rc = qrscaner_init(cdriver, width, height, onQr);
+		if (rc == 0) {
+			qrscaner_start();
+		} else {
+			throw runtime_error(to_string(rc));
+		}
+	} catch (exception& e) {
+		_log->log(Logger::Type::WARNING, "INIT", "fail to init qr-scaner: " + string(e.what()));
+	}
+
+	// bonus system
+	try {
+		cout << "init bonus system module.." << endl;
+		_bonuscnf = new JParser("./config/bonus.json");
+		bonus::init(_bonuscnf->get("bonus-sys"), _bonuscnf->get("promotions"));
+	} catch (exception& e) {
+		_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to init bonus system: " + string(e.what()));
 	}
 
 	// extboard callbacks

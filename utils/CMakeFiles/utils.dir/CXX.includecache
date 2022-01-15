@@ -469,6 +469,8 @@ button_driver.h
 /home/elpi/workspace/sm-sys/wash-machine-main/utils/button_driver.h
 bonus.h
 /home/elpi/workspace/sm-sys/wash-machine-main/utils/bonus.h
+wiringPi.h
+-
 sstream
 -
 unistd.h

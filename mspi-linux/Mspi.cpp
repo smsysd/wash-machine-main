@@ -36,6 +36,7 @@ void (*Mspi::_callback)(int);
 int Mspi::_csPin;
 int Mspi::_intPin;
 bool Mspi::_needInt = false;
+bool Mspi::_enableInt = false;
 
 void Mspi::_interrupt() {
 	_mutex.lock();
@@ -69,9 +70,12 @@ ReturnCode Mspi::_handle(uint16_t id, void* arg) {
 	if (_handling) {
 		return OK;
 	}
+	if (!_enableInt) {
+		return OK;
+	}
 
 	if (digitalRead(_intPin) == 0) {
-		cout << "mspi poll int" << endl;
+		// cout << "mspi poll int" << endl;
 		_needInt = true;
 	}
 	if (_needInt) {
@@ -182,6 +186,14 @@ void Mspi::cmd(int cmd, int arg) {
 		_mutex.unlock();
 		throw runtime_error("fail send mspi cmd: " + string(e.what()));
 	}
+}
+
+void Mspi::enableInt() {
+	_enableInt = true;
+}
+
+void Mspi::disableInt() {
+	_enableInt = false;
 }
 
 int Mspi::_getIntReason() {
@@ -306,7 +318,7 @@ void Mspi::_sendPreambule(OB ob, int raddr, int nData) {
 	}
 	_read(data, 1);
 	if (data[0] & (uint8_t)ACK::INTF) {
-		cout << "mspi logic int" << endl;
+		// cout << "mspi logic int" << endl;
 		_needInt = true;
 	}
 	data[0] &= ~((uint8_t)ACK::INTF);

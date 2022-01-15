@@ -29,6 +29,7 @@ struct CardInfo {
 	Type type;
 	uint64_t id;
 	double count;
+	string owner;
 };
 
 void init(json& bonusSysCnf, json& promotions);
