@@ -36,7 +36,7 @@
 		"type": "ledmatrix",
 		"address": 64,
 		"dir-pin": 6,
-		"driver": "/dev/tty0",
+		"driver": "/dev/ttyS5",
 		"baud-rate": 9600
 	},
 

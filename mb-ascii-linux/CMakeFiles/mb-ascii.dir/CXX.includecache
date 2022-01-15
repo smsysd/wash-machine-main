@@ -6,17 +6,17 @@
 
 #IncludeRegexTransform: 
 
-/home/elpi/workspace/sm-sys/wash-machine-main/crc/crc.h
+/home/elpi/workspace/sm-sys-gen/devcnf/crc/crc.h
 stdint.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/MbAsciiMaster.cpp
+/home/elpi/workspace/sm-sys-gen/devcnf/mb-ascii-linux/MbAsciiMaster.cpp
 MbAsciiMaster.h
-/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
+/home/elpi/workspace/sm-sys-gen/devcnf/mb-ascii-linux/MbAsciiMaster.h
 ../crc/crc.h
-/home/elpi/workspace/sm-sys/wash-machine-main/crc/crc.h
+/home/elpi/workspace/sm-sys-gen/devcnf/crc/crc.h
 wiringPi.h
-/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/wiringPi.h
+/home/elpi/workspace/sm-sys-gen/devcnf/mb-ascii-linux/wiringPi.h
 sys/types.h
 -
 sys/stat.h
@@ -42,7 +42,7 @@ chrono
 iostream
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/MbAsciiMaster.h
+/home/elpi/workspace/sm-sys-gen/devcnf/mb-ascii-linux/MbAsciiMaster.h
 stdint.h
 -
 vector

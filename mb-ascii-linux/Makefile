@@ -67,10 +67,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
+CMAKE_SOURCE_DIR = /home/elpi/workspace/sm-sys-gen/devcnf
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys/wash-machine-main
+CMAKE_BINARY_DIR = /home/elpi/workspace/sm-sys-gen/devcnf
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,14 +99,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles /home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux//CMakeFiles/progress.marks
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys/wash-machine-main/CMakeFiles 0
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-gen/devcnf/CMakeFiles /home/elpi/workspace/sm-sys-gen/devcnf/mb-ascii-linux//CMakeFiles/progress.marks
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpi/workspace/sm-sys-gen/devcnf/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/clean
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/clean
 .PHONY : clean
 
 # The main clean target
@@ -116,22 +116,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/preinstall
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/preinstall
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 mb-ascii-linux/CMakeFiles/mb-ascii.dir/rule:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/CMakeFiles/mb-ascii.dir/rule
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mb-ascii-linux/CMakeFiles/mb-ascii.dir/rule
 .PHONY : mb-ascii-linux/CMakeFiles/mb-ascii.dir/rule
 
 # Convenience name for target.
@@ -141,7 +141,7 @@ mb-ascii: mb-ascii-linux/CMakeFiles/mb-ascii.dir/rule
 
 # fast build rule for target.
 mb-ascii/fast:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/build
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/build
 .PHONY : mb-ascii/fast
 
 MbAsciiMaster.o: MbAsciiMaster.cpp.o
@@ -150,7 +150,7 @@ MbAsciiMaster.o: MbAsciiMaster.cpp.o
 
 # target to build an object file
 MbAsciiMaster.cpp.o:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/MbAsciiMaster.cpp.o
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/MbAsciiMaster.cpp.o
 .PHONY : MbAsciiMaster.cpp.o
 
 MbAsciiMaster.i: MbAsciiMaster.cpp.i
@@ -159,7 +159,7 @@ MbAsciiMaster.i: MbAsciiMaster.cpp.i
 
 # target to preprocess a source file
 MbAsciiMaster.cpp.i:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/MbAsciiMaster.cpp.i
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/MbAsciiMaster.cpp.i
 .PHONY : MbAsciiMaster.cpp.i
 
 MbAsciiMaster.s: MbAsciiMaster.cpp.s
@@ -168,7 +168,7 @@ MbAsciiMaster.s: MbAsciiMaster.cpp.s
 
 # target to generate assembly for a file
 MbAsciiMaster.cpp.s:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/MbAsciiMaster.cpp.s
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(MAKE) $(MAKESILENT) -f mb-ascii-linux/CMakeFiles/mb-ascii.dir/build.make mb-ascii-linux/CMakeFiles/mb-ascii.dir/MbAsciiMaster.cpp.s
 .PHONY : MbAsciiMaster.cpp.s
 
 # Help Target
@@ -194,6 +194,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/elpi/workspace/sm-sys/wash-machine-main && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/elpi/workspace/sm-sys-gen/devcnf && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

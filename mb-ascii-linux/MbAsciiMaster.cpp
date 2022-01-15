@@ -131,6 +131,8 @@ void MbAsciiMaster::rread(int addr, int raddr, int* regs, int nRegs, int timeout
 		digitalWrite(_dir, HIGH);
 	}
 	write(_fd, buff, 17);
+	tcdrain(_fd);
+	usleep(800);
 	int n = _receive(buff, timeout);
 	if (_extract8(buff, 2) != 0x03) {
 		throw runtime_error("error response: " + to_string(_extract8(buff, 4)) + ", func: " + to_string(_extract8(buff, 2)));
@@ -156,6 +158,7 @@ int MbAsciiMaster::_receive(char* buff, int timeout) {
 		if (read(_fd, &c, 1) > 0) {
 			tla = chrono::steady_clock::now();
 			if (c == ':') {
+				// cout << "entry" << endl;
 				break;
 			}
 		}
