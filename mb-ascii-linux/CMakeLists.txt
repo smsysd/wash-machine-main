@@ -4,4 +4,4 @@ project(mb-ascii)
 
 add_library(mb-ascii MbAsciiMaster.cpp)
 
-target_link_libraries(mb-ascii crc wiringPi)
+target_link_libraries(mb-ascii crc wiringPi crc)

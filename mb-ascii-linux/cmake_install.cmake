@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpi/workspace/sm-sys-gen/devcnf/mb-ascii-linux
+# Install script for directory: /home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

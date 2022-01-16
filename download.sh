@@ -6,8 +6,17 @@ echo $IPADDR
 ssh-copy-id $HOST@$IPADDR
 
 DIR=${PWD}
-sudo rm -f -r ./build
-sudo rm -f CMakeCache.txt
+if [[ $3 = "-c" ]] ; then
+rm -f -r ./build
+rm -f -r ./CMakeFiles
+rm -f CMakeCache.txt
+fi
+
 rsync -au ${DIR} $HOST@$IPADDR:
 
-ssh $HOST@$IPADDR "cd wash-machine-main; bash ./build.sh $3"
+if [[ $3 = "-c" ]] ; then
+ssh $HOST@$IPADDR "cd wash-machine-main; bash ./build.sh -c"
+else
+ssh $HOST@$IPADDR "cd wash-machine-main; bash ./build.sh"
+fi
+

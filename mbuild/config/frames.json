@@ -50,6 +50,7 @@
 	],
 
 	"fonts": [
-		{"id": 1, "name": "font.json", "index": "macro"}
+		{"id": 0, "name": "micro.json", "index": "micro"},
+		{"id": 0, "name": "macro.json", "index": "macro"}
 	]
 }
