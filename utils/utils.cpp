@@ -16,6 +16,7 @@
 #include <string.h>
 #include <mutex>
 #include <time.h>
+#include <cmath>
 
 #include <iostream>
 #include <string>
@@ -137,6 +138,7 @@ namespace {
 	}
 
 	ReturnCode _handler(uint16_t id, void* arg) {
+		static int borehole = 0;
 		static double previousk = 0;
 
 		if (mode == Mode::SERVICE && _tServiceMode > 0) {
@@ -144,14 +146,23 @@ namespace {
 				_onServiceEnd();
 			}
 		}
-
-		double k = bonus::getCoef();
-		if (previousk > 1 && k <= 1) {
-			render::showFrame(render::SpecFrame::GIVE_MONEY);
-		} else
-		if (previousk <= 1 && k > 1) {
-			render::showFrame(render::SpecFrame::GIVE_MONEY_BONUS);
+		
+		if (borehole % 30 == 0) {
+			double k = bonus::getCoef();
+			if (previousk > 1 && k <= 1) {
+				previousk = k;
+				render::showFrame(render::SpecFrame::GIVE_MONEY);
+				cout << "[INFO][UTILS] 'give money' mode frame switched to default" << endl;
+			} else
+			if (previousk <= 1 && k > 1) {
+				previousk = k;
+				render::showFrame(render::SpecFrame::GIVE_MONEY_BONUS);
+				cout << "[INFO][UTILS] 'give money' mode frame switched to bonus" << endl;
+			}
 		}
+
+		borehole++;
+
 		return OK;
 	}
 
@@ -292,6 +303,7 @@ void init(
 		json& fonts = _frames->get("fonts");
 		render::init(display, _frames->get("frames"), sf, go, bg, fonts);
 		render::regVar(&_nMoney, L"money");
+		render::regVar(&_session.k100, L"sbonus");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		throw runtime_error("fail to init render core: " + string(e.what()));
@@ -405,6 +417,7 @@ void init(
 }
 
 void setGiveMoneyMode() {
+	bool isBonus = false;
 	try {
 		extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, 0);
 	} catch (exception& e) {
@@ -413,13 +426,18 @@ void setGiveMoneyMode() {
 	render::SpecFrame f = render::SpecFrame::GIVE_MONEY;
 	if (bonus::getCoef() > 1) {
 		f = render::SpecFrame::GIVE_MONEY_BONUS;
+		isBonus = true;
 	}
 	try {
 		render::showFrame(f);
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "RENDER", "fail to show give money frame: " + string(e.what()));
 	}
-	cout << "'give money' mode applied" << endl;
+	if (isBonus) {
+		cout << "'give money' mode applied with bonus frame" << endl;
+	} else {
+		cout << "'give money' mode applied" << endl;
+	}
 	mode = Mode::GIVE_MONEY;
 }
 
@@ -508,6 +526,7 @@ void setServiceProgram(int id) {
 void beginSession(Session::Type type, uint64_t id) {
 	double k = bonus::getCoef();
 	_session.k = k;
+	_session.k100 = round(k*100);
 	_session.type = type;
 	_session.cardid = id;
 	_session.totalSpent = 0;

@@ -7,15 +7,17 @@
 
 	"promotions": [
 		{
+			"id": 0,
 			"type": "coefficient",
 			"priority": 1,
 			"k": 1.2,
 			"sumk": 1.1,
-			"time": "20:30-6:00",
+			"time": "20:23-06:00",
 			"week-days": "every",
 			"months": [1, 2, 3, 11, 12]
 		},
 		{
+			"id": 1,
 			"type": "coefficient",
 			"priority": 2,
 			"k": 1.4,
@@ -25,6 +27,7 @@
 			"months": [1, 2, 3, 11, 12]
 		},
 		{
+			"id": 2,
 			"type": "coefficient",
 			"priority": 2,
 			"k": 1.5,

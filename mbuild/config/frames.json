@@ -45,7 +45,7 @@
 			"mode": "center",
 			"color": 5,
 			"lines": [
-				"$bonus%",
+				"$gbonus%",
 				"ВНЕСИТЕ",
 				"ДЕНЬГИ"
 			]

@@ -10,6 +10,8 @@
 #include <ctime>
 #include <unistd.h>
 #include <sstream>
+#include <iostream>
+#include <cmath>
 
 using namespace std;
 using json = nlohmann::json;
@@ -139,6 +141,7 @@ namespace {
 			COEFFICIENT
 		};
 
+		int id;
 		Type type;
 		double k;
 		double sk;
@@ -201,7 +204,7 @@ namespace {
 
 void init(json& bonusSysCnf, json& promotions) {
 	// link with render
-	render::regVar(&_bonus, L"bonus");
+	render::regVar(&_bonus, L"gbonus");
 	
 	// general init
 	string bt = JParser::getf(bonusSysCnf, "type", "bonus-system");
@@ -224,6 +227,7 @@ void init(json& bonusSysCnf, json& promotions) {
 		try {
 			json& jp = promotions[i];
 			Promotion sp;
+			sp.id = JParser::getf(jp, "id", "promotion");
 			string pt = JParser::getf(jp, "type", "promotion");
 			if (pt == "coefficient") {
 				sp.type = Promotion::COEFFICIENT;
@@ -273,6 +277,8 @@ void init(json& bonusSysCnf, json& promotions) {
 			} else {
 				throw runtime_error("unknown type '" + pt + "'");
 			}
+			_promotions.push_back(sp);
+			cout << "[INFO][BONUS] add promotion " << sp.id << endl;
 		} catch (exception& e) {
 			throw runtime_error("fail to load promomtion " + to_string(i) + ": " + string(e.what()));
 		}
@@ -313,22 +319,30 @@ void close(double acrue) {
 }
 
 double getCoef() {
-	vector<int> vap(_promotions.size());
+	vector<int> vap;
 	for (int i = 0; i < _promotions.size(); i++) {
 		if (_promotions[i].isActive()) {
 			vap.push_back(i);
 		}
 	}
 	if (vap.size() == 0) {
+		cout << "[INFO][BONUS] no one promotions is active" << endl;
+		_bonus = 100;
 		return 1;
 	} else
 	if (vap.size() == 1) {
+		cout << "one promotions is active, type: " << _promotions[vap[0]].type << ", k: " << _promotions[vap[0]].k << endl;
+		_bonus = round(_promotions[vap[0]].k*100);
 		return _promotions[vap[0]].k;
 	} else {
 		int k = 0;
+		cout << vap.size() << " is active, them id: ";
 		for (int i = 0; i < vap.size(); i++) {
 			k += _promotions[vap[i]].sk;
+			cout << _promotions[vap[i]].id << " ";
 		}
+		cout << ", summary k: " << k << endl;
+		_bonus = round(k*100);
 		return k;
 	}
 }

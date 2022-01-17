@@ -21,6 +21,7 @@ namespace {
 		for (int i = 0; i < _buttons.size(); i++) {
 			if (_buttons[i].type == Button::Type::EXTBOARD) {
 				if (_buttons[i].index == iButton) {
+					cout << "[INFO][BUTTON] button " << _buttons[i].id << " pushed" << endl;
 					_onButtonPushed(_buttons[i]);
 				}
 			}

@@ -97,12 +97,10 @@ namespace {
 
 	void _lmredraw() {
 		// setup default to frame options
-		if (_currentRenderingFrame == nullptr) {
-			return;
-		}
 		
 		_lm->setOpt(_currentRenderingFrame->mode, _currentRenderingFrame->font, _currentRenderingFrame->color);
-		cout << "set opt: M " << (int)_currentRenderingFrame->mode << ", F " << (int)_currentRenderingFrame->font << ", C " << (int)_currentRenderingFrame->color << endl;
+		usleep(5000);
+		// cout << "set opt: M " << (int)_currentRenderingFrame->mode << ", F " << (int)_currentRenderingFrame->font << ", C " << (int)_currentRenderingFrame->color << endl;
 		// inject variables
 		wstring ss = _currentRenderingFrame->format;
 		for (int i = 0; i < _vars.size(); i++) {
@@ -127,7 +125,10 @@ namespace {
 	}
 
 	void _redraw() {
-		cout << "redraw.." << endl;
+		if (_currentRenderingFrame == nullptr) {
+			return;
+		}
+		cout << "[INFO][RENDER] redraw " << _currentRenderingFrame->id << " frame.." << endl;
 		if (_lm != nullptr) {
 			_lmredraw();
 		} else {
@@ -313,8 +314,7 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 				}
 
 				// parse frame format
-				f.format = L" ";
-				f.format[0] = 0x08;
+				f.format = L"";
 				json& lines = frames[i]["lines"];
 				for (int j = 0; j < lines.size(); j++) {
 					try {
@@ -326,8 +326,9 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 					}
 				}
 				f.format.push_back((wchar_t)0x04);
+				f.format.push_back((wchar_t)0x08);
 				_lmframes.push_back(f);
-				cout << "frame " << f.id << " added" << endl;
+				// cout << "frame " << f.id << " added, format: " << _ws2s(f.format)  << endl;
 			} catch (exception& e) {
 				throw runtime_error("fail to load " + to_string(i) + " frame: " + string(e.what()));
 			}
@@ -449,14 +450,13 @@ void showFrame(SpecFrame frame) {
 	int f = -1;
 	
 	switch (frame) {
-	case SpecFrame::LOGO: f = _logoFrame;
-	case SpecFrame::UNKNOWN_CARD: f = _unknownCardFrame;
-	case SpecFrame::BONUS_ERROR: f = _bonusErrorFrame;
-	case SpecFrame::INTERNAL_ERROR: f = _internalErrorFrame;
-	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame;
-	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame;
+	case SpecFrame::LOGO: f = _logoFrame; break;
+	case SpecFrame::UNKNOWN_CARD: f = _unknownCardFrame; break;
+	case SpecFrame::BONUS_ERROR: f = _bonusErrorFrame; break;
+	case SpecFrame::INTERNAL_ERROR: f = _internalErrorFrame; break;
+	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame; break;
+	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame; break;
 	}
-
 	showFrame(f);
 }
 
@@ -471,12 +471,12 @@ void showTempFrame(SpecFrame frame, int tSec) {
 	int f = -1;
 	
 	switch (frame) {
-	case SpecFrame::LOGO: f = _logoFrame;
-	case SpecFrame::UNKNOWN_CARD: f = _unknownCardFrame;
-	case SpecFrame::BONUS_ERROR: f = _bonusErrorFrame;
-	case SpecFrame::INTERNAL_ERROR: f = _internalErrorFrame;
-	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame;
-	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame;
+	case SpecFrame::LOGO: f = _logoFrame; break;
+	case SpecFrame::UNKNOWN_CARD: f = _unknownCardFrame; break;
+	case SpecFrame::BONUS_ERROR: f = _bonusErrorFrame; break;
+	case SpecFrame::INTERNAL_ERROR: f = _internalErrorFrame; break;
+	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame; break;
+	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame; break;
 	}
 
 	showTempFrame(f, tSec);
