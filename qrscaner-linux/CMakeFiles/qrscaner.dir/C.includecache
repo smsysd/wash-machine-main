@@ -9,11 +9,15 @@
 /home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.c
 qrscaner.h
 /home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.h
+stdlib.h
+-
 string.h
 -
 stdio.h
 -
 pthread.h
+-
+unistd.h
 -
 
 /home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.h

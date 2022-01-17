@@ -31,6 +31,7 @@ utils/CMakeFiles/utils.dir/utils.cpp.o: extboard/ExtBoard.h
 utils/CMakeFiles/utils.dir/utils.cpp.o: general-tools/general_tools.h
 utils/CMakeFiles/utils.dir/utils.cpp.o: jparser-linux/JParser.h
 utils/CMakeFiles/utils.dir/utils.cpp.o: json.h
+utils/CMakeFiles/utils.dir/utils.cpp.o: linux-stdsiga/stdsiga.h
 utils/CMakeFiles/utils.dir/utils.cpp.o: logger-linux/Logger.h
 utils/CMakeFiles/utils.dir/utils.cpp.o: mspi-linux/Mspi.h
 utils/CMakeFiles/utils.dir/utils.cpp.o: qrscaner-linux/qrscaner.h

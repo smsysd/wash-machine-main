@@ -1,0 +1,2 @@
+/usr/bin/ar qc libstdsiga.a CMakeFiles/stdsiga.dir/stdsiga.c.o
+/usr/bin/ranlib libstdsiga.a

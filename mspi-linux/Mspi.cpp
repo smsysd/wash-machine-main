@@ -117,6 +117,7 @@ Mspi::Mspi(string driver, int speedHz, int csPin, int intPin, void (*callback)(i
 		throw runtime_error("fail to configure driver: speed");
     }
     _spi_tr.speed_hz = max_speed_hz;
+	_delay = 1000000 / speedHz;
 
 	_csPin = csPin;
 	_intPin = intPin;
@@ -223,6 +224,7 @@ void Mspi::_write(uint8_t* data, int nData) {
     _spi_tr.len    = nData;
 
     int rc = ioctl(_fd, SPI_IOC_MESSAGE(1), &_spi_tr);
+	// usleep(nData*8*_delay);
     if(rc != nData) {
         throw runtime_error("fail to write: " + to_string(rc));
     }
@@ -234,6 +236,7 @@ void Mspi::_read(uint8_t* buffer, int nData) {
     _spi_tr.len    = nData;
 
     int rc = ioctl(_fd, SPI_IOC_MESSAGE(1), &_spi_tr);
+	// usleep(nData*8*_delay);
     if(rc < nData) {
 		throw runtime_error("fail to read: " + to_string(rc));
     }

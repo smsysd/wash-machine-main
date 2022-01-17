@@ -48,6 +48,7 @@ private:
 	const int timeOutMs = 100;
 
     int _fd;
+	int _delay;
     struct spi_ioc_transfer _spi_tr;
     static int _csPin;
 	static int _intPin;

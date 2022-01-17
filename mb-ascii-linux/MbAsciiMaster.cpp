@@ -64,6 +64,8 @@ void MbAsciiMaster::cmd(int addr, int cmd, int timeout) {
 	}
 	
 	write(_fd, buff, 17);
+	tcdrain(_fd);
+	usleep(1100);
 	int n = _receive(buff, timeout);
 	if (_extract8(buff, 2) != 0x06) {
 		throw runtime_error("error response: " + to_string(_extract8(buff, 4)) + ", func: " + to_string(_extract8(buff, 2)));
@@ -77,6 +79,8 @@ void MbAsciiMaster::str(int addr, char* str, int timeout) {
 		digitalWrite(_dir, HIGH);
 	}
 	write(_fd, buff, 9 + strlen(str));
+	tcdrain(_fd);
+	usleep(1100);
 	int n = _receive(buff, timeout);
 	if (_extract8(buff, 2) != 0x42) {
 		throw runtime_error("error response: " + to_string(_extract8(buff, 4)) + ", func: " + to_string(_extract8(buff, 2)));
@@ -113,6 +117,8 @@ void MbAsciiMaster::rwrite(int addr, int raddr, const int* regs, int nRegs, int 
 		digitalWrite(_dir, HIGH);
 	}
 	write(_fd, buff, 19 + nRegs*4);
+	tcdrain(_fd);
+	usleep(1100);
 	int n = _receive(buff, timeout);
 	if (_extract8(buff, 2) != 0x10) {
 		throw runtime_error("error response: " + to_string(_extract8(buff, 4)) + ", func: " + to_string(_extract8(buff, 2)));
@@ -132,7 +138,7 @@ void MbAsciiMaster::rread(int addr, int raddr, int* regs, int nRegs, int timeout
 	}
 	write(_fd, buff, 17);
 	tcdrain(_fd);
-	usleep(800);
+	usleep(1100);
 	int n = _receive(buff, timeout);
 	if (_extract8(buff, 2) != 0x03) {
 		throw runtime_error("error response: " + to_string(_extract8(buff, 4)) + ", func: " + to_string(_extract8(buff, 2)));

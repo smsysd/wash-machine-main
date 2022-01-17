@@ -17,6 +17,7 @@ add_subdirectory(timer)
 add_subdirectory(ledmatrix-linux)
 add_subdirectory(mb-ascii-linux)
 add_subdirectory(utils)
+add_subdirectory(linux-stdsiga)
 
 
 add_executable(wash-machine main.cpp)

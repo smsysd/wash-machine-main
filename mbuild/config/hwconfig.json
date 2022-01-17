@@ -6,8 +6,7 @@
 		},
 		"modules": [
 			{"address": 32, "active-levels": 0, "io-mask": 251},
-			{"address": 33, "active-levels": 0, "io-mask": 251},
-			{"address": 34, "active-levels": 0, "io-mask": 251}
+			{"address": 33, "active-levels": 0, "io-mask": 251}
 		]
 	},
 
@@ -15,7 +14,7 @@
 		"driver": "/dev/spidev1.1",
 		"int-pin": 2,
 		"cs-pin": 15,
-		"speed": 4000
+		"speed": 8000
 	},
 
 	"performing-units": [
@@ -37,7 +36,9 @@
 		"address": 64,
 		"dir-pin": 6,
 		"driver": "/dev/ttyS5",
-		"baud-rate": 9600
+		"baud-rate": 9600,
+		"handler-delay": 10000,
+		"redraw-borehole": 500
 	},
 
 	"range-finder": {
@@ -71,9 +72,16 @@
 	},
 
 	"qr-scaner": {
-		"width": 1980,
-		"height": 1080,
-		"driver": "/dev/video0"
+		"enable": false,
+		"width": 800,
+		"height": 640,
+		"focus": 620,
+		"bright": -20,
+		"contrast": 63,
+		"expos": 100,
+
+		"driver": "/dev/video0",
+		"read-delay": 2000
 	},
 
 	"leds": [

@@ -51,27 +51,28 @@ void LedMatrix::writeBlock(int x, int y, RGB332& bitmap) {
 }
 
 void LedMatrix::switchBuffer() {
-	_cmd(Cmd::SWITCH_BUFFER, _toSmall);
+	_cmd(Cmd::SWITCH_BUFFER, _toLarge);
 }
 
 void LedMatrix::clear() {
-    _cmd(Cmd::CLEAR, _toMedium);
+    _cmd(Cmd::CLEAR, _toLarge);
 }
 
 void LedMatrix::reset() {
 	_cmd(Cmd::RESET, _toLarge);
+	usleep(500000);
 }
 
 void LedMatrix::setCursor(int x, int y) {
 	int buf[10];
 	buf[0] = (uint8_t)x | (y << 8);
-	_mb->rwrite(_deviceAddress, (int)AddressMap::CURSOR, buf, 1, _toSmall);
+	_mb->rwrite(_deviceAddress, (int)AddressMap::CURSOR, buf, 1, _toLarge);
 }
 
 void LedMatrix::setDefaultCursor(int x, int y) {
 	int buf[10];
 	buf[0] = (uint8_t)x | (y << 8);
-	_mb->rwrite(_deviceAddress, (int)AddressMap::DEFCURSOR, buf, 1, _toSmall);
+	_mb->rwrite(_deviceAddress, (int)AddressMap::DEFCURSOR, buf, 1, _toLarge);
 }
 
 void LedMatrix::setOpt(Mode mode, int font, int color) {
@@ -79,7 +80,7 @@ void LedMatrix::setOpt(Mode mode, int font, int color) {
 	buf[0] = (int)mode;
 	buf[0] |= (font & 0x07) << 4;
 	buf[0] |= (color & 7) << 7;
-	_mb->rwrite(_deviceAddress, (int)AddressMap::STRMODE, buf, 1, _toSmall);
+	_mb->rwrite(_deviceAddress, (int)AddressMap::STRMODE, buf, 1, _toLarge);
 }
 
 void LedMatrix::writeString(const char* str) {
@@ -129,7 +130,7 @@ void LedMatrix::writePrepareBlock(int iBlock, bool sw) {
 void LedMatrix::setBright(float bright) {
 	int buf[10];
 	buf[0] = (uint8_t)(bright * 255.0);
-	_mb->rwrite(_deviceAddress, (int)AddressMap::BRIGHT, buf, 1, _toSmall);
+	_mb->rwrite(_deviceAddress, (int)AddressMap::BRIGHT, buf, 1, _toLarge);
 }
 
 void LedMatrix::prepareFont(Font& font, int iFont, const char* encode) {
@@ -140,8 +141,8 @@ void LedMatrix::prepareFont(Font& font, int iFont, const char* encode) {
 	uint32_t rh = (buf[iFont*2] << 16) | buf[iFont*2 + 1];
 	uint32_t ch = _hash(font);
 	if (rh != ch) {
-		cout << "received and calculated hash is different, r: " << rh << ", c: " << ch << endl;
-		getchar();
+		cout << "received and calculated hash is different, r: " << rh << ", c: " << ch << ", of font " << iFont << endl;
+		// getchar();
 		_loadFont(font, iFont, encode);
 	}
 }
@@ -153,12 +154,13 @@ void LedMatrix::prepareBlock(RGB332 bitmap, int iBlock) {
 	uint32_t rh = (buf[0] << 16) | buf[1];
 	uint32_t ch = _hash(bitmap);
 	if (rh != ch) {
-		cout << "received and calculated hash is different, r: " << rh << ", c: " << ch << endl;
+		cout << "received and calculated hash is different, r: " << rh << ", c: " << ch << ", of block " << iBlock << endl;
 		_loadBlock(bitmap, iBlock);
 	}
 }
 
 void LedMatrix::prepareBlock(string pathToImg, int iBlock) {
+	// cout << pathToImg.c_str() << endl;
 	BMP bmp(pathToImg.c_str());
 	int w = bmp.bmp_info_header.width;
 	int h = bmp.bmp_info_header.height;
@@ -200,7 +202,7 @@ void LedMatrix::_loadFont(Font& font, int iFont, const char* encode) {
 		buf[0] = bm.width;
 		buf[1] = _toCP866(chars[i], encode);
 		_gliphToBitmap(bm, &buf[2]);
-		cout << "width: " << buf[0] << ", index: " << buf[1] << endl;
+		// cout << "width: " << buf[0] << ", index: " << buf[1] << endl;
 		_mb->rwrite(_deviceAddress, (int)AddressMap::LOAD_CHAR, buf, 26, _toLarge);
 	}
 	_mb->cmd(_deviceAddress, (int)Cmd::SAVE, _toLarge);

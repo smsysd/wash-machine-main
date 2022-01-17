@@ -57,6 +57,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/elpi/workspace/sm-sys/wash-machine-main/ledmatrix-linux/cmake_install.cmake")
   include("/home/elpi/workspace/sm-sys/wash-machine-main/mb-ascii-linux/cmake_install.cmake")
   include("/home/elpi/workspace/sm-sys/wash-machine-main/utils/cmake_install.cmake")
+  include("/home/elpi/workspace/sm-sys/wash-machine-main/linux-stdsiga/cmake_install.cmake")
 
 endif()
 

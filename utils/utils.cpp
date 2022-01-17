@@ -5,6 +5,7 @@
 #include "../logger-linux/Logger.h"
 #include "../qrscaner-linux/qrscaner.h"
 #include "../timer/Timer.h"
+#include "../linux-stdsiga/stdsiga.h"
 #include "render.h"
 #include "button_driver.h"
 #include "bonus.h"
@@ -154,6 +155,10 @@ namespace {
 		return OK;
 	}
 
+	void _softTerminate() {
+		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal, terminating..");
+	}
+
 }
 
 Mode cmode() {
@@ -173,6 +178,7 @@ void init(
 	_onServiceEnd = onServiceEnd;
 
 	cout << "init general-tools.." << endl;
+	stdsiga_init(_softTerminate);
 	general_tools_init();
 	int wprc = wiringPiSetup();
 	if (wprc != 0) {
@@ -314,14 +320,16 @@ void init(
 			_log->log(Logger::Type::WARNING, "UTILS", "fail to load effects: " + string(e.what()));
 		}
 		json effects;
+		json specef;
 		if (_effects != nullptr) {
 			try {
 				effects = _effects->get("effects");
+				specef = _effects->get("spec-effects");
 			} catch (exception& e) {
 				_log->log(Logger::Type::WARNING, "CONFIG", "fail get load effects: " + string(e.what()));
 			}
 		}
-		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, relIns);
+		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, specef, relIns);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));
@@ -341,16 +349,33 @@ void init(
 	try {
 		cout << "init qr scanner.." << endl;
 		json& qrscnf = _hwconfig->get("qr-scaner");
-		string driver = JParser::getf(qrscnf, "driver", "qr-scaner");
-		int width = JParser::getf(qrscnf, "width", "qr-scaner");
-		int height = JParser::getf(qrscnf, "height", "qr-scaner");
-		char cdriver[256] = {0};
-		strcpy(cdriver, driver.c_str());
-		int rc = qrscaner_init(cdriver, width, height, onQr);
-		if (rc == 0) {
-			qrscaner_start();
+		bool en = JParser::getf(qrscnf, "enable", "qr-scaner");
+		if (en) {
+			string driver = JParser::getf(qrscnf, "driver", "qr-scaner");
+			int width = JParser::getf(qrscnf, "width", "qr-scaner");
+			int height = JParser::getf(qrscnf, "height", "qr-scaner");
+			int bright = JParser::getf(qrscnf, "bright", "qr-scaner");
+			int contrast = JParser::getf(qrscnf, "contrast", "qr-scaner");
+			json sexpos = JParser::getf(qrscnf, "expos", "qr-scaner");
+			json sfocus = JParser::getf(qrscnf, "focus", "qr-scaner");
+			int readDelay = JParser::getf(qrscnf, "read-delay", "qr-scaner");
+			bool equalb = JParser::getf(qrscnf, "eqal-blocking", "qr-scaner");
+			int expos = QRSCANER_AUTO;
+			int focus = QRSCANER_AUTO;
+			if (sexpos.is_number()) {
+				expos = sexpos;
+			}
+			if (sfocus.is_number()) {
+				focus = sfocus;
+			}
+			int rc = qrscaner_init(driver.c_str(), width, height, readDelay, bright, expos, focus, contrast, equalb ? 1 : 0, onQr);
+			if (rc == 0) {
+				qrscaner_start();
+			} else {
+				throw runtime_error(to_string(rc));
+			}
 		} else {
-			throw runtime_error(to_string(rc));
+			cout << "qr scaner disabled" << endl;
 		}
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "INIT", "fail to init qr-scaner: " + string(e.what()));
@@ -362,7 +387,7 @@ void init(
 		_bonuscnf = new JParser("./config/bonus.json");
 		bonus::init(_bonuscnf->get("bonus-sys"), _bonuscnf->get("promotions"));
 	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to init bonus system: " + string(e.what()));
+		_log->log(Logger::Type::WARNING, "INIT", "fail to init bonus system: " + string(e.what()));
 	}
 
 	// extboard callbacks

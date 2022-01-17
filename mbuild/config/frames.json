@@ -18,25 +18,92 @@
 	"frames": [
 		{
 			"id": 0,
-			"font": 0,
+			"font": 1,
 			"bg": "none",
 			"mode": "center",
-			"color": 255,
+			"color": 7,
 			"lines": [
-				"ПОЖАЛУЙСТА",
-				"ВНЕСИТЕ {c0f:ДЕНЬГИ}"
+				"",
+				"{c6:AQUANTER}"
 			]
 		},
-
 		{
 			"id": 1,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"ВНЕСИТЕ",
+				"ДЕНЬГИ"
+			]
+		},
+		{
+			"id": 2,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 5,
+			"lines": [
+				"$bonus%",
+				"ВНЕСИТЕ",
+				"ДЕНЬГИ"
+			]
+		},
+		{
+			"id": 3,
 			"font": 0,
 			"bg": "none",
 			"mode": "center",
-			"color": 255,
+			"color": 4,
+			"lines": [
+				"ОШИБКА",
+				"БОНУСНОЙ",
+				"СИСТЕМЫ"
+			]
+		},
+		{
+			"id": 4,
+			"font": 0,
+			"bg": "none",
+			"mode": "center",
+			"color": 4,
+			"lines": [
+				"ОШИБКА",
+				"СИСТЕМЫ"
+			]
+		},
+		{
+			"id": 5,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 4,
+			"lines": [
+				"КАРТА НЕ",
+				"РАСПОЗНАНА"
+			]
+		},
+		{
+			"id": 10,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
 			"lines": [
 				"ВЫБЕРИТЕ ПРОГРАММУ",
-				"{cf0:$money} RUB."
+				"$money RUB"
+			]
+		},
+		{
+			"id": 11,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"ВЫБЕРИТЕ ПРОГРАММУ",
+				"{c5:$money} RUB."
 			]
 		}
 	],
@@ -51,6 +118,6 @@
 
 	"fonts": [
 		{"id": 0, "name": "micro.json", "index": "micro"},
-		{"id": 0, "name": "macro.json", "index": "macro"}
+		{"id": 1, "name": "macro.json", "index": "macro"}
 	]
 }

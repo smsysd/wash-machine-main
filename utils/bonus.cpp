@@ -218,7 +218,6 @@ void init(json& bonusSysCnf, json& promotions) {
 	}
 
 	_desiredWriteoff = JParser::getf(bonusSysCnf, "bonus-writeoff", "bonus-system");
-	_desiredWriteoff = JParser::getf(bonusSysCnf, "give-money", "bonus-system");
 
 	// fill promotions
 	for (int i = 0; i < promotions.size(); i++) {
@@ -247,10 +246,10 @@ void init(json& bonusSysCnf, json& promotions) {
 					}
 					for (int i = 0; i < jp["week-days"].size(); i++) {
 						int day = jp["week-days"][i];
-						day--;
 						if (day < 1 || day > 7) {
 							throw runtime_error("incorrect 'week-days'");
 						}
+						day--;
 						sp.weekdays[day] = true;
 					}
 				}
@@ -264,10 +263,10 @@ void init(json& bonusSysCnf, json& promotions) {
 					}
 					for (int i = 0; i < jp["months"].size(); i++) {
 						int month = jp["months"][i];
-						month--;
 						if (month < 1 || month > 12) {
 							throw runtime_error("incorrect 'months'");
 						}
+						month--;
 						sp.months[month] = true;
 					}
 				}

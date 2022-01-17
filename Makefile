@@ -311,6 +311,19 @@ utils/fast:
 	$(MAKE) $(MAKESILENT) -f utils/CMakeFiles/utils.dir/build.make utils/CMakeFiles/utils.dir/build
 .PHONY : utils/fast
 
+#=============================================================================
+# Target rules for targets named stdsiga
+
+# Build rule for target.
+stdsiga: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 stdsiga
+.PHONY : stdsiga
+
+# fast build rule for target.
+stdsiga/fast:
+	$(MAKE) $(MAKESILENT) -f linux-stdsiga/CMakeFiles/stdsiga.dir/build.make linux-stdsiga/CMakeFiles/stdsiga.dir/build
+.PHONY : stdsiga/fast
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -357,6 +370,7 @@ help:
 	@echo "... mspi"
 	@echo "... qrscaner"
 	@echo "... rgb332"
+	@echo "... stdsiga"
 	@echo "... timer"
 	@echo "... utils"
 	@echo "... wash-machine"

@@ -802,7 +802,7 @@ namespace {
 	}
 }
 
-void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& releiveInstructions) {
+void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& specEffects, json& releiveInstructions) {
 	// get hw extboard config
 	cout << "load hardware extboard config.." << endl;
 	string driver = JParser::getf(extboard, "driver", "extboard");
@@ -1026,11 +1026,24 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			throw runtime_error("fail to load '" + to_string(i) + "' effect: " + string(e.what()));
 		}
 	}
+	_giveMoneyEffect = JParser::getf(specEffects, "give-money", "spec-effects");
+	_serviceEffect = JParser::getf(specEffects, "service", "spec-effects");
+	
+	cout << "assert spec-effects.." << endl;
+	try {
+		_getEffect(_giveMoneyEffect);
+	} catch (exception& e) {
+		throw runtime_error("spec effect 'give-money'(" + to_string(_giveMoneyEffect) + ") not found in effects");
+	}
+	try {
+		_getEffect(_serviceEffect);
+	} catch (exception& e) {
+		throw runtime_error("spec effect 'service'(" + to_string(_serviceEffect) + ") not found in effects");
+	}
 
 	// create mspi connection
 	cout << "create MSPI connection.." << endl;
 	_mspi = new Mspi(driver, speed, csPin, intPin, _int);
-	_mspi->enableInt();
 	
 	// connect to extboard
 	cout << "connect to extboard.." << endl;
@@ -1082,6 +1095,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	pthread_create(&_thread_id, NULL, _handler, NULL);
 	_operations = fifo_create(32, sizeof(Handle));
 	_isInit = true;
+	_mspi->enableInt();
 }
 
 /* Light control */

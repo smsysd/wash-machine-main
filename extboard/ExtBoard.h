@@ -25,7 +25,7 @@ namespace extboard {
 		INTERNAL
 	};
 
-	void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& releiveInstructions);
+	void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& specEffects, json& releiveInstructions);
 	
 	/* Light control no exceptions */
 	void startLightEffect(int id, int index);

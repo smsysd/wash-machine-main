@@ -64,9 +64,22 @@ namespace {
 	int _unknownCardFrame = -1;
 	int _bonusErrorFrame = -1;
 	int _internalErrorFrame = -1;
+	vector<int> _fontsId;
+	vector<int> _blocksId;
 
 	int _parse(wstring& s, int b, Frame& f);
 	int _parseCtrl(wstring& s, int b, Frame& f);
+
+	template<typename T>
+	bool _is_contain(vector<T> vec, T val) {
+		for (int i = 0; i < vec.size(); i++) {
+			if (vec[i] == val) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	wstring _s2ws(const std::string& str) {
 		using convert_typeX = std::codecvt_utf8<wchar_t>;
@@ -84,8 +97,12 @@ namespace {
 
 	void _lmredraw() {
 		// setup default to frame options
-		_lm->setOpt(_currentRenderingFrame->mode, _currentRenderingFrame->font, _currentRenderingFrame->color);
+		if (_currentRenderingFrame == nullptr) {
+			return;
+		}
 		
+		_lm->setOpt(_currentRenderingFrame->mode, _currentRenderingFrame->font, _currentRenderingFrame->color);
+		cout << "set opt: M " << (int)_currentRenderingFrame->mode << ", F " << (int)_currentRenderingFrame->font << ", C " << (int)_currentRenderingFrame->color << endl;
 		// inject variables
 		wstring ss = _currentRenderingFrame->format;
 		for (int i = 0; i < _vars.size(); i++) {
@@ -106,10 +123,11 @@ namespace {
 			}
 		}
 		string css = _ws2s(ss);
-		_lm->writeString(css.c_str(), "UTF-16");
+		_lm->writeString(css.c_str(), "UTF-8");
 	}
 
 	void _redraw() {
+		cout << "redraw.." << endl;
 		if (_lm != nullptr) {
 			_lmredraw();
 		} else {
@@ -136,21 +154,18 @@ namespace {
 				i++;
 			} catch (exception& e) {
 				cout << "[WARNING][RENDER]|HANDLER| " << e.what() << endl;
+				usleep(1000);
 			}
 		}
 	}
 
 	Frame* _getFrame(int id) {
-		if (_lm != nullptr) {
-			for (int i = 0; i < _lmframes.size(); i++) {
-				if (_lmframes[i].id == id) {
-					return & _lmframes[i];
-				}
+		for (int i = 0; i < _lmframes.size(); i++) {
+			if (_lmframes[i].id == id) {
+				return & _lmframes[i];
 			}
-			throw runtime_error("ledmatrix frame '" + to_string(id) + "' not found");
-		} else {
-			throw runtime_error("std frames still not supported");
 		}
+		throw runtime_error("ledmatrix frame '" + to_string(id) + "' not found");
 	}
 
 	Var& _getVar(wstring name) {
@@ -192,15 +207,14 @@ namespace {
 		}
 
 		if (s.at(b+1) == 'c') {
-			if (mark != b + 4) {
+			if (mark != b + 3) {
 				return 0;
 			}
 			f.format.push_back((wchar_t)0x01);
 			f.format += s.at(b+2);
-			f.format += s.at(b+3);
-			int al = _parse(s, b + 5, f);
+			int al = _parse(s, b + 4, f);
 			f.format.push_back((wchar_t)0x06);
-			return b + 5 + al;
+			return b + 4 + al;
 		} else
 		if (s.at(b+1) == 'f') {
 			if (mark != b + 3) {
@@ -312,9 +326,43 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 					}
 				}
 				f.format.push_back((wchar_t)0x04);
+				_lmframes.push_back(f);
+				cout << "frame " << f.id << " added" << endl;
 			} catch (exception& e) {
 				throw runtime_error("fail to load " + to_string(i) + " frame: " + string(e.what()));
 			}
+		}
+
+		cout << "assert spec frames.." << endl;
+		try {
+			_getFrame(_logoFrame);
+		} catch (exception& e) {
+			throw runtime_error("no logo frame (" + to_string(_logoFrame) + ") in frames");
+		}
+		try {
+			_getFrame(_giveMoneyFrame);
+		} catch (exception& e) {
+			throw runtime_error("no give-money frame (" + to_string(_giveMoneyFrame) + ") in frames");
+		}
+		try {
+			_getFrame(_bonusGiveMoneyFrame);
+		} catch (exception& e) {
+			throw runtime_error("no give-money-bonus frame (" + to_string(_bonusGiveMoneyFrame) + ") in frames");
+		}
+		try {
+			_getFrame(_bonusErrorFrame);
+		} catch (exception& e) {
+			throw runtime_error("no error-bonus frame (" + to_string(_bonusErrorFrame) + ") in frames");
+		}
+		try {
+			_getFrame(_unknownCardFrame);
+		} catch (exception& e) {
+			throw runtime_error("no unknown-card frame (" + to_string(_unknownCardFrame) + ") in frames");
+		}
+		try {
+			_getFrame(_internalErrorFrame);
+		} catch (exception& e) {
+			throw runtime_error("no error-internal frame (" + to_string(_internalErrorFrame) + ") in frames");
 		}
 
 		// init hardware
@@ -323,6 +371,8 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 		int dp = JParser::getf(displaycnf, "dir-pin", "display");
 		string driver = JParser::getf(displaycnf, "driver", "display");
 		int brn = JParser::getf(displaycnf, "baud-rate", "display");
+		_handlerDelay = JParser::getf(displaycnf, "handler-delay", "display");
+		_redrawBorehole = JParser::getf(displaycnf, "redraw-borehole", "display");
 		int br;
 		if (brn == 2400) {
 			br = B2400;
@@ -352,10 +402,14 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 				string name = JParser::getf(fonts[i], "name", "fonts[" + to_string(i) + "]");
 				string ind = JParser::getf(fonts[i], "index", "fonts[" + to_string(i) + "]");
 				int id = JParser::getf(fonts[i], "id", "fonts[" + to_string(i) + "]");
+				if (_is_contain(_fontsId, id)) {
+					throw runtime_error("font " + to_string(id) + " duplicate");
+				}
+				_fontsId.push_back(id);
 				Font font("./config/fonts/" + name, ind);
-				_lm->prepareFont(font, id, "UTF-16");
+				_lm->prepareFont(font, id, "UTF-8");
 			} catch (exception& e) {
-				throw runtime_error("fail to prepare font: " + string(e.what()));
+				throw runtime_error("fail to prepare font " + to_string(i) + ": " + string(e.what()));
 			}
 		}
 
@@ -363,11 +417,15 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 		cout << "prepre blocks.." << endl;
 		for (int i = 0; i < bg.size(); i++) {
 			try {
-				string name = JParser::getf(fonts[i], "name", "bg[" + to_string(i) + "]");
-				int id = JParser::getf(fonts[i], "id", "bg[" + to_string(i) + "]");
+				string name = JParser::getf(bg[i], "name", "bg[" + to_string(i) + "]");
+				int id = JParser::getf(bg[i], "id", "bg[" + to_string(i) + "]");
+				if (_is_contain(_blocksId, id)) {
+					throw runtime_error("block " + to_string(id) + " duplicate");
+				}
+				_blocksId.push_back(id);
 				_lm->prepareBlock("./config/img/" + name, id);
 			} catch (exception& e) {
-				throw runtime_error("fail to prepare block: " + string(e.what()));
+				throw runtime_error("fail to prepare block " + to_string(i) + ": " + string(e.what()));
 			}
 		}
 		cout << "reset and clear display.." << endl;
@@ -383,7 +441,7 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 	} else {
 		throw runtime_error("unknown display type '" + dt + "'");
 	}
-
+	cout << "start handler.." << endl;
 	_genth = new thread(_handler);
 }
 
@@ -406,7 +464,7 @@ void showFrame(int idFrame) {
 	Frame* f = _getFrame(idFrame);
 	_currentRenderingFrame = f;
 	_renderingFrame = f;
-	_redraw();
+	_pushedRedraw = true;
 }
 
 void showTempFrame(SpecFrame frame, int tSec) {
@@ -428,7 +486,7 @@ void showTempFrame(int idFrame, int tSec) {
 	Frame* f = _getFrame(idFrame);
 	_tOffTempFrame += time(NULL) + tSec;
 	_currentRenderingFrame = f;
-	_redraw();
+	_pushedRedraw = true;
 }
 
 void redraw() {
