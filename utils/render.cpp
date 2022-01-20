@@ -132,6 +132,7 @@ namespace {
 		if (_lm != nullptr) {
 			_lmredraw();
 		} else {
+			sleep(5);
 			throw runtime_error ("std redraw still not supported");
 		}
 	}

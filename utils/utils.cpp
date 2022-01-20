@@ -170,6 +170,19 @@ namespace {
 		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal, terminating..");
 	}
 
+	void _extboardError(extboard::ErrorType et, string text) {
+		string ets;
+		switch (et) {
+		case extboard::ErrorType::NONE:
+			cout << "[INFO][EXTBOARD] restored " << text << endl; 
+			return;
+		case extboard::ErrorType::DISCONNECT_DEV: ets = "DISCONNECT DEV"; break;
+		case extboard::ErrorType::INTERNAL: ets = "INTERNAL ERROR";break;
+		default: break;
+		}
+		_log->log(Logger::Type::ERROR, "EXTBOARD", ets + ": " + text);
+	}
+
 }
 
 Mode cmode() {
@@ -306,7 +319,7 @@ void init(
 		render::regVar(&_session.k100, L"sbonus");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
-		throw runtime_error("fail to init render core: " + string(e.what()));
+		// throw runtime_error("fail to init render core: " + string(e.what()));
 	}
 
 	// extboard
@@ -342,6 +355,7 @@ void init(
 			}
 		}
 		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, specef, relIns);
+		extboard::registerOnErrorHandler(_extboardError);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
 		throw runtime_error("fail to init expander board: " + string(e.what()));

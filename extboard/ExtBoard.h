@@ -20,8 +20,8 @@ namespace extboard {
 		SERVICE_EFFECT
 	};
 	enum class ErrorType {
-		DISCONNECT_EXTBOARD,
-		DISCONNECT_EXTDEV,
+		NONE,
+		DISCONNECT_DEV,
 		INTERNAL
 	};
 

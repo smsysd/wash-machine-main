@@ -36,7 +36,7 @@ void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
 			b.id = JParser::getf(buttons[i], "id", "");
 			string type = JParser::getf(buttons[i], "type", "");
 			if (type == "extboard") {
-				b.type = Button::Type::TOUCH;
+				b.type = Button::Type::EXTBOARD;
 				b.index = JParser::getf(buttons[i], "index", "");
 			} else
 			if (type == "touch") {

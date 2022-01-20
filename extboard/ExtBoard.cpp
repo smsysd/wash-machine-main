@@ -629,15 +629,17 @@ namespace {
 
 	void _int(int reason) {
 		static int suspicion = 0;
-		if (!_isInit) {
-			return;
-		}
+		cout << "[INFO][EXTBOARD]|INT| " << reason << endl;
 		_mutex.lock();
 		uint8_t buf[32] = {0};
 		if (reason == (int)IntReason::ERROR) {
+			if (!_isInit) {
+				return;
+			}
 			uint8_t buf[128];
 			memset(buf, 0, sizeof(buf));
 			try {
+				_isInit = false;
 				_mspi->read((int)Addr::ERROR_DESC, buf, 64);
 				suspicion = 0;
 				if (buf[0] == (uint8_t)ErrorCode::INTERNAL) {
@@ -652,12 +654,12 @@ namespace {
 				} else
 				if (buf[0] == (uint8_t)ErrorCode::NO_BUTTON_MODULE) {
 					_mutex.unlock();
-					_onError(ErrorType::DISCONNECT_EXTDEV, "NO BM " + to_string((int)buf[1]));
+					_onError(ErrorType::DISCONNECT_DEV, "NO BM " + to_string((int)buf[1]));
 					return;
 				} else
 				if (buf[0] == (uint8_t)ErrorCode::NO_PERFORMER) {
 					_mutex.unlock();
-					_onError(ErrorType::DISCONNECT_EXTDEV, "NO PERF " + to_string((int)buf[1]));
+					_onError(ErrorType::DISCONNECT_DEV, "NO PERF " + to_string((int)buf[1]));
 					return;
 				} else {
 					_mutex.unlock();
@@ -671,24 +673,15 @@ namespace {
 		} else
 		if (reason == (int)IntReason::WAIT_OPT) {
 			_isInit = false;
-			try {
-				cout << "extboard was reset during operations - reinit" << endl;
-				cout << "upload options.." << endl;
-				_uploadAllOptions();
-				cout << "init external devices.." << endl;
-				usleep(10000);
-				_initExtdev();
-				suspicion = 0;
-			} catch (exception& e) {
-				cout << "fail to reinit: " << e.what() << endl;
-				suspicion++;
-			}
 		} else
 		if (reason == (int)IntReason::BUTTON && _onButton != nullptr) {
+			if (!_isInit) {
+				return;
+			}
 			try {
 				_mspi->read((int)Addr::BUTTONS, buf, 9);
 				suspicion = 0;
-				buf[0] &= ~(_buttoneb.io);
+				buf[0] &= _buttoneb.io; // this mean used mask - not io
 				for (int i = 0; i < 8; i++) {
 					if (buf[0] & (1 << i)) {
 						_onButton(i);
@@ -710,6 +703,9 @@ namespace {
 			}
 		} else
 		if (reason == (int)IntReason::CARD && _onCard != nullptr) {
+			if (!_isInit) {
+				return;
+			}
 			try {
 				_mspi->read((int)Addr::RFID_CARD, buf, 8);
 				suspicion = 0;
@@ -721,6 +717,9 @@ namespace {
 			}
 		} else
 		if (reason == (int)IntReason::MONEY && _onMoney != nullptr) {
+			if (!_isInit) {
+				return;
+			}
 			try {
 				_mspi->read((int)Addr::PAYMENT, buf, 6);
 				suspicion = 0;
@@ -734,22 +733,50 @@ namespace {
 			}
 		} else
 		if (reason == (int)IntReason::OBJ_CLOSER && _onCloser != nullptr) {
+			if (!_isInit) {
+				return;
+			}
 			_onCloser(true);
 		} else
 		if (reason == (int)IntReason::OBJ_WASTE && _onCloser != nullptr) {
+			if (!_isInit) {
+				return;
+			}
 			_onCloser(false);
 		}
 		_mutex.unlock();
 		if (suspicion > 10) {
-			_onError(ErrorType::DISCONNECT_EXTBOARD, "");
+			_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
 		}
 	}
 
 	void* _handler(void* arg) {
 		uint8_t buf[2048];
 		int suspicion = 0;
+		bool hpos;
 		while (true) {
 			_mutex.lock();
+			while (!_isInit) {
+				try {
+					cout << "[WARNING][EXTBOARD] extboard was reset during operations - reinit.." << endl;
+					hpos = false;
+					_uploadAllOptions();
+					hpos = true;
+					usleep(50000);
+					_initExtdev();
+					_isInit = true;
+					_onError(ErrorType::NONE, "");
+					suspicion = 0;
+				} catch (exception& e) {
+					sleep(5);
+					cout << "[ERROR][EXTBOARD] fail to reinit: " << e.what() << endl;
+					if (hpos) {
+						_onError(ErrorType::DISCONNECT_DEV, string(e.what()));
+					} else {
+						_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
+					}
+				}
+			}
 			try {
 				Handle* h = (Handle*)fifo_get(&_operations);
 				if (h == nullptr) {
@@ -760,6 +787,7 @@ namespace {
 					buf[1] = h->data[1];
 					_mspi->write((int)Addr::DIRECT_SET, buf, 2);
 					fifo_pop(&_operations);
+					suspicion = 0;
 				} else
 				if (h->type == HandleType::RELEIVE_PRESSURE) {
 					_mspi->cmd((int)Cmd::RELIEVE_PRESSURE, 0);
@@ -771,21 +799,25 @@ namespace {
 						}
 					}
 					fifo_pop(&_operations);
+					suspicion = 0;
 				} else
 				if (h->type == HandleType::RESET_EFFECT) {
 					_mspi->cmd((int)Cmd::RESET_EFFECT, h->data[0]);
 					fifo_pop(&_operations);
+					suspicion = 0;
 				} else
 				if (h->type == HandleType::SET_RELAY_GROUP) {
 					int rgi = _get_rgi(h->data[0]);
 					_mspi->cmd((int)Cmd::APPLAY_RGROUP, rgi);
 					fifo_pop(&_operations);
+					suspicion = 0;
 				} else
 				if (h->type == HandleType::START_EFFECT) {
 					LightEffect* ef = _getEffect(h->data[0]);
 					ef->data[0] = h->data[1];
 					_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*5);
 					fifo_pop(&_operations);
+					suspicion = 0;
 				} else {
 					fifo_pop(&_operations);
 				}
@@ -795,7 +827,8 @@ namespace {
 			}
 			_mutex.unlock();
 			if (suspicion > 10) {
-				_onError(ErrorType::DISCONNECT_EXTBOARD, "");
+				suspicion = 0;
+				_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
 			}
 			usleep(10000);
 		}
