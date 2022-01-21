@@ -68,6 +68,16 @@ namespace {
 		throw runtime_error("program with id '" + to_string(id) + "' not found");
 	}
 
+	int _getpi(vector<Program>& programs, int id) {
+		for (int i = 0; i < programs.size(); i++) {
+			if (programs[i].id == id) {
+				return i;
+			}
+		}
+
+		throw runtime_error("program with id '" + to_string(id) + "' not found");
+	}
+
 	void _putSession(json& sd) {
 		DIR* dir = opendir("./statistics");
 		if (dir) {
@@ -110,19 +120,24 @@ namespace {
 	}
 
 	Timer::Action _withdraw(timer_t) {
+		// cout << "withdraw " << time(NULL) % 100 << endl;
 		if(!_session.isBegin) {
 			return Timer::Action::CONTINUE;
 		}
 		_moneyMutex.lock();
 		double oldv = _nMoney;
 		if (mode == Mode::PROGRAM) {
+			// cout << "withdraw, program " << _currentProgram << ", use time " <<_programs[_currentProgram].useTimeSec << ", free use time " << _programs[_currentProgram].freeUseTimeSec << endl;
 			if (_programs[_currentProgram].useTimeSec > _programs[_currentProgram].freeUseTimeSec) {
+				// cout << "withdraw " << _programs[_currentProgram].rate << " money" << endl;
 				_nMoney -= _programs[_currentProgram].rate;
 				if (_nMoney <= 0) {
 					_nMoney = 0;
 					if (oldv > 0) {
 						_onCashRunout();
 					}
+				} else {
+					render::redraw();
 				}
 			}
 			_session.totalSpent += oldv - _nMoney;
@@ -315,7 +330,7 @@ void init(
 		json& bg = _frames->get("backgrounds");
 		json& fonts = _frames->get("fonts");
 		render::init(display, _frames->get("frames"), sf, go, bg, fonts);
-		render::regVar(&_nMoney, L"money");
+		render::regVar(&_nMoney, L"money", 0);
 		render::regVar(&_session.k100, L"sbonus");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
@@ -432,21 +447,15 @@ void init(
 
 void setGiveMoneyMode() {
 	bool isBonus = false;
-	try {
-		extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, 0);
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to start effect: " + string(e.what()));
-	}
+	extboard::setRelayGroup(0);
+	extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, 0);
 	render::SpecFrame f = render::SpecFrame::GIVE_MONEY;
 	if (bonus::getCoef() > 1) {
 		f = render::SpecFrame::GIVE_MONEY_BONUS;
 		isBonus = true;
 	}
-	try {
-		render::showFrame(f);
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "RENDER", "fail to show give money frame: " + string(e.what()));
-	}
+	render::showFrame(f);
+
 	if (isBonus) {
 		cout << "'give money' mode applied with bonus frame" << endl;
 	} else {
@@ -470,6 +479,7 @@ void setProgram(int id) {
 	Program* p;
 	try {
 		p = _getProgram(_programs, id);
+		_currentProgram = _getpi(_programs, id);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "INTERNAL", "fail to set program: " + string(e.what()));
 		return;
@@ -506,6 +516,7 @@ void setServiceProgram(int id) {
 	Program* p;
 	try {
 		p = _getProgram(_servicePrograms, id);
+		_currentProgram = _getpi(_servicePrograms, id);
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "INTERNAL", "fail to set service program: " + string(e.what()));
 		return;

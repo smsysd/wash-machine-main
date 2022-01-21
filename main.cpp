@@ -50,6 +50,18 @@ int main(int argc, char const *argv[]) {
 }
 
 void onCashAppeared() {
+	if (isBonusBegin) {
+		if (bonusCard.id != 0) {
+			beginSession(Session::Type::CLIENT, bonusCard.id);
+		} else
+		if (rfidCard.id != 0) {
+			beginSession(Session::Type::CLIENT, rfidCard.id);
+		} else {
+			beginSession(Session::Type::CLIENT, 0);
+		}
+	} else {
+		beginSession(Session::Type::CLIENT, 0);
+	}
 	setProgram(0);
 }
 
@@ -58,6 +70,9 @@ void onCashRunout() {
 		isBonusBegin = false;
 		accrueRemainBonusesAndClose();
 	}
+	bonusCard.id = 0;
+	rfidCard.id = 0;
+	dropSession();
 	setGiveMoneyMode();
 }
 
@@ -69,6 +84,9 @@ void onButtonPushed(const Button& button) {
 				isBonusBegin = false;
 				accrueRemainBonusesAndClose();
 			}
+			bonusCard.id = 0;
+			rfidCard.id = 0;
+			dropSession();
 			setGiveMoneyMode();
 			break;
 		case Button::Purpose::PROGRAM:
@@ -107,6 +125,7 @@ void onQr(const char* qr) {
 			}
 		} else
 		if (bonusCard.type == CardInfo::SERVICE) {
+			beginSession(Session::Type::SERVICE, bonusCard.id);
 			setServiceMode(bonusCard.id);
 		} else {
 			showTempFrame(SpecFrame::UNKNOWN_CARD, tErrorFrame);
@@ -116,12 +135,14 @@ void onQr(const char* qr) {
 
 void onCard(uint64_t cardid) {
 	bool rc = getLocalCardInfo(rfidCard, cardid);
+	// TODO static (rfid) card may be bonus too
 	if (!rc) {
 		showTempFrame(SpecFrame::UNKNOWN_CARD, tErrorFrame);
 		return;
 	}
 
 	if (rfidCard.type == CardInfo::SERVICE) {
+		beginSession(Session::Type::SERVICE, rfidCard.id);
 		setServiceMode(rfidCard.id);
 	} else
 	if (rfidCard.type == CardInfo::BONUS_ORG || rfidCard.type == CardInfo::BONUS_PERS) {

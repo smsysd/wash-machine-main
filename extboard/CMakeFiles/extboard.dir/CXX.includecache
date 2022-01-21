@@ -17,6 +17,8 @@ ExtBoard.h
 /home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
 ../general-tools/general_tools.h
 /home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
+wiringPi.h
+-
 stdlib.h
 -
 string.h

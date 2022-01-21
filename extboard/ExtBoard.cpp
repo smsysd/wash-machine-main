@@ -4,6 +4,7 @@
 #include "../jparser-linux/JParser.h"
 #include "../general-tools/general_tools.h"
 
+#include <wiringPi.h>
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
@@ -229,6 +230,7 @@ namespace {
 	pthread_t _thread_id;
 	Fifo _operations;
 	int _currentRelayGroupId = -1;
+	int _nrstPin = -1;
 	mutex _mutex;
 
 	void (*_onButton)(int iButton);
@@ -439,8 +441,9 @@ namespace {
 							resetbits |= 1 << bms[i][j].i;
 						}
 					}
-					li.data[0] = resetbits;
-					li.data[1] = setbits;
+					li.data[0] = i;
+					li.data[1] = resetbits;
+					li.data[2] = setbits;
 					aiv.push_back(li);
 				}
 			}
@@ -550,6 +553,31 @@ namespace {
 		throw runtime_error("fail " + when + ": unknown error");
 	}
 
+	void _connect () {
+		uint8_t buf[8];
+		int tries = 0;
+		try {
+			if (_nrstPin > 0) {
+				pinMode(_nrstPin, OUTPUT);
+				digitalWrite(_nrstPin, 0);
+				usleep(10000);
+				digitalWrite(_nrstPin, 1);
+			} else {
+				_mspi->cmd((int)Cmd::RESET, 0);
+			}
+			usleep(400000);
+			_mspi->read((int)Addr::WIA, buf, 3);
+			_mspi->read((int)Addr::VERSION, &buf[3], 2);
+		} catch (exception& e) {
+			sleep(2);
+			tries++;
+			if (tries >= 10) {
+				throw runtime_error("fail to connect");
+			}
+		}
+		cout << "extboard connected, WIA_PRJ: " << (int)(buf[0] << 8 | buf[1]) << ", WIA_SUB: " << (int)buf[2] << ", VERSION: [" << (int)buf[3] << ", " << (int)buf[4] << "]" << endl;
+	}
+
 	void _uploadAllOptions() {
 		uint8_t buf[256];
 		memset(buf, 0, 32);
@@ -640,6 +668,7 @@ namespace {
 			memset(buf, 0, sizeof(buf));
 			try {
 				_isInit = false;
+				_mspi->disableInt();
 				_mspi->read((int)Addr::ERROR_DESC, buf, 64);
 				suspicion = 0;
 				if (buf[0] == (uint8_t)ErrorCode::INTERNAL) {
@@ -673,6 +702,19 @@ namespace {
 		} else
 		if (reason == (int)IntReason::WAIT_OPT) {
 			_isInit = false;
+			_mspi->disableInt();
+		} else
+		if (reason == (int)IntReason::LOR) {
+			if (!_isInit) {
+				return;
+			}
+			try {
+				_mspi->read((int)Addr::LOR, buf, 1);
+				cout << "[INFO][ETBOARD] LOR " << (int)buf[0] << endl;
+			} catch (exception& e) {
+				cout << "[WARNING][EXTBOARD]|INT| fail to read LOR: " << e.what() << endl;
+				suspicion++;
+			}
 		} else
 		if (reason == (int)IntReason::BUTTON && _onButton != nullptr) {
 			if (!_isInit) {
@@ -689,16 +731,16 @@ namespace {
 				}
 				for (int i = 0; i < 8; i++) {
 					if (i < _buttonms.size()) {
-						buf[i] &= ~_buttonms[i].io;
+						buf[i+1] &= ~_buttonms[i].io;
 						for (int j = 0; j < 8; j++) {
-							if (buf[i] & (1 << j)) {
+							if (buf[i+1] & (1 << j)) {
 								_onButton(8 + i*8 + j);
 							}
 						}
 					}
 				}
 			} catch (exception& e) {
-				cout << "fail to read buttons: " << e.what() << endl;
+				cout << "[WARNING][EXTBOARD]|INT| fail to read buttons: " << e.what() << endl;
 				suspicion++;
 			}
 		} else
@@ -753,6 +795,7 @@ namespace {
 	void* _handler(void* arg) {
 		uint8_t buf[2048];
 		int suspicion = 0;
+		int borehole = 0;
 		bool hpos;
 		while (true) {
 			_mutex.lock();
@@ -760,12 +803,14 @@ namespace {
 				try {
 					cout << "[WARNING][EXTBOARD] extboard was reset during operations - reinit.." << endl;
 					hpos = false;
+					_connect();
 					_uploadAllOptions();
 					hpos = true;
 					usleep(50000);
 					_initExtdev();
 					_isInit = true;
 					_onError(ErrorType::NONE, "");
+					_mspi->enableInt();
 					suspicion = 0;
 				} catch (exception& e) {
 					sleep(5);
@@ -779,6 +824,9 @@ namespace {
 			}
 			try {
 				Handle* h = (Handle*)fifo_get(&_operations);
+				if (h != nullptr) {
+					cout << "[INFO][EXTBOARD]|HANDLER| handling " << (int)h->type << ", total fifo size " << _operations.nElements << endl;
+				}
 				if (h == nullptr) {
 					usleep(10000);
 				} else
@@ -807,30 +855,47 @@ namespace {
 					suspicion = 0;
 				} else
 				if (h->type == HandleType::SET_RELAY_GROUP) {
-					int rgi = _get_rgi(h->data[0]);
+					int rgi;
+					try {
+						rgi = _get_rgi(h->data[0]);
+					} catch (exception& e) {
+						fifo_pop(&_operations);
+						throw runtime_error(e.what());
+					}
 					_mspi->cmd((int)Cmd::APPLAY_RGROUP, rgi);
 					fifo_pop(&_operations);
 					suspicion = 0;
 				} else
 				if (h->type == HandleType::START_EFFECT) {
+					fifo_pop(&_operations);
 					LightEffect* ef = _getEffect(h->data[0]);
 					ef->data[0] = h->data[1];
 					_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*5);
-					fifo_pop(&_operations);
 					suspicion = 0;
 				} else {
 					fifo_pop(&_operations);
+					cout << "[WARNING][EXTBOARD]|HANDLER| undefined handle: " << (int)h->type << endl;
 				}
 			} catch (exception& e) {
-				cout << "fail extboard handle: " << e.what() << endl;
+				cout << "[WARNING][EXTBOARD]|HANDLER| fail handle: " << e.what() << endl;
 				suspicion++;
+				sleep(2);
 			}
 			_mutex.unlock();
 			if (suspicion > 10) {
 				suspicion = 0;
+				_isInit = false;
+				_mspi->disableInt();
 				_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
 			}
+			if (borehole % 1000 == 0) {
+				// add repetive handles
+				if (_currentRelayGroupId >= 0) {
+					setRelayGroup(_currentRelayGroupId);
+				}
+			}
 			usleep(10000);
+			borehole++;
 		}
 	}
 }
@@ -842,6 +907,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	int speed = JParser::getf(extboard, "speed", "extboard");
 	int csPin = JParser::getf(extboard, "cs-pin", "extboard");
 	int intPin = JParser::getf(extboard, "int-pin", "extboard");
+	_nrstPin = JParser::getf(extboard, "nrst-pin", "extboard");
 
 	cout << "load performing units config.." << endl;
 	for (int i = 0; i < performingUnits.size(); i++) {
@@ -1081,21 +1147,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	// connect to extboard
 	cout << "connect to extboard.." << endl;
 	uint8_t buf[1024];
-	int tries = 0;
-	try {
-		_mspi->cmd((int)Cmd::RESET, 0);
-		usleep(100000);
-		_mspi->read((int)Addr::WIA, buf, 3);
-		_mspi->read((int)Addr::VERSION, &buf[3], 2);
-	} catch (exception& e) {
-		usleep(100000);
-		tries++;
-		if (tries >= 10) {
-			throw runtime_error("fail to connect");
-		}
-	}
-
-	cout << "extboard connected, WIA_PRJ: " << (int)(buf[0] << 8 | buf[1]) << ", WIA_SUB: " << (int)buf[2] << ", VERSION: [" << (int)buf[3] << ", " << (int)buf[4] << "]" << endl;
+	_connect();
 	
 	// wait for extboard self init
 	cout << "wait for extboard self init.." << endl;
@@ -1165,6 +1217,13 @@ void relievePressure() {
 
 void setRelayGroup(int id) {
 	Handle h;
+	try {
+		_get_rgi(id);
+	} catch (exception& e) {
+		cout << "[WARNING][EXTBOARD] relay group " << id << "not found" << endl;
+		return;
+	}
+	_currentRelayGroupId = id;
 	h.type = HandleType::SET_RELAY_GROUP;
 	h.data[0] = id;
 	fifo_put(&_operations, &h);

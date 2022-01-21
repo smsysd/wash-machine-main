@@ -45,7 +45,7 @@ private:
 		void (*function)();
 	};
 
-	const int timeOutMs = 100;
+	const int timeOutMs = 1000;
 
     int _fd;
 	int _delay;

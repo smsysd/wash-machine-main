@@ -154,7 +154,7 @@ int8_t shiftElements(void *ptr, uint32_t sizeEl, uint32_t realLen, uint32_t full
 			end--;
 		}
 	} else {
-		if (shiftBytes >= realLenBytes) {
+		if (shiftBytes > realLenBytes) {
 			return INCORRECT_ARG;
 		}
 		begin = shiftBytes;

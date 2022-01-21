@@ -91,7 +91,8 @@
 			"mode": "center",
 			"color": 7,
 			"lines": [
-				"ВЫБЕРИТЕ ПРОГРАММУ",
+				"ВЫБЕРИТЕ",
+				"ПРОГРАММУ",
 				"$money RUB"
 			]
 		},
@@ -102,7 +103,74 @@
 			"mode": "center",
 			"color": 7,
 			"lines": [
-				"ВЫБЕРИТЕ ПРОГРАММУ",
+				"ВЫБЕРИТЕ",
+				"ПРОГРАММУ",
+				"{c5:$money} RUB."
+			]
+		},
+		{
+			"id": 12,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"ПАУЗА",
+				"$money RUB"
+			]
+		},
+		{
+			"id": 13,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"ПАУЗА",
+				"{c5:$money} RUB."
+			]
+		},
+		{
+			"id": 14,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"ВОДА",
+				"$money RUB"
+			]
+		},
+		{
+			"id": 15,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"ВОДА",
+				"{c5:$money} RUB."
+			]
+		},
+		{
+			"id": 16,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"ПЕНА",
+				"$money RUB"
+			]
+		},
+		{
+			"id": 17,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"ПЕНА",
 				"{c5:$money} RUB."
 			]
 		}

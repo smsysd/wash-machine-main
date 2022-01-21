@@ -7,6 +7,7 @@
 #include "../BMP.h"
 #include "../logger-linux/Logger.h"
 
+#include <sstream>
 #include <stdint.h>
 #include <vector>
 #include <iostream>
@@ -30,6 +31,7 @@ namespace {
 		const void* var;
 		VarType type;
 		wstring name;
+		int precision;
 	};
 	struct Frame {
 		int id;
@@ -108,7 +110,9 @@ namespace {
 			if (vp != string::npos) {
 				wstring vsv;
 				if (_vars[i].type == VarType::FLOAT) {
-					vsv = to_wstring(*((const double*)_vars[i].var));
+					double dv = *((const double*)_vars[i].var);
+					int iv = (int)ceil(dv);
+					vsv = to_wstring(iv);
 				} else 
 				if (_vars[i].type == VarType::INT) {
 					vsv = to_wstring(*((const int*)_vars[i].var));
@@ -151,6 +155,8 @@ namespace {
 
 				if (i % _redrawBorehole == 0 || _pushedRedraw) {
 					_redraw();
+					i = _redrawBorehole;
+					_pushedRedraw = false;
 				}
 				usleep(_handlerDelay);
 				i++;
@@ -235,17 +241,17 @@ namespace {
 }
 
 void regVar(const int* var, wstring name) {
-	Var _var = {var, VarType::INT, name};
+	Var _var = {var, VarType::INT, name, 0};
 	_vars.push_back(_var);
 }
 
-void regVar(const double* var, wstring name) {
-	Var _var = {var, VarType::FLOAT, name};
+void regVar(const double* var, wstring name, int precision) {
+	Var _var = {var, VarType::FLOAT, name, precision};
 	_vars.push_back(_var);
 }
 
 void regVar(const char* var, wstring name) {
-	Var _var = {var, VarType::STRING, name};
+	Var _var = {var, VarType::STRING, name, 0};
 	_vars.push_back(_var);
 }
 
@@ -463,9 +469,11 @@ void showFrame(SpecFrame frame) {
 
 void showFrame(int idFrame) {
 	Frame* f = _getFrame(idFrame);
-	_currentRenderingFrame = f;
 	_renderingFrame = f;
-	_pushedRedraw = true;
+	if (_tOffTempFrame <= 0) {
+		_currentRenderingFrame = f;
+		_pushedRedraw = true;
+	}
 }
 
 void showTempFrame(SpecFrame frame, int tSec) {

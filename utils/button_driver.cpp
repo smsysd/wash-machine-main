@@ -18,11 +18,37 @@ namespace {
 	void (*_onButtonPushed)(const Button& button);
 
 	void _onExtboardButton(int iButton) {
-		for (int i = 0; i < _buttons.size(); i++) {
-			if (_buttons[i].type == Button::Type::EXTBOARD) {
-				if (_buttons[i].index == iButton) {
-					cout << "[INFO][BUTTON] button " << _buttons[i].id << " pushed" << endl;
-					_onButtonPushed(_buttons[i]);
+		Button::Type type;
+		int bm;
+		int index;
+		cout << "[INFO][BUTTON] ibutton " << iButton << endl;
+		if (iButton >= 72) {
+			return;
+		}
+		if (iButton < 8) {
+			type = Button::Type::EB;
+			index = iButton;
+			for (int i = 0; i < _buttons.size(); i++) {
+				if (_buttons[i].type == type) {
+					if (_buttons[i].index = index) {
+						cout << "[INFO][BUTTON] button " << _buttons[i].id << " pushed" << endl;
+						_onButtonPushed(_buttons[i]);
+					}
+				}
+			}
+		} else {
+			type = Button::Type::BM;
+			iButton -= 8;
+			bm = iButton / 8;
+			index = iButton % 8;
+			for (int i = 0; i < _buttons.size(); i++) {
+				if (_buttons[i].type == type) {
+					if (_buttons[i].bm == bm) {
+						if (_buttons[i].index = index) {
+							cout << "[INFO][BUTTON] button " << _buttons[i].id << " pushed" << endl;
+							_onButtonPushed(_buttons[i]);
+						}
+					}
 				}
 			}
 		}
@@ -35,9 +61,23 @@ void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
 			Button b;
 			b.id = JParser::getf(buttons[i], "id", "");
 			string type = JParser::getf(buttons[i], "type", "");
-			if (type == "extboard") {
-				b.type = Button::Type::EXTBOARD;
+			if (type == "eb") {
+				b.type = Button::Type::EB;
 				b.index = JParser::getf(buttons[i], "index", "");
+				if (b.index > 7 || b.index < 0) {
+					throw runtime_error("'index' must be in [0:7]");
+				}
+			} else
+			if (type == "bm") {
+				b.type = Button::Type::BM;
+				b.bm = JParser::getf(buttons[i], "bm", "");
+				b.index = JParser::getf(buttons[i], "index", "");
+				if (b.index > 7 || b.index < 0) {
+					throw runtime_error("'index' must be in [0:7]");
+				}
+				if (b.bm > 7 || b.bm < 0) {
+					throw runtime_error("'bm' must be in [0:7]");
+				}
 			} else
 			if (type == "touch") {
 				b.type = Button::Type::TOUCH;
@@ -45,6 +85,7 @@ void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
 			} else {
 				throw runtime_error("unkown type '" + type + "'");
 			}
+
 			string purpose = JParser::getf(buttons[i], "purpose", "");
 			if (purpose == "program") {
 				b.purpose = Button::Purpose::PROGRAM;
@@ -57,6 +98,7 @@ void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
 				throw runtime_error("unknown purpose '" + purpose + "'");
 			}
 			_buttons.push_back(b);
+			cout << "[INFO][BUTTON] add button " << b.id << ", type " << (int)b.type << ", purpose: " << (int)b.purpose << ", index " << b.index << ", bm " << b.bm << endl;
 		} catch (exception& e) {
 			throw runtime_error("fail to load '" + to_string(i) + "' button: " + string(e.what()));
 		}

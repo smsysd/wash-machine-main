@@ -3,29 +3,40 @@
 		{
 			"id": 0,
 			"performers": [
-				{"address": 48, "state": 3}
+				{"address": 48, "state": 0}
+			]
+		},
+		{
+			"id": 1,
+			"performers": [
+				{"address": 48, "state": 1}
+			]
+		},
+		{
+			"id": 2,
+			"performers": [
+				{"address": 48, "state": 2}
 			]
 		}
 	],
 
 	"programs": [
-		{"id": 0, "name": "pause", "frame": 0, "bonus-frame": 1, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0},
-		{"id": 1, "name": "water", "frame": 2, "bonus-frame": 3, "relay-group": 1, "free-use-time": 2, "rate": 30, "effect": 0},
-		{"id": 3, "name": "wax", "frame": 6, "bonus-frame": 7, "relay-group": 3, "free-use-time": 2, "rate": 120, "effect": 0},
-		{"id": 4, "name": "cleaner", "frame": 8, "bonus-frame": 9, "relay-group": 4, "free-use-time": 2, "rate": 60, "effect": 0}
+		{"id": 0, "name": "choose", "frame": 10, "bonus-frame": 11, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 1},
+		{"id": 1, "name": "pause", "frame": 12, "bonus-frame": 13, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 1},
+		{"id": 2, "name": "water", "frame": 14, "bonus-frame": 15, "relay-group": 1, "free-use-time": 2, "rate": 20, "effect": 1},
+		{"id": 3, "name": "foam", "frame": 16, "bonus-frame": 17, "relay-group": 2, "free-use-time": 2, "rate": 60, "effect": 1}
 	],
 
 	"service-programs": [
-		{"id": 0, "name": "s.water", "frame": 101, "relay-group": 1, "effect": 0},
-		{"id": 1, "name": "s.cleaner", "frame": 102, "relay-group": 4, "effect": 0}
+		{"id": 2, "name": "s.water", "frame": 101, "relay-group": 1, "effect": 0},
+		{"id": 5, "name": "s.cleaner", "frame": 102, "relay-group": 4, "effect": 0}
 	],
 
 	"buttons": [
-		{"id": 0, "type": "extboard", "index": 0, "purpose": "end"},
-		{"id": 1, "type": "extboard", "index": 1, "purpose": "program", "program": 0, "service-program": 0},
-		{"id": 2, "type": "extboard", "index": 2, "purpose": "program", "program": 1, "service-program": 1},
-		{"id": 3, "type": "extboard", "index": 3, "purpose": "program", "program": 2, "service-program": 2},
-		{"id": 4, "type": "extboard", "index": 4, "purpose": "program", "program": 3, "service-program": 3}
+		{"id": 0, "type": "eb", "index": 0, "purpose": "end"},
+		{"id": 1, "type": "eb", "index": 1, "purpose": "program", "program": 1, "service-program": 2},
+		{"id": 2, "type": "bm", "bm": 0, "index": 4, "purpose": "program", "program": 2, "service-program": 2},
+		{"id": 3, "type": "bm", "bm": 1, "index": 4, "purpose": "program", "program": 3, "service-program": 5}
 	],
 
 	"cards": [

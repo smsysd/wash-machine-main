@@ -15,15 +15,18 @@ namespace button_driver {
 struct Button {
 	enum class Purpose {
 		PROGRAM,
-		END
+		END,
+		SERVICE
 	};
 	enum class Type {
-		EXTBOARD,
+		EB,
+		BM,
 		TOUCH
 	};
 	Purpose purpose;
 	Type type;
 	int id;
+	int bm;
 	int index;
 	int prog;
 	int serviceProg;
