@@ -7,6 +7,7 @@
 #include "../BMP.h"
 #include "../logger-linux/Logger.h"
 
+#include <queue>
 #include <sstream>
 #include <stdint.h>
 #include <vector>
@@ -42,6 +43,11 @@ namespace {
 		wstring format;
 		vector<Var> vars;
 	};
+	struct TempFrame {
+		Frame* frame;
+		time_t tBegin;
+		int tShow;
+	};
 
 	thread* _genth = nullptr;
 	LedMatrix* _lm;
@@ -55,8 +61,8 @@ namespace {
 	
 	Frame* _currentRenderingFrame = nullptr;
 	Frame* _renderingFrame = nullptr;
-	time_t _tOffTempFrame = 0;
-	int _redrawBorehole = 100;
+	queue<TempFrame> _tempFrameQueue;
+	int _redrawBorehole = 200;
 	int _handlerDelay = 10000;
 	bool _pushedRedraw = false;
 	
@@ -66,6 +72,7 @@ namespace {
 	int _unknownCardFrame = -1;
 	int _bonusErrorFrame = -1;
 	int _internalErrorFrame = -1;
+	int _serviceFrame = -1;
 	vector<int> _fontsId;
 	vector<int> _blocksId;
 
@@ -145,12 +152,25 @@ namespace {
 		int i = 0;
 		while (true) {
 			try {
-				if (_tOffTempFrame > 0 && time(NULL) > _tOffTempFrame) {
-					_tOffTempFrame = 0;
-					_currentRenderingFrame = _renderingFrame;
-					_redraw();
-					i = _redrawBorehole + 1;
-					_pushedRedraw = false;
+				if (_tempFrameQueue.size() > 0) {
+					TempFrame& tf = _tempFrameQueue.front();
+					if (tf.tBegin == 0) {
+						_currentRenderingFrame = tf.frame;
+						tf.tBegin = time(NULL);
+						_redraw();
+						_pushedRedraw = false;
+						i = _redrawBorehole + 1;
+					} else {
+						if (time(NULL) - tf.tBegin >= tf.tShow) {
+							_tempFrameQueue.pop();
+							if (_tempFrameQueue.size() == 0) {
+								_currentRenderingFrame = _renderingFrame;
+								_redraw();
+								_pushedRedraw = false;
+								i = _redrawBorehole + 1;
+							}
+						}
+					}
 				}
 
 				if (i % _redrawBorehole == 0 || _pushedRedraw) {
@@ -162,7 +182,7 @@ namespace {
 				i++;
 			} catch (exception& e) {
 				cout << "[WARNING][RENDER]|HANDLER| " << e.what() << endl;
-				usleep(1000);
+				usleep(10000);
 			}
 		}
 	}
@@ -265,6 +285,7 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 	_unknownCardFrame = JParser::getf(specFrames, "unknown-card", "spec-frames");
 	_internalErrorFrame = JParser::getf(specFrames, "error-internal", "spec-frames");
 	_logoFrame = JParser::getf(specFrames, "logo", "spec-frames");
+	_serviceFrame = JParser::getf(specFrames, "service", "spec-frames");
 
 	if (dt == "ledmatrix") {
 		cout << "display type is 'ledmatrix'" << endl;
@@ -372,6 +393,11 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 		} catch (exception& e) {
 			throw runtime_error("no error-internal frame (" + to_string(_internalErrorFrame) + ") in frames");
 		}
+		try {
+			_getFrame(_serviceFrame);
+		} catch (exception& e) {
+			throw runtime_error("no service frame (" + to_string(_serviceFrame) + ") in frames");
+		}
 
 		// init hardware
 		cout << "init hardware" << endl;
@@ -463,14 +489,20 @@ void showFrame(SpecFrame frame) {
 	case SpecFrame::INTERNAL_ERROR: f = _internalErrorFrame; break;
 	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame; break;
 	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame; break;
+	case SpecFrame::SERVICE: f = _serviceFrame; break;
 	}
-	showFrame(f);
+
+	try {
+		showFrame(f);
+	} catch (exception& e) {
+		cout << "[WARNING][RENDER] fail show frame: " << e.what() << endl;
+	}
 }
 
 void showFrame(int idFrame) {
 	Frame* f = _getFrame(idFrame);
 	_renderingFrame = f;
-	if (_tOffTempFrame <= 0) {
+	if (_tempFrameQueue.size() == 0) {
 		_currentRenderingFrame = f;
 		_pushedRedraw = true;
 	}
@@ -486,16 +518,22 @@ void showTempFrame(SpecFrame frame, int tSec) {
 	case SpecFrame::INTERNAL_ERROR: f = _internalErrorFrame; break;
 	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame; break;
 	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame; break;
+	case SpecFrame::SERVICE: f = _serviceFrame; break;
 	}
-
-	showTempFrame(f, tSec);
+	
+	try {
+		showTempFrame(f, tSec);
+	} catch (exception& e) {
+		cout << "[WARNING][RENDER] fail show temp frame: " << e.what() << endl;
+	}
 }
 
 void showTempFrame(int idFrame, int tSec) {
-	Frame* f = _getFrame(idFrame);
-	_tOffTempFrame += time(NULL) + tSec;
-	_currentRenderingFrame = f;
-	_pushedRedraw = true;
+	TempFrame tf;
+	tf.frame = _getFrame(idFrame);
+	tf.tShow = tSec;
+	tf.tBegin = 0;
+	_tempFrameQueue.push(tf);
 }
 
 void redraw() {

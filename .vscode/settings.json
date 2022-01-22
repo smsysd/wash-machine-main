@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"stdexcept": "cpp",
-		"ostream": "cpp"
+		"ostream": "cpp",
+		"cmath": "cpp"
 	}
 }

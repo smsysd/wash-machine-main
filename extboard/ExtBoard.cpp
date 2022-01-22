@@ -812,6 +812,10 @@ namespace {
 					_onError(ErrorType::NONE, "");
 					_mspi->enableInt();
 					suspicion = 0;
+					if (_currentRelayGroupId >= 0) {
+						usleep(100000);
+						setRelayGroup(_currentRelayGroupId);
+					}
 				} catch (exception& e) {
 					sleep(5);
 					cout << "[ERROR][EXTBOARD] fail to reinit: " << e.what() << endl;
@@ -1220,7 +1224,7 @@ void setRelayGroup(int id) {
 	try {
 		_get_rgi(id);
 	} catch (exception& e) {
-		cout << "[WARNING][EXTBOARD] relay group " << id << "not found" << endl;
+		cout << "[WARNING][EXTBOARD] relay group " << id << " not found" << endl;
 		return;
 	}
 	_currentRelayGroupId = id;

@@ -115,8 +115,18 @@ namespace {
 		if (_session.isBegin) {
 			_nMoney += nMoney * _session.k;
 			_session.depositedMoney += nMoney;
+		} else {
+			cout << "[WARNING][UTILS] money received, but session is not begin" << endl;
+			_onCashAppeared();
+			if (_session.isBegin) {
+				_nMoney += nMoney * _session.k;
+				_session.depositedMoney += nMoney;
+			} else {
+				_nMoney += nMoney;
+			}
 		}
 		_moneyMutex.unlock();
+		render::redraw();
 	}
 
 	Timer::Action _withdraw(timer_t) {
@@ -202,6 +212,10 @@ namespace {
 
 Mode cmode() {
 	return mode;
+}
+
+bool issession() {
+	return _session.isBegin;
 }
 
 void init(
@@ -334,7 +348,7 @@ void init(
 		render::regVar(&_session.k100, L"sbonus");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
-		// throw runtime_error("fail to init render core: " + string(e.what()));
+		throw runtime_error("fail to init render core: " + string(e.what()));
 	}
 
 	// extboard
@@ -465,11 +479,10 @@ void setGiveMoneyMode() {
 }
 
 void setServiceMode(uint64_t cardid) {
-	try {
-		extboard::startLightEffect(extboard::SpecEffect::SERVICE_EFFECT, 0);
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to start effect: " + string(e.what()));
-	}
+	extboard::setRelayGroup(0);
+	render::showFrame(render::SpecFrame::SERVICE);
+
+	extboard::startLightEffect(extboard::SpecEffect::SERVICE_EFFECT, 0);
 	cout << "'service' mode applied" << endl;
 	_tOffServiceMode = time(NULL) + _tServiceMode;
 	mode = Mode::SERVICE;
@@ -570,11 +583,17 @@ void beginSession(Session::Type type, uint64_t id) {
 	}
 
 	_session.tBegin = time(NULL);
+	if (type == Session::Type::CLIENT) {
+		cout << "[INFO][UTILS] client session begin, k " << _session.k << endl;
+	} else
+	if (type == Session::Type::SERVICE) {
+		cout << "[INFO][UTILS] service session begin" << endl;
+	}
 	_session.isBegin = true;
 }
 
 void dropSession() {
-	// TODO
+	// TODO ? what ??
 	if (!_session.isBegin) {
 		return;
 	}
@@ -619,18 +638,8 @@ void dropSession() {
 	} else {
 		_log->log(Logger::Type::ERROR, "MONITOR", "not defined session type");
 	}
+	_nMoney = 0;
 	_session.isBegin =  false;
-}
-
-bool startBonuses(CardInfo& cardInfo, const char* qr) {
-	try {
-		cardInfo = bonus::open(qr);
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "BONUS", "fail to open transaction: " + string(e.what()));
-		return false;
-	}
-
-	return true;
 }
 
 bool writeOffBonuses() {
@@ -639,6 +648,8 @@ bool writeOffBonuses() {
 		_nMoney += realWriteoff;
 		if (_session.isBegin) {
 			_session.writeoffBonuses += realWriteoff;
+		} else {
+			cout << "[WARNING][UTILS] boneses writeoff, but session is not begin" << endl;
 		}
 		return true;
 	} catch (exception& e) {
@@ -648,10 +659,14 @@ bool writeOffBonuses() {
 }
 
 void accrueRemainBonusesAndClose() {
+	double acrue = _nMoney;
 	if (_session.isBegin) {
-		_log->log(Logger::Type::ERROR, "BONUS", "fail close transaction with " + to_string(_nMoney) + " money: session not begin");
+		// acrue = _nMoney / _session.k;
+	} else {
+		// cout << "[WARNING][UTILS] fail close transaction with " << _nMoney << " money: session not begin" << endl;
+		_log->log(Logger::Type::WARNING, "BONUS", "close transaction with " + to_string(_nMoney) + " money, but session not begin");
 	}
-	double acrue = _nMoney * _session.k;
+
 	try {
 		bonus::close(acrue);
 		_session.acrueBonuses += acrue;
@@ -662,6 +677,7 @@ void accrueRemainBonusesAndClose() {
 }
 
 bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid) {
+	printf("find card %X..\n", cardid);
 	for (int i = 0; i < _cards.size(); i++) {
 		if (_cards[i].id == cardid) {
 			cardInfo = _cards[i];
@@ -670,6 +686,20 @@ bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid) {
 	}
 
 	return false;
+}
+
+void addMoney(double nMoney, bool asBonus) {
+	_moneyMutex.lock();
+	_nMoney += nMoney;
+	if (_session.isBegin) {
+		if (asBonus) {
+			_session.writeoffBonuses += nMoney;
+		} else {
+			_session.depositedMoney += nMoney;
+		}
+	}
+	_moneyMutex.unlock();
+	render::redraw();
 }
 
 }

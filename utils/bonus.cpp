@@ -170,10 +170,12 @@ namespace {
 	string _cert;
 	char _access[256];
 	double _desiredWriteoff = 0;
+	bool _multibonus = false;
+	bool _isOpen = false;
 
 	json _japi(string ucmd) {
 		char buf[4096] = {0};
-		string cmd  = "python3 ./utils/point_api.py " + _cert + " " + string(_access) + " " + ucmd;
+		string cmd  = "python3 ./point_api.py " + _cert + " " + string(_access) + " " + ucmd;
 		FILE* pp = popen(cmd.c_str(), "r");
 		if (pp == NULL) {
 			throw runtime_error("fail to open pipe to 'point_api.py'");
@@ -187,16 +189,12 @@ namespace {
 		try {
 			data = json::parse(buf);
 		} catch (exception& e) {
-			throw runtime_error("fail to parse result from 'point_api.py': " + string(e.what()));
+			throw runtime_error("fail to parse result from 'point_api.py': " + string(e.what()) + "\noutput: '" + buf + "'");
 		}
-		try {
-			int rc = data["rc"];
-			if (rc < 0) {
-				string rt = data["rt"];
-				throw runtime_error("error response of server '" + to_string(rc) + "': " + rt);
-			}
-		} catch (exception& e) {
-			throw runtime_error("fail to parse result from 'point_api.py': " + string(e.what()));
+		rc = JParser::getf(data, "rc", "'point_api.py'");
+		string rt = JParser::getf(data, "rt", "'point_api.py'");
+		if (rc < 0) {
+			throw runtime_error("error response '" + to_string(rc) + "': " + rt);
 		}
 		return data;
 	}
@@ -221,6 +219,7 @@ void init(json& bonusSysCnf, json& promotions) {
 	}
 
 	_desiredWriteoff = JParser::getf(bonusSysCnf, "bonus-writeoff", "bonus-system");
+	_multibonus = JParser::getf(bonusSysCnf, "multibonus", "bonus-system");
 
 	// fill promotions
 	for (int i = 0; i < promotions.size(); i++) {
@@ -285,37 +284,86 @@ void init(json& bonusSysCnf, json& promotions) {
 	}
 }
 
-CardInfo open(const char* access) {
+bool open(CardInfo& card, const char* access) {
 	memset(_access, 0, sizeof(_access));
 	strcpy(_access, access);
-	json res = _japi("open");
-	int ct = JParser::getf(res, "type", "server response");
-	double cnt = JParser::getf(res, "count", "server response");
-	uint64_t cid = JParser::getf(res, "id", "server response");
-	CardInfo ci;
-	if (ct == 0) {
-		ci.type = CardInfo::BONUS_PERS;
-	} else
-	if (ct == 1) {
-		ci.type = CardInfo::BONUS_ORG;
-	} else
-	if (ct == 5) {
-		ci.type = CardInfo::SERVICE;
-	} else {
-		ci.type = CardInfo::UNKNOWN;
+	CardInfo ci = {.id = 0, .count = 0};
+	ci.type = CardInfo::UNKNOWN;
+	try {
+		json res = _japi("open");
+		int ct = JParser::getf(res, "type", "server response");
+		double cnt = JParser::getf(res, "count", "server response");
+		uint64_t cid = JParser::getf(res, "id", "server response");
+		if (ct == 0) {
+			ci.type = CardInfo::BONUS_PERS;
+		} else
+		if (ct == 1) {
+			ci.type = CardInfo::BONUS_ORG;
+		} else
+		if (ct == 5) {
+			ci.type = CardInfo::SERVICE;
+		} else {
+			ci.type = CardInfo::UNKNOWN;
+		}
+		ci.id = cid;
+		ci.count = cnt;
+		card = ci;
+	} catch (exception& e) {
+		cout << "[INFO][BONUS] can't open transaction: " << e.what() << endl;
+		return false;
 	}
-	ci.id = cid;
-	ci.count = cnt;
-	return ci;
+	_isOpen = true;
+	return true;
+}
+
+bool open(CardInfo& card, uint64_t access) {
+	memset(_access, 0, sizeof(_access));
+	char straccess[32] = {0};
+	sprintf(straccess, "SAK%X", access);
+	strcpy(_access, straccess);
+	CardInfo ci = {.id = 0, .count = 0};
+	ci.type = CardInfo::UNKNOWN;
+	try {
+		json res = _japi("open");
+		int ct = JParser::getf(res, "type", "server response");
+		double cnt = JParser::getf(res, "count", "server response");
+		uint64_t cid = JParser::getf(res, "id", "server response");
+		if (ct == 0) {
+			ci.type = CardInfo::BONUS_PERS;
+		} else
+		if (ct == 1) {
+			ci.type = CardInfo::BONUS_ORG;
+		} else
+		if (ct == 5) {
+			ci.type = CardInfo::SERVICE;
+		} else {
+			ci.type = CardInfo::UNKNOWN;
+		}
+		ci.id = cid;
+		ci.count = cnt;
+		card = ci;
+	} catch (exception& e) {
+		cout << "[INFO][BONUS] can't open transaction: " << e.what() << endl;
+		return false;
+	}
+	_isOpen = true;
+	return true;
 }
 
 double writeoff() {
+	if (!_isOpen) {
+		throw runtime_error("transaction is not open");
+	}
 	json res = _japi("writeoff " + to_string(_desiredWriteoff));
 	return JParser::getf(res, "count", "server response");
 }
 
 void close(double acrue) {
+	if (!_isOpen) {
+		throw runtime_error("transaction is not open");
+	}
 	_japi("close " + to_string(acrue));
+	_isOpen = false;
 }
 
 double getCoef() {
@@ -345,6 +393,10 @@ double getCoef() {
 		_bonus = round(k*100);
 		return k;
 	}
+}
+
+bool ismultibonus() {
+	return _multibonus;
 }
 
 }

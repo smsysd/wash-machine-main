@@ -21,7 +21,7 @@ namespace {
 		Button::Type type;
 		int bm;
 		int index;
-		cout << "[INFO][BUTTON] ibutton " << iButton << endl;
+		// cout << "[INFO][BUTTON] ibutton " << iButton << endl;
 		if (iButton >= 72) {
 			return;
 		}
@@ -30,7 +30,7 @@ namespace {
 			index = iButton;
 			for (int i = 0; i < _buttons.size(); i++) {
 				if (_buttons[i].type == type) {
-					if (_buttons[i].index = index) {
+					if (_buttons[i].index == index) {
 						cout << "[INFO][BUTTON] button " << _buttons[i].id << " pushed" << endl;
 						_onButtonPushed(_buttons[i]);
 					}
@@ -44,7 +44,7 @@ namespace {
 			for (int i = 0; i < _buttons.size(); i++) {
 				if (_buttons[i].type == type) {
 					if (_buttons[i].bm == bm) {
-						if (_buttons[i].index = index) {
+						if (_buttons[i].index == index) {
 							cout << "[INFO][BUTTON] button " << _buttons[i].id << " pushed" << endl;
 							_onButtonPushed(_buttons[i]);
 						}

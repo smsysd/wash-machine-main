@@ -18,15 +18,12 @@
 using namespace std;
 using namespace utils;
 using namespace button_driver;
-using namespace bonus;
-using namespace render;
 using json = nlohmann::json;
 
 const int tErrorFrame = 4;
 const int tLogoFrame = 3;
 
-CardInfo bonusCard;
-CardInfo rfidCard;
+CardInfo card;
 bool isBonusBegin = false;
 
 void onCashAppeared();
@@ -39,7 +36,7 @@ void onServiceEnd();
 int main(int argc, char const *argv[]) {
 
 	init(onCashAppeared, onCashRunout, onButtonPushed, onQr, onCard, onServiceEnd);
-	showTempFrame(SpecFrame::LOGO, tLogoFrame);
+	render::showTempFrame(render::SpecFrame::LOGO, tLogoFrame);
 	setGiveMoneyMode();
 	
 	while (true) {
@@ -51,11 +48,8 @@ int main(int argc, char const *argv[]) {
 
 void onCashAppeared() {
 	if (isBonusBegin) {
-		if (bonusCard.id != 0) {
-			beginSession(Session::Type::CLIENT, bonusCard.id);
-		} else
-		if (rfidCard.id != 0) {
-			beginSession(Session::Type::CLIENT, rfidCard.id);
+		if (card.id != 0) {
+			beginSession(Session::Type::CLIENT, card.id);
 		} else {
 			beginSession(Session::Type::CLIENT, 0);
 		}
@@ -70,8 +64,7 @@ void onCashRunout() {
 		isBonusBegin = false;
 		accrueRemainBonusesAndClose();
 	}
-	bonusCard.id = 0;
-	rfidCard.id = 0;
+	card.id = 0;
 	dropSession();
 	setGiveMoneyMode();
 }
@@ -84,8 +77,7 @@ void onButtonPushed(const Button& button) {
 				isBonusBegin = false;
 				accrueRemainBonusesAndClose();
 			}
-			bonusCard.id = 0;
-			rfidCard.id = 0;
+			card.id = 0;
 			dropSession();
 			setGiveMoneyMode();
 			break;
@@ -106,53 +98,82 @@ void onButtonPushed(const Button& button) {
 	}
 }
 
-void onQr(const char* qr) {
-	if (isBonusBegin) {
-		// TODO (if another qr ?? (if old client ??))
-		writeOffBonuses();
-	} else {
-		bool rc = startBonuses(bonusCard, qr);
-		if (!rc) {
-			showTempFrame(SpecFrame::BONUS_ERROR, tErrorFrame);
-			return;
+void _handleCard() {
+	bool rc;
+	if (card.type == CardInfo::SERVICE) {
+		dropSession();
+		if (cmode() != Mode::SERVICE) {
+			beginSession(Session::Type::SERVICE, card.id);
+			setServiceMode(card.id);
+		} else {
+			setGiveMoneyMode();
 		}
-		isBonusBegin = true;
-		if (bonusCard.type == CardInfo::BONUS_ORG || bonusCard.type == CardInfo::BONUS_PERS) {
+	} else
+	if (card.type == CardInfo::BONUS_ORG || card.type == CardInfo::BONUS_PERS) {
+		if (isBonusBegin) {
+			if (bonus::ismultibonus()) {
+				rc = writeOffBonuses();
+				if (!rc) {
+					render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
+				}
+			}
+		} else {
 			rc = writeOffBonuses();
 			if (!rc) {
-				showTempFrame(SpecFrame::BONUS_ERROR, tErrorFrame);
-				return;
+				render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
+			} else {
+				isBonusBegin = true;
 			}
-		} else
-		if (bonusCard.type == CardInfo::SERVICE) {
-			beginSession(Session::Type::SERVICE, bonusCard.id);
-			setServiceMode(bonusCard.id);
-		} else {
-			showTempFrame(SpecFrame::UNKNOWN_CARD, tErrorFrame);
 		}
+	} else
+	if (card.type == CardInfo::ONETIME) {
+		if (isBonusBegin) {
+			if (bonus::ismultibonus()) {
+				addMoney(card.count);
+			}
+		} else {
+			isBonusBegin = true;
+		}
+	} else {
+		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+	}
+}
+
+void onQr(const char* qr) {
+	bool rc = bonus::open(card, qr);
+	if (rc) {
+		_handleCard();
+	} else {
+		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
 	}
 }
 
 void onCard(uint64_t cardid) {
-	bool rc = getLocalCardInfo(rfidCard, cardid);
-	// TODO static (rfid) card may be bonus too
-	if (!rc) {
-		showTempFrame(SpecFrame::UNKNOWN_CARD, tErrorFrame);
+	bool rc = getLocalCardInfo(card, cardid);
+	if (rc) {
+		if (card.type == CardInfo::SERVICE) {
+			dropSession();
+			if (cmode() != Mode::SERVICE) {
+				beginSession(Session::Type::SERVICE, card.id);
+				setServiceMode(card.id);
+			} else {
+				setGiveMoneyMode();
+			}
+		} else {
+			render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		}
 		return;
 	}
 
-	if (rfidCard.type == CardInfo::SERVICE) {
-		beginSession(Session::Type::SERVICE, rfidCard.id);
-		setServiceMode(rfidCard.id);
-	} else
-	if (rfidCard.type == CardInfo::BONUS_ORG || rfidCard.type == CardInfo::BONUS_PERS) {
-		// may be rfid bonus card
-	} else
-	if (rfidCard.type == CardInfo::UNKNOWN) {
-		showTempFrame(SpecFrame::UNKNOWN_CARD, tErrorFrame);
+	rc = bonus::open(card, cardid);
+	if (rc) {
+		_handleCard();
+	} else {
+		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
 	}
 }
 
 void onServiceEnd() {
+	dropSession();
 	setGiveMoneyMode();
 }

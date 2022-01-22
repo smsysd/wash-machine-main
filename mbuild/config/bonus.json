@@ -1,8 +1,9 @@
 {
 	"bonus-sys": {
 		"type": "aquanter",
-		"certificate": "./config/bonus_cert.json",
-		"bonus-writeoff": 100
+		"certificate": "./config/point_cert.json",
+		"bonus-writeoff": 100,
+		"multibonus": false
 	},
 
 	"promotions": [

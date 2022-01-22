@@ -16,7 +16,8 @@ namespace render {
 		BONUS_ERROR,
 		INTERNAL_ERROR,
 		GIVE_MONEY,
-		GIVE_MONEY_BONUS
+		GIVE_MONEY_BONUS,
+		SERVICE
 	};
 	enum DisplayType {
 		LEDMATRIX,

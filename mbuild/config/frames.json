@@ -12,7 +12,8 @@
 		"give-money-bonus": 2,
 		"error-bonus": 3,
 		"error-internal": 4,
-		"unknown-card": 5
+		"unknown-card": 5,
+		"service": 8
 	},
 
 	"frames": [
@@ -80,9 +81,20 @@
 			"mode": "center",
 			"color": 4,
 			"lines": [
-				"КАРТА НЕ",
-				"РАСПОЗНАНА"
+				"КАРТА   НЕ",
+				"НАЙДЕНА"
 			]
+		},
+		{
+			"id": 8,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"",
+				"СЕРВИС"
+			]			
 		},
 		{
 			"id": 10,
@@ -93,7 +105,7 @@
 			"lines": [
 				"ВЫБЕРИТЕ",
 				"ПРОГРАММУ",
-				"$money RUB"
+				"$money  RUB"
 			]
 		},
 		{
@@ -105,7 +117,7 @@
 			"lines": [
 				"ВЫБЕРИТЕ",
 				"ПРОГРАММУ",
-				"{c5:$money} RUB."
+				"{c5:$money}  RUB"
 			]
 		},
 		{
@@ -116,7 +128,7 @@
 			"color": 7,
 			"lines": [
 				"ПАУЗА",
-				"$money RUB"
+				"$money  RUB"
 			]
 		},
 		{
@@ -127,7 +139,7 @@
 			"color": 7,
 			"lines": [
 				"ПАУЗА",
-				"{c5:$money} RUB."
+				"{c5:$money}  RUB"
 			]
 		},
 		{
@@ -138,7 +150,7 @@
 			"color": 7,
 			"lines": [
 				"ВОДА",
-				"$money RUB"
+				"$money  RUB"
 			]
 		},
 		{
@@ -149,7 +161,7 @@
 			"color": 7,
 			"lines": [
 				"ВОДА",
-				"{c5:$money} RUB."
+				"{c5:$money}  RUB"
 			]
 		},
 		{
@@ -160,7 +172,7 @@
 			"color": 7,
 			"lines": [
 				"ПЕНА",
-				"$money RUB"
+				"$money  RUB"
 			]
 		},
 		{
@@ -171,7 +183,29 @@
 			"color": 7,
 			"lines": [
 				"ПЕНА",
-				"{c5:$money} RUB."
+				"{c5:$money}  RUB"
+			]
+		},
+		{
+			"id": 101,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"СЕРВИС",
+				"ВОДА"
+			]
+		},
+		{
+			"id": 102,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"СЕРВИС",
+				"ПЫЕСОС"
 			]
 		}
 	],

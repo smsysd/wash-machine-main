@@ -74,12 +74,17 @@ void setServiceProgram(int id);
 void beginSession(Session::Type type, uint64_t id);
 void dropSession();
 
-bool startBonuses(CardInfo& cardInfo, const char* qr);
+/* bonus macros */
 bool writeOffBonuses();
 void accrueRemainBonusesAndClose();
 bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid);
 
+/* flags */
 Mode cmode();
+bool issession();
+
+/* extra control */
+void addMoney(double nMoney, bool asBonus = true);
 
 }
 

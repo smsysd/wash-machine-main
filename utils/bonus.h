@@ -34,10 +34,15 @@ struct CardInfo {
 };
 
 void init(json& bonusSysCnf, json& promotions);
-CardInfo open(const char* access);
+
+// no throwable
+bool open(CardInfo& card, const char* access);
+bool open(CardInfo& card, uint64_t access);
+
 double writeoff();
 void close(double acrue);
 double getCoef();
+bool ismultibonus();
 
 }
 

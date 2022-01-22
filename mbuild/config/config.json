@@ -17,6 +17,12 @@
 			"performers": [
 				{"address": 48, "state": 2}
 			]
+		},
+		{
+			"id": 4,
+			"performers": [
+				{"address": 48, "state": 4}
+			]
 		}
 	],
 
@@ -40,7 +46,7 @@
 	],
 
 	"cards": [
-		{"id": 123, "type": "service", "owner": "test user"}
+		{"id": 1017090366, "type": "service", "owner": "test user"}
 	],
 
 	"service-time": 300

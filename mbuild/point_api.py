@@ -62,17 +62,17 @@ def rete(rc, rt):
 
 
 def reto(type, count, uid):
-	print('{"rc": 0, "rt": null, "type": ' + str(type) + ', "count": ' + str(count) + ', "uid": "' + str(uid) + '"}')
+	print('{"rc": 0, "rt": " ", "type": ' + str(type) + ', "count": ' + str(count) + ', "uid": "' + str(uid) + '"}')
 	exit(0)
 
 
 def retc():
-	print('{"rc": 0, "rt": null}')
+	print('{"rc": 0, "rt": " "}')
 	exit(0)
 
 
 def retwoff(count):
-	print('{"rc": 0, "rt": null, "count": ' + str(count) + '}')
+	print('{"rc": 0, "rt": " ", "count": ' + str(count) + '}')
 	exit(0)
 
 
@@ -119,7 +119,7 @@ def req(hn, cert, id, acs, cmd, count, save = False):
 			push_save(hn, cert, id, acs, cmd, count)
 			return None
 		else:
-			rete(-5, "request fault")
+			rete(-5, "request fault: server is unavailable")
 	if r.status_code != 200:
 		if save:
 			push_save(hn, cert, id, acs, cmd, count)
