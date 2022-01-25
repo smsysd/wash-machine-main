@@ -192,7 +192,11 @@ namespace {
 	}
 
 	void _softTerminate() {
-		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal, terminating..");
+		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal");
+		cout << "[INFO][UTILS] wait end of wash.." << endl;
+		while (mode != Mode::GIVE_MONEY) {
+			sleep(2);
+		}
 	}
 
 	void _extboardError(extboard::ErrorType et, string text) {
@@ -457,6 +461,7 @@ void init(
 	_wdtimer = new Timer(1, 0, _withdraw);
 
 	cout << "initialize complete." << endl;
+	// extboard::up_cash();
 }
 
 void setGiveMoneyMode() {

@@ -43,6 +43,10 @@ namespace extboard {
 	void registerOnMoneyAddedHandler(void (*handler)(double nMoney));
 	void registerOnObjectCloserHandler(void (*handler)(bool state));
 	void registerOnErrorHandler(void (*handler)(ErrorType et, string text));
+
+	// * * * DEPRICATED * * *
+	// up cash from temp file, it was created when error initialize and read money before reset not null
+	// void up_cash();
 }
 
 #endif

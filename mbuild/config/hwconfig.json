@@ -87,14 +87,25 @@
 	},
 
 	"leds": [
-		{"id": 0, "type": "bm", "address": 33, "index": 2},
-		{"id": 1, "type": "lp", "index": 1},
-		{"id": 2, "type": "eb", "index": 1},
-		{"id": 3, "type": "bm", "address": 32, "index": 2},
-		{"id": 4, "type": "lp", "index": 2},
-		{"id": 5, "type": "eb", "index": 2},
-		{"id": 6, "type": "bm", "address": 32, "index": 3},
-		{"id": 7, "type": "lp", "index": 3},
-		{"id": 8, "type": "eb", "index": 3}
+		{"id": 1, "type": "bm", "address": 32, "index": 2},
+		{"id": 2, "type": "bm", "address": 32, "index": 3},
+		{"id": 3, "type": "bm", "address": 33, "index": 2},
+		{"id": 4, "type": "bm", "address": 33, "index": 3},
+		{"id": 10, "type": "lp", "index": 0},
+		{"id": 11, "type": "lp", "index": 1},
+		{"id": 12, "type": "lp", "index": 2},
+		{"id": 13, "type": "lp", "index": 3},
+		{"id": 14, "type": "lp", "index": 4},
+		{"id": 15, "type": "lp", "index": 5},
+		{"id": 16, "type": "lp", "index": 6},
+		{"id": 17, "type": "lp", "index": 7},
+		{"id": 18, "type": "lp", "index": 8},
+		{"id": 19, "type": "lp", "index": 9},
+		{"id": 20, "type": "lp", "index": 10},
+		{"id": 21, "type": "lp", "index": 11},
+		{"id": 22, "type": "lp", "index": 12},
+		{"id": 23, "type": "lp", "index": 13},
+		{"id": 24, "type": "lp", "index": 14},
+		{"id": 25, "type": "lp", "index": 15}
 	]
 }

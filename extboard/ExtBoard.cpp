@@ -5,6 +5,8 @@
 #include "../general-tools/general_tools.h"
 
 #include <wiringPi.h>
+#include <fstream>
+#include <sstream>
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
@@ -527,6 +529,12 @@ namespace {
 		return money;
 	}
 
+	void _put_cash(double nMoney) {
+		ofstream f("./.cash", ios_base::app);
+		f << nMoney << endl;
+		f.close();
+	}
+
 	void _getErrorAndThrow(string when) {
 		uint8_t buf[128];
 		memset(buf, 0, sizeof(buf));
@@ -556,6 +564,7 @@ namespace {
 	void _connect () {
 		uint8_t buf[8];
 		int tries = 0;
+
 		try {
 			if (_nrstPin > 0) {
 				pinMode(_nrstPin, OUTPUT);
@@ -855,6 +864,13 @@ namespace {
 				} else
 				if (h->type == HandleType::RESET_EFFECT) {
 					_mspi->cmd((int)Cmd::RESET_EFFECT, h->data[0]);
+					while (true) {
+						usleep(10000);
+						_mspi->read((int)Addr::LOR, buf, 1);
+						if (buf[0] != (uint8_t)OKC) {
+							break;
+						}
+					}
 					fifo_pop(&_operations);
 					suspicion = 0;
 				} else
@@ -1070,7 +1086,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			for (int j = 0; j < ins.size(); j++) {
 				_appendLightIns(iv, ins[j]);
 			}
-			iv[iv.size()-1].cmd |= (uint8_t)LightCmd::NODELAY_BIT;
+			// iv[iv.size()-1].cmd |= (uint8_t)LightCmd::NODELAY_BIT;
 			LightInstruction eli;
 			eli.cmd = (uint8_t)LightCmd::END;
 			iv.push_back(eli);
@@ -1117,13 +1133,13 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			}
 			_effects.push_back(ef);
 			cout << "effect '" << ef.id << "' loaded: " << "nTI - " << ef.nTotalInstructions << " nRI - " << ef.nResetInstructions;
-			// for (int j = 0; j < ef.nTotalInstructions; j++) {
-			// 	if (ef.instructions[j].cmd & 0x80) {
-			// 		printf(" |%X %X %X %X %X|* ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
-			// 	} else {
-			// 		printf(" |%X %X %X %X %X| ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
-			// 	}
-			// }
+			for (int j = 0; j < ef.nTotalInstructions; j++) {
+				if (ef.instructions[j].cmd & 0x80) {
+					printf(" |%X %X %X %X %X|* ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
+				} else {
+					printf(" |%X %X %X %X %X| ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
+				}
+			}
 			cout << endl;
 		} catch (exception& e) {
 			throw runtime_error("fail to load '" + to_string(i) + "' effect: " + string(e.what()));
@@ -1131,7 +1147,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	}
 	_giveMoneyEffect = JParser::getf(specEffects, "give-money", "spec-effects");
 	_serviceEffect = JParser::getf(specEffects, "service", "spec-effects");
-	
+
 	cout << "assert spec-effects.." << endl;
 	try {
 		_getEffect(_giveMoneyEffect);
@@ -1145,12 +1161,12 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	}
 
 	// create mspi connection
+	uint8_t buf[1024];
 	cout << "create MSPI connection.." << endl;
 	_mspi = new Mspi(driver, speed, csPin, intPin, _int);
 	
 	// connect to extboard
 	cout << "connect to extboard.." << endl;
-	uint8_t buf[1024];
 	_connect();
 	
 	// wait for extboard self init
@@ -1184,7 +1200,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	pthread_create(&_thread_id, NULL, _handler, NULL);
 	_operations = fifo_create(32, sizeof(Handle));
 	_isInit = true;
-	_mspi->enableInt();
+	_mspi->enableInt();	
 }
 
 /* Light control */
@@ -1193,6 +1209,7 @@ void startLightEffect(int id, int index) {
 	h.type = HandleType::START_EFFECT;
 	h.data[0] = id;
 	h.data[1] = index;
+	resetLightEffect(index);
 	fifo_put(&_operations, &h);
 }
 
@@ -1260,6 +1277,31 @@ void registerOnObjectCloserHandler(void (*handler)(bool state)) {
 
 void registerOnErrorHandler(void (*handler)(ErrorType et, string text)) {
 	_onError = handler;
+}
+
+void up_cash() {
+	char buf[256] = {0};
+	double nmoney = 0;
+	try {
+		ifstream f("./.cash", ios_base::in);
+		while (f.getline(buf, 256)) {
+			try {
+				nmoney += strtod(buf, NULL);
+			} catch (exception& e) {
+				cout << "[WARNING][EXTBOARD] fail to up cash line: " << e.what() << endl;
+			}
+			memset(buf, 0, 256);
+		}			
+	} catch (exception& e) {
+		cout << "[WARNING][EXTBOARD] fail to up cash: " << e.what() << endl;
+	}
+	
+	system("rm -f ./.cash");
+	if (nmoney > 0) {
+		if (_onMoney != nullptr) {
+			_onMoney(nmoney);
+		}
+	}
 }
 
 }

@@ -19,6 +19,10 @@ ExtBoard.h
 /home/elpi/workspace/sm-sys/wash-machine-main/general-tools/general_tools.h
 wiringPi.h
 -
+fstream
+-
+sstream
+-
 stdlib.h
 -
 string.h
