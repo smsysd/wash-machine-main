@@ -20,6 +20,7 @@ public:
     vector<int> getCharCodes();
     vector<int> getStringDimensions(wstring);
 	int getMaxHeight();
+	string getEncode();
 private:
 
     struct Gliph {
@@ -30,8 +31,12 @@ private:
     static const char _fontMarks[];
     static const char _bgMarks[];
 
+	string _encode;
+
     vector<Gliph> _gliphs;
 
+	wstring _s2ws(const std::string& str);
+	string _ws2s(const std::wstring& wstr);
     void _loadJsonFont(string file, string index);
     RGB332 _extractJsonBitmap(json& bitmap);
 

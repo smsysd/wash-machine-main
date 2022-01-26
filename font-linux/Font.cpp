@@ -68,6 +68,10 @@ int Font::getMaxHeight() {
 	return h;
 }
 
+string Font::getEncode() {
+	return _encode;
+}
+
 vector<int> Font::getStringDimensions(wstring ws) {
 	vector<int> dv;
 	int width = 0;
@@ -90,6 +94,20 @@ vector<int> Font::getStringDimensions(wstring ws) {
 	dv.push_back(height);
 
 	return dv;
+}
+
+wstring Font::_s2ws(const std::string& str) {
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	wstring_convert<convert_typeX, wchar_t> converterX;
+
+	return converterX.from_bytes(str);
+}
+
+string Font::_ws2s(const std::wstring& wstr) {
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+	return converterX.to_bytes(wstr);
 }
 
 void Font::_loadJsonFont(string file, string index) {
@@ -118,13 +136,13 @@ void Font::_loadJsonFont(string file, string index) {
 
 		json f = JParser::getf(data, index, "font file");
 		json s = JParser::getf(f, "symbols", index);
+		_encode = "UTF-16";
 		
 		cout << "load symbols.." << endl;
 		for (int i = 0; i < s.size(); i++) {
 			Gliph cb;
-			string str = s[i]["name"].get<string>();
-			wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-			wstring wstr = converter.from_bytes(str.c_str());
+			string str = s[i]["name"];
+			wstring wstr = _s2ws(str);
 			if (wstr.length() > 0) {
 				cb.charCode = wstr.at(0);
 			} else {

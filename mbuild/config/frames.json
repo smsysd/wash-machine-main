@@ -3,7 +3,10 @@
 		"default-color": 255,
 		"default-font": 0,
 		"default-cursor": [0, 2],
-		"default-mode": "center"
+		"default-mode": "center",
+		"encode": "UTF-8",
+		"disconnect-frame-timeout": 120,
+		"disconnect-bg": 0
 	},
 
 	"spec-frames": {
@@ -13,6 +16,7 @@
 		"error-bonus": 3,
 		"error-internal": 4,
 		"unknown-card": 5,
+		"repair": 6,
 		"service": 8
 	},
 
@@ -86,6 +90,17 @@
 			]
 		},
 		{
+			"id": 6,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 4,
+			"lines": [
+				"ТЕХ.",
+				"РАБОТЫ"
+			]
+		},
+		{
 			"id": 8,
 			"font": 1,
 			"bg": "none",
@@ -149,8 +164,10 @@
 			"mode": "center",
 			"color": 7,
 			"lines": [
+				"",
+				"",
 				"ВОДА",
-				"$money  RUB"
+				"$money"
 			]
 		},
 		{
@@ -160,8 +177,10 @@
 			"mode": "center",
 			"color": 7,
 			"lines": [
+				"",
+				"",
 				"ВОДА",
-				"{c5:$money}  RUB"
+				"{c5:$money}"
 			]
 		},
 		{

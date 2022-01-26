@@ -49,5 +49,7 @@
 		{"id": 1017090366, "type": "service", "owner": "test user"}
 	],
 
-	"service-time": 300
+	"service-time": 300,
+
+	"releive-pressure-program": 1
 }

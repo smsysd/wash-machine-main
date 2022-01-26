@@ -73,6 +73,10 @@ namespace {
 	int _bonusErrorFrame = -1;
 	int _internalErrorFrame = -1;
 	int _serviceFrame = -1;
+	int _repairFrame = -1;
+	int _disconnectBg = -1;
+	int _disconnectFrameTimeout = -1;
+	char _encode[32] = {0};
 	vector<int> _fontsId;
 	vector<int> _blocksId;
 
@@ -106,7 +110,10 @@ namespace {
 
 	void _lmredraw() {
 		// setup default to frame options
-		
+		if (_currentRenderingFrame->bg >= 0) {
+			_lm->writePrepareBlock(_currentRenderingFrame->bg, false);
+			usleep(50000);
+		}
 		_lm->setOpt(_currentRenderingFrame->mode, _currentRenderingFrame->font, _currentRenderingFrame->color);
 		usleep(5000);
 		// cout << "set opt: M " << (int)_currentRenderingFrame->mode << ", F " << (int)_currentRenderingFrame->font << ", C " << (int)_currentRenderingFrame->color << endl;
@@ -132,7 +139,7 @@ namespace {
 			}
 		}
 		string css = _ws2s(ss);
-		_lm->writeString(css.c_str(), "UTF-8");
+		_lm->writeString(css.c_str(), _encode);
 	}
 
 	void _redraw() {
@@ -277,7 +284,7 @@ void regVar(const char* var, wstring name) {
 
 void init(json& displaycnf, json& frames, json& specFrames, json& option, json& bg, json& fonts) {
 	// get necessary config fields
-	cout << "get necessary config fields.." << endl;
+	cout << "[INFO][RENDER] get necessary config fields.." << endl;
 	string dt = JParser::getf(displaycnf, "type", "display");
 	_giveMoneyFrame = JParser::getf(specFrames, "give-money", "spec-frames");
 	_bonusGiveMoneyFrame = JParser::getf(specFrames, "give-money-bonus", "spec-frames");
@@ -286,11 +293,12 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 	_internalErrorFrame = JParser::getf(specFrames, "error-internal", "spec-frames");
 	_logoFrame = JParser::getf(specFrames, "logo", "spec-frames");
 	_serviceFrame = JParser::getf(specFrames, "service", "spec-frames");
+	_repairFrame = JParser::getf(specFrames, "repair", "spec-frames");
 
 	if (dt == "ledmatrix") {
-		cout << "display type is 'ledmatrix'" << endl;
+		cout << "[INFO][RENDER] display type is 'ledmatrix'" << endl;
 		// parse general options
-		cout << "parse general options.." << endl;
+		cout << "[INFO][RENDER] parse general options.." << endl;
 		defFont = JParser::getf(option, "default-font", "general-option");
 		defColor = JParser::getf(option, "default-color", "general-option");
 		json& defCursor = JParser::getf(option, "default-cursor", "general-option");
@@ -305,15 +313,19 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 		} else {
 			throw runtime_error("unknown render mode: " + dm);
 		}
+		string encode = JParser::getf(option, "encode", "general-option");
+		strcpy(_encode, encode.c_str());
+		_disconnectFrameTimeout = JParser::getf(option, "disconnect-frame-timeout", "general-option");
+		_disconnectBg = JParser::getf(option, "disconnect-bg", "general-option");
 
 		// load frames
-		cout << "load frames.." << endl;
+		cout << "[INFO][RENDER] load frames.." << endl;
 		for (int i = 0; i < frames.size(); i++) {
 			try {
 				Frame f;
 				f.id = frames[i]["id"];
 				try {
-					f.bg = frames[i]["background"];
+					f.bg = frames[i]["bg"];
 				} catch (exception& e) {
 					f.bg = -1;
 				}
@@ -362,7 +374,7 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 			}
 		}
 
-		cout << "assert spec frames.." << endl;
+		cout << "[INFO][RENDER] assert spec frames.." << endl;
 		try {
 			_getFrame(_logoFrame);
 		} catch (exception& e) {
@@ -398,9 +410,14 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 		} catch (exception& e) {
 			throw runtime_error("no service frame (" + to_string(_serviceFrame) + ") in frames");
 		}
+		try {
+			_getFrame(_repairFrame);
+		} catch (exception& e) {
+			throw runtime_error("no repair frame (" + to_string(_repairFrame) + ") in frames");
+		}
 
 		// init hardware
-		cout << "init hardware" << endl;
+		cout << "[INFO][RENDER] init hardware" << endl;
 		int addr = JParser::getf(displaycnf, "address", "display");
 		int dp = JParser::getf(displaycnf, "dir-pin", "display");
 		string driver = JParser::getf(displaycnf, "driver", "display");
@@ -430,7 +447,7 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 		}
 
 		// prepare fonts
-		cout << "prepare fonts.." << endl;
+		cout << "[INFO][RENDER] prepare fonts.." << endl;
 		for (int i = 0; i < fonts.size(); i++) {
 			try {
 				string name = JParser::getf(fonts[i], "name", "fonts[" + to_string(i) + "]");
@@ -441,14 +458,14 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 				}
 				_fontsId.push_back(id);
 				Font font("./config/fonts/" + name, ind);
-				_lm->prepareFont(font, id, "UTF-8");
+				_lm->prepareFont(font, id);
 			} catch (exception& e) {
 				throw runtime_error("fail to prepare font " + to_string(i) + ": " + string(e.what()));
 			}
 		}
 
 		// prepare blocks
-		cout << "prepre blocks.." << endl;
+		cout << "[INFO][RENDER] prepre blocks.." << endl;
 		for (int i = 0; i < bg.size(); i++) {
 			try {
 				string name = JParser::getf(bg[i], "name", "bg[" + to_string(i) + "]");
@@ -462,7 +479,11 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 				throw runtime_error("fail to prepare block " + to_string(i) + ": " + string(e.what()));
 			}
 		}
-		cout << "reset and clear display.." << endl;
+		if (_disconnectBg >= 0 && _disconnectFrameTimeout > 0) {
+			cout << "[INFO][RENDER] configure disconnect behavior.." << endl;
+			_lm->setDisconnectBlock(_disconnectBg, _disconnectFrameTimeout);
+		}
+		cout << "[INFO][RENDER] reset and clear display.." << endl;
 		try {
 			_lm->reset();
 			_lm->clear();
@@ -475,7 +496,7 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 	} else {
 		throw runtime_error("unknown display type '" + dt + "'");
 	}
-	cout << "start handler.." << endl;
+	cout << "[INFO][RENDER] start handler.." << endl;
 	_genth = new thread(_handler);
 }
 
@@ -490,6 +511,7 @@ void showFrame(SpecFrame frame) {
 	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame; break;
 	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame; break;
 	case SpecFrame::SERVICE: f = _serviceFrame; break;
+	case SpecFrame::REPAIR: f = _repairFrame; break;
 	}
 
 	try {
@@ -519,6 +541,7 @@ void showTempFrame(SpecFrame frame, int tSec) {
 	case SpecFrame::GIVE_MONEY: f = _giveMoneyFrame; break;
 	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame; break;
 	case SpecFrame::SERVICE: f = _serviceFrame; break;
+	case SpecFrame::REPAIR: f = _repairFrame; break;
 	}
 	
 	try {

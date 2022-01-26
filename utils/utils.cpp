@@ -47,12 +47,14 @@ namespace {
 	Logger* _log = nullptr;
 	Timer* _wdtimer = nullptr;
 	mutex _moneyMutex;
+	bool _terminate = false;
 
 	vector<Program> _programs;
 	vector<Program> _servicePrograms;
 	vector<CardInfo> _cards;
 	Session _session;
 	int _currentProgram = -1;
+	int _releivePressureProgram = -1;
 
 	double _nMoney = 0;
 	time_t _tOffServiceMode = 0;
@@ -195,8 +197,11 @@ namespace {
 		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal");
 		cout << "[INFO][UTILS] wait end of wash.." << endl;
 		while (mode != Mode::GIVE_MONEY) {
-			sleep(2);
+			usleep(10000);
 		}
+		_terminate = true;
+		render::showFrame(render::SpecFrame::REPAIR);
+		sleep(2);
 	}
 
 	void _extboardError(extboard::ErrorType et, string text) {
@@ -264,12 +269,8 @@ void init(
 
 	// get other config fields..
 	cout << "get other config fields.." << endl;
-	try {
-		_tServiceMode = _config->get("service-time");
-	} catch (exception& e) {
-		_log->log(Logger::Type::INFO, "CONFIG", "no field 'service-time' - set as infinity");
-		_tServiceMode = -1;
-	}
+	_tServiceMode = _config->get("service-time");
+	_releivePressureProgram = _config->get("releive-pressure-program");
 
 	// fill programs
 	try {
@@ -465,8 +466,12 @@ void init(
 }
 
 void setGiveMoneyMode() {
+	if (_terminate) {
+		return;
+	}
 	bool isBonus = false;
 	extboard::setRelayGroup(0);
+	extboard::relievePressure();
 	extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, 0);
 	render::SpecFrame f = render::SpecFrame::GIVE_MONEY;
 	if (bonus::getCoef() > 1) {
@@ -484,6 +489,9 @@ void setGiveMoneyMode() {
 }
 
 void setServiceMode(uint64_t cardid) {
+	if (_terminate) {
+		return;
+	}
 	extboard::setRelayGroup(0);
 	render::showFrame(render::SpecFrame::SERVICE);
 
@@ -494,6 +502,9 @@ void setServiceMode(uint64_t cardid) {
 }
 
 void setProgram(int id) {
+	if (_terminate) {
+		return;
+	}
 	Program* p;
 	try {
 		p = _getProgram(_programs, id);
@@ -503,17 +514,10 @@ void setProgram(int id) {
 		return;
 	}
 
-	try {
-		extboard::startLightEffect(p->effect, 0);
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to start effect: " + string(e.what()));
-	}
-
-	try {
-		extboard::setRelayGroup(p->relayGroup);
-	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to set program");
-		return;
+	extboard::startLightEffect(p->effect, 0);
+	extboard::setRelayGroup(p->relayGroup);
+	if (id == _releivePressureProgram) {
+		extboard::relievePressure();
 	}
 
 	try {
@@ -531,6 +535,9 @@ void setProgram(int id) {
 }
 
 void setServiceProgram(int id) {
+	if (_terminate) {
+		return;
+	}
 	Program* p;
 	try {
 		p = _getProgram(_servicePrograms, id);
@@ -567,6 +574,9 @@ void setServiceProgram(int id) {
 }
 
 void beginSession(Session::Type type, uint64_t id) {
+	if (_terminate) {
+		return;
+	}
 	double k = bonus::getCoef();
 	_session.k = k;
 	_session.k100 = round(k*100);
@@ -648,6 +658,9 @@ void dropSession() {
 }
 
 bool writeOffBonuses() {
+	if (_terminate) {
+		return false;
+	}
 	try {
 		double realWriteoff = bonus::writeoff();
 		_nMoney += realWriteoff;
@@ -664,6 +677,9 @@ bool writeOffBonuses() {
 }
 
 void accrueRemainBonusesAndClose() {
+	if (_terminate) {
+		return;
+	}
 	double acrue = _nMoney;
 	if (_session.isBegin) {
 		// acrue = _nMoney / _session.k;

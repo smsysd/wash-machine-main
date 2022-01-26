@@ -56,6 +56,7 @@ void LedMatrix::switchBuffer() {
 
 void LedMatrix::clear() {
     _cmd(Cmd::CLEAR, _toLarge);
+	usleep(50000);
 }
 
 void LedMatrix::reset() {
@@ -127,23 +128,60 @@ void LedMatrix::writePrepareBlock(int iBlock, bool sw) {
 	_mb->rwrite(_deviceAddress, (int)AddressMap::BLOCK, buf, 1, _toLarge);
 }
 
+void LedMatrix::setDisconnectBlock(int iBlock, int timeout_sec, bool enable) {
+	int buf[2];
+	bool save = false;
+	// cout << "sdb: read" << endl;
+	usleep(10000);
+	_mb->rread(_deviceAddress, (int)AddressMap::INACTIONM, &buf[1], 1, _toLarge);
+	usleep(10000);
+	if (enable) {
+		_assertBlock(iBlock);
+		if (timeout_sec <= 0) {
+			throw runtime_error("incorrect arg: timeout_sec");
+		}
+		if (timeout_sec > 127) {
+			timeout_sec = 127;
+		}
+		buf[0] = iBlock;
+		buf[0] |= timeout_sec << 8;
+		buf[0] |= 0x8000;
+		if (buf[0] != buf[1]) {
+			// cout << "sdb: write en" << endl;
+			_mb->rwrite(_deviceAddress, (int)AddressMap::INACTIONM, buf, 1, _toLarge);
+			save = true;
+		}
+	} else {
+		if (buf[1] & 0x8000) {
+			buf[0] = 0;
+			// cout << "sdb: write dis" << endl;
+			_mb->rwrite(_deviceAddress, (int)AddressMap::INACTIONM, buf, 1, _toLarge);
+			save = true;
+		}
+	}
+	if (save) {
+		usleep(50000);
+		// cout << "sdb: save" << endl;
+		_mb->cmd(_deviceAddress, (int)Cmd::SAVE, _toLarge);
+		usleep(50000);
+	}
+}
+
 void LedMatrix::setBright(float bright) {
 	int buf[10];
 	buf[0] = (uint8_t)(bright * 255.0);
 	_mb->rwrite(_deviceAddress, (int)AddressMap::BRIGHT, buf, 1, _toLarge);
 }
 
-void LedMatrix::prepareFont(Font& font, int iFont, const char* encode) {
-	cout << "prepare font.." << endl;
+void LedMatrix::prepareFont(Font& font, int iFont) {
 	int buf[_nFonts*2];
 	_assertFont(iFont);
 	_mb->rread(_deviceAddress, (int)AddressMap::CHECK_FONTS, buf, _nFonts * 2, _toLarge);
 	uint32_t rh = (buf[iFont*2] << 16) | buf[iFont*2 + 1];
 	uint32_t ch = _hash(font);
 	if (rh != ch) {
-		cout << "received and calculated hash is different, r: " << rh << ", c: " << ch << ", of font " << iFont << endl;
-		// getchar();
-		_loadFont(font, iFont, encode);
+		cout << "[INFO][LEDMATRIX] received and calculated hash is different, r: " << rh << ", c: " << ch << ", of font " << iFont << endl;
+		_loadFont(font, iFont);
 	}
 }
 
@@ -154,13 +192,12 @@ void LedMatrix::prepareBlock(RGB332 bitmap, int iBlock) {
 	uint32_t rh = (buf[0] << 16) | buf[1];
 	uint32_t ch = _hash(bitmap);
 	if (rh != ch) {
-		cout << "received and calculated hash is different, r: " << rh << ", c: " << ch << ", of block " << iBlock << endl;
+		cout << "[INFO][LEDMATRIX] received and calculated hash is different, r: " << rh << ", c: " << ch << ", of block " << iBlock << endl;
 		_loadBlock(bitmap, iBlock);
 	}
 }
 
 void LedMatrix::prepareBlock(string pathToImg, int iBlock) {
-	// cout << pathToImg.c_str() << endl;
 	BMP bmp(pathToImg.c_str());
 	int w = bmp.bmp_info_header.width;
 	int h = bmp.bmp_info_header.height;
@@ -183,7 +220,7 @@ void LedMatrix::prepareBlock(string pathToImg, int iBlock) {
 	prepareBlock(data, iBlock);
 }
 
-void LedMatrix::_loadFont(Font& font, int iFont, const char* encode) {
+void LedMatrix::_loadFont(Font& font, int iFont) {
 	int buf[256];
 	
 	buf[0] = iFont;
@@ -191,21 +228,22 @@ void LedMatrix::_loadFont(Font& font, int iFont, const char* encode) {
 	uint32_t h = _hash(font);
 	buf[2] = h >> 16;
 	buf[3] = (uint16_t)h;
-	cout << "load font.." << endl;
 	_mb->rwrite(_deviceAddress, (int)AddressMap::LOAD_FONT, buf, 4, _toLarge);
 
 	vector<int> chars = font.getCharCodes();
 	RGB332 bm;
-	cout << "load symbols.." << endl;
 	for (int i = 0; i < chars.size(); i++) {
 		bm = font.getGliph(chars[i]);
 		buf[0] = bm.width;
-		buf[1] = _toCP866(chars[i], encode);
+		buf[1] = _toCP866(chars[i], font.getEncode().c_str());
 		_gliphToBitmap(bm, &buf[2]);
 		// cout << "width: " << buf[0] << ", index: " << buf[1] << endl;
+		usleep(10000);
 		_mb->rwrite(_deviceAddress, (int)AddressMap::LOAD_CHAR, buf, 26, _toLarge);
 	}
+	usleep(50000);
 	_mb->cmd(_deviceAddress, (int)Cmd::SAVE, _toLarge);
+	usleep(50000);
 }
 
 void LedMatrix::_loadBlock(RGB332& bitmap, int iBlock) {
@@ -213,12 +251,10 @@ void LedMatrix::_loadBlock(RGB332& bitmap, int iBlock) {
 	
 	buf[0] = iBlock;
 	buf[1] = bitmap.width | (bitmap.height << 8);
-	cout << "load block, w: " << bitmap.width << ", h: " << bitmap.height << endl;
 	uint32_t h = _hash(bitmap);
 	buf[2] = h >> 16;
 	buf[3] = (uint16_t)h;
 	_mb->rwrite(_deviceAddress, (int)AddressMap::LOAD_BLOCK, buf, 4, _toLarge);
-
 	int n = bitmap.width * bitmap.height;
 	int j = 0;
 	int k = 0;
@@ -245,6 +281,8 @@ void LedMatrix::_loadBlock(RGB332& bitmap, int iBlock) {
 		} else {
 			cl = n;
 		}
+		// cout << "[INFO][LEDMATRIX] load " << cl*5 << " pixels" << endl;
+		usleep(50000);
 		_mb->rwrite(_deviceAddress, (int)AddressMap::LOAD_PIXELS, &buf[bi], cl, _toLarge);
 		n -= cl;
 		bi += cl;
@@ -252,7 +290,9 @@ void LedMatrix::_loadBlock(RGB332& bitmap, int iBlock) {
 			break;
 		}
 	}
+	usleep(50000);
 	_mb->cmd(_deviceAddress, (int)Cmd::SAVE, _toLarge);
+	usleep(50000);
 }
 
 void LedMatrix::_cmd(Cmd cmd, int timeout) {

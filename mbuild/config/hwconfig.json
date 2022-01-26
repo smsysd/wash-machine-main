@@ -5,8 +5,8 @@
 			"used-mask": 3
 		},
 		"modules": [
-			{"address": 32, "active-levels": 0, "io-mask": 239},
-			{"address": 33, "active-levels": 0, "io-mask": 239}
+			{"address": 33, "active-levels": 0, "io-mask": 239},
+			{"address": 32, "active-levels": 0, "io-mask": 239}
 		]
 	},
 
@@ -15,7 +15,7 @@
 		"int-pin": 2,
 		"cs-pin": 15,
 		"nrst-pin": 16,
-		"speed": 8000
+		"speed": 32000
 	},
 
 	"performing-units": [
@@ -23,13 +23,10 @@
 	],
 
 	"releive-instructions": [
-		{"set": [42, 255]},
-		{"delay": 1000},
-		{"set": [42, 0]},
-		{"delay": 1000},
-		{"set": [42, 255]},
-		{"delay": 1000},
-		{"set": [42, 0]}
+		{"set": [48, 62]},
+		{"delay": 5500},
+		{"set": [48, 0]},
+		{"delay": 1000}
 	],
 
 	"display": {

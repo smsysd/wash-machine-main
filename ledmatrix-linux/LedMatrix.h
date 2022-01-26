@@ -37,8 +37,9 @@ public:
 	void setDefaultCursor(int x, int y);
 
     void setBright(float bright);
+	void setDisconnectBlock(int iBlock, int timeout_sec, bool enable = true);
 
-	void prepareFont(Font& font, int iFont, const char* encode);
+	void prepareFont(Font& font, int iFont);
 	void prepareBlock(RGB332 bitmap, int iBlock);
 	void prepareBlock(string pathToImg, int iBlock);
 
@@ -57,6 +58,7 @@ private:
 		CURSOR = 0x11,
 		DEFCURSOR = 0x12,
 		BLOCK = 0x20,
+		INACTIONM = 0x24,
 		BRIGHT = 0x30,
 		LOAD_FONT = 0x100,
 		LOAD_CHAR = 0x105,
@@ -83,7 +85,7 @@ private:
 	int _toLarge;
 
     void _cmd(Cmd cmd, int timeout);
-	void _loadFont(Font& font, int iFont, const char* encode);
+	void _loadFont(Font& font, int iFont);
 	void _loadBlock(RGB332& bitmap, int iBlock);
 
 	uint32_t _hash(Font& font);

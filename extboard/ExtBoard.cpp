@@ -33,6 +33,19 @@ namespace {
 		INIT_EXTDEV = 0x05,
 		WORK = 0x06
 	};
+	enum class LOR {
+		ST_MASK = 0x03,
+		ST_OKC = 0x02,
+		ST_OK = 0x01,
+		ST_ERROR = 0x00,
+		OP_NONE = 0x00,
+		OP_RELEIVE = 0x01 << 2,
+		OP_RSTEFFECT = 0x02 << 2,
+		OP_DIRPERFWR = 0x03 << 2,
+		OP_RESET = 0x04 << 2,
+		OP_SETRELGR = 0x05 << 2,
+		OP_MASK = 0xFC
+	};
 
 	enum class ErrorCode {
 		NONE = 0x00,
@@ -233,6 +246,7 @@ namespace {
 	Fifo _operations;
 	int _currentRelayGroupId = -1;
 	int _nrstPin = -1;
+	uint8_t _lor = (uint8_t)LOR::OP_NONE | (uint8_t)LOR::ST_OK;
 	mutex _mutex;
 
 	void (*_onButton)(int iButton);
@@ -646,14 +660,14 @@ namespace {
 		_mspi->cmd((int)Cmd::END_OPT, 0);
 		int timeout = 0;
 		while (true) {
-			usleep(100000);
+			usleep(250000);
 			_mspi->read((int)Addr::STATUS, buf, 1);
 			if (buf[0] == (uint8_t)Status::WORK) {
 				break;
 			} else
 			if (buf[0] == (uint8_t)Status::INIT_EXTDEV) {
 				timeout++;
-				if (timeout > 200) { // ~20 seconds
+				if (timeout > 400) { // ~20 seconds
 					throw ("fail to init external devices: timeout");
 				}
 			} else if (buf[0] == (uint8_t)Status::ERROR) {
@@ -662,6 +676,13 @@ namespace {
 				throw runtime_error("fail to init external devices: incorrect status " + to_string((int)buf[0]));
 			}
 		}
+	}
+
+	uint8_t _getLor() {
+		uint8_t temp;
+		temp =_lor;
+		_lor = (uint8_t)LOR::OP_NONE | (uint8_t)LOR::ST_OK;
+		return temp;
 	}
 
 	void _int(int reason) {
@@ -720,6 +741,7 @@ namespace {
 			try {
 				_mspi->read((int)Addr::LOR, buf, 1);
 				cout << "[INFO][ETBOARD] LOR " << (int)buf[0] << endl;
+				_lor = buf[0];
 			} catch (exception& e) {
 				cout << "[WARNING][EXTBOARD]|INT| fail to read LOR: " << e.what() << endl;
 				suspicion++;
@@ -852,10 +874,16 @@ namespace {
 				} else
 				if (h->type == HandleType::RELEIVE_PRESSURE) {
 					_mspi->cmd((int)Cmd::RELIEVE_PRESSURE, 0);
+					_mutex.unlock();
+					int timeout = 0;
 					while (true) {
 						usleep(100000);
-						_mspi->read((int)Addr::LOR, buf, 1);
-						if (buf[0] != (uint8_t)OKC) {
+						if (_getLor() == ((uint8_t)LOR::OP_RELEIVE | (uint8_t)LOR::ST_OK)) {
+							break;
+						}
+						timeout++;
+						if (timeout > 400) {
+							suspicion++;
 							break;
 						}
 					}
@@ -910,7 +938,7 @@ namespace {
 			}
 			if (borehole % 1000 == 0) {
 				// add repetive handles
-				if (_currentRelayGroupId >= 0) {
+				if (_currentRelayGroupId >= 0 && _operations.nElements == 0) {
 					setRelayGroup(_currentRelayGroupId);
 				}
 			}
@@ -922,14 +950,14 @@ namespace {
 
 void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& specEffects, json& releiveInstructions) {
 	// get hw extboard config
-	cout << "load hardware extboard config.." << endl;
+	cout << "[INFO][EXTBOARD] load hardware extboard config.." << endl;
 	string driver = JParser::getf(extboard, "driver", "extboard");
 	int speed = JParser::getf(extboard, "speed", "extboard");
 	int csPin = JParser::getf(extboard, "cs-pin", "extboard");
 	int intPin = JParser::getf(extboard, "int-pin", "extboard");
 	_nrstPin = JParser::getf(extboard, "nrst-pin", "extboard");
 
-	cout << "load performing units config.." << endl;
+	cout << "[INFO][EXTBOARD] load performing units config.." << endl;
 	for (int i = 0; i < performingUnits.size(); i++) {
 		try {
 			PerformerUnit pu;
@@ -957,7 +985,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		}
 	}
 
-	cout << "load relays groups.." << endl;
+	cout << "[INFO][EXTBOARD] load relays groups.." << endl;
 	for (int i = 0; i < relaysGroups.size(); i++) {
 		try {
 			RelaysGroup rg = {0};
@@ -980,7 +1008,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		}
 	}
 	
-	cout << "load payment hardware config.." << endl;
+	cout << "[INFO][EXTBOARD] load payment hardware config.." << endl;
 	json& cash = JParser::getf(payment, "cash", "payment");
 	_loadPayment(cash, _cash, "cash");
 	json& coin = JParser::getf(payment, "coin", "payment");
@@ -988,7 +1016,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	json& terminal = JParser::getf(payment, "terminal", "payment");
 	_loadPayment(terminal, _terminal, "terminal");
 
-	cout << "load buttons hardware config.." << endl;
+	cout << "[INFO][EXTBOARD] load buttons hardware config.." << endl;
 	json& bseb = JParser::getf(buttons, "extboard", "buttons");
 	_buttoneb.addr = 0;
 	_buttoneb.activeLevels = JParser::getf(bseb, "active-levels", "buttons extborad");
@@ -1018,14 +1046,16 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		}
 	}
 
-	cout << "load range-finder hardware config.." << endl;
+	cout << "[INFO][EXTBOARD] load range-finder hardware config.." << endl;
 	_closerRange = JParser::getf(rangeFinder, "closer-range", "range-finder");
 
-	cout << "load temperature sensors hardware config.." << endl;
+	cout << "[INFO][EXTBOARD] load temperature sensors hardware config.." << endl;
 	_tempSens1Addr = JParser::getf(tempSens[0], "address", "temp-sens '0'");
 	_tempSens2Addr = JParser::getf(tempSens[1], "address", "temp-sens '1'");
 
-	cout << "load releive instructions.." << endl;
+	cout << "[INFO][EXTBOARD] load releive instructions.." << endl;
+	memset(_releiveInstructions, 0, sizeof(_releiveInstructions));
+	_nReleiveInstructions = 0;
 	for (int i = 0; i < releiveInstructions.size(); i++) {
 		try {
 			bool success = false;
@@ -1038,15 +1068,18 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 				_releiveInstructions[i*2 + 1] = states;
 			} catch (exception& e) {
 				int delay = ins["delay"];
-				_releiveInstructions[i*2] = 0;
+				_releiveInstructions[i*2] = 255;
 				_releiveInstructions[i*2 + 1] = delay / 100;
 			}
+			// cout << "ins " << i << " added: " << (int)_releiveInstructions[i*2] << " " << (int)_releiveInstructions[i*2 + 1] << " " << endl;
+			_nReleiveInstructions++;
 		} catch (exception& e) {
 			throw runtime_error("fail to load '" + to_string(i) + "' releive instruction: " + string(e.what()));
 		}
 	}
+	
 
-	cout << "load leds.." << endl;
+	cout << "[INFO][EXTBOARD] load leds.." << endl;
 	for (int i = 0; i < leds.size(); i++) {
 		try {
 			Led led;
@@ -1073,7 +1106,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		}
 	}
 
-	cout << "load effects instructions.." << endl;
+	cout << "[INFO][EXTBOARD] load effects instructions.." << endl;
 	for (int i = 0; i < effects.size(); i++) {
 		try {
 			LightEffect ef;
@@ -1132,14 +1165,14 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 				ef.data[8 + j*5 + 4] = ef.instructions[j].data[3];
 			}
 			_effects.push_back(ef);
-			cout << "effect '" << ef.id << "' loaded: " << "nTI - " << ef.nTotalInstructions << " nRI - " << ef.nResetInstructions;
-			for (int j = 0; j < ef.nTotalInstructions; j++) {
-				if (ef.instructions[j].cmd & 0x80) {
-					printf(" |%X %X %X %X %X|* ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
-				} else {
-					printf(" |%X %X %X %X %X| ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
-				}
-			}
+			cout << "[INFO][EXTBOARD] effect '" << ef.id << "' loaded: " << "nTI - " << ef.nTotalInstructions << " nRI - " << ef.nResetInstructions;
+			// for (int j = 0; j < ef.nTotalInstructions; j++) {
+			// 	if (ef.instructions[j].cmd & 0x80) {
+			// 		printf(" |%X %X %X %X %X|* ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
+			// 	} else {
+			// 		printf(" |%X %X %X %X %X| ", ef.instructions[j].cmd & 0x7F, ef.instructions[j].data[0], ef.instructions[j].data[1], ef.instructions[j].data[2], ef.instructions[j].data[3]);
+			// 	}
+			// }
 			cout << endl;
 		} catch (exception& e) {
 			throw runtime_error("fail to load '" + to_string(i) + "' effect: " + string(e.what()));
@@ -1148,7 +1181,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	_giveMoneyEffect = JParser::getf(specEffects, "give-money", "spec-effects");
 	_serviceEffect = JParser::getf(specEffects, "service", "spec-effects");
 
-	cout << "assert spec-effects.." << endl;
+	cout << "[INFO][EXTBOARD] assert spec-effects.." << endl;
 	try {
 		_getEffect(_giveMoneyEffect);
 	} catch (exception& e) {
@@ -1162,15 +1195,15 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 
 	// create mspi connection
 	uint8_t buf[1024];
-	cout << "create MSPI connection.." << endl;
+	cout << "[INFO][EXTBOARD] create MSPI connection.." << endl;
 	_mspi = new Mspi(driver, speed, csPin, intPin, _int);
 	
 	// connect to extboard
-	cout << "connect to extboard.." << endl;
+	cout << "[INFO][EXTBOARD] connect to extboard.." << endl;
 	_connect();
 	
 	// wait for extboard self init
-	cout << "wait for extboard self init.." << endl;
+	cout << "[INFO][EXTBOARD] wait for extboard self init.." << endl;
 	int timeout = 0;
 	while (true) {
 		usleep(100000);
@@ -1191,12 +1224,12 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		}
 	}
 
-	cout << "upload options.." << endl;
+	cout << "[INFO][EXTBOARD] upload options.." << endl;
 	_uploadAllOptions();
-	cout << "init external devices.." << endl;
+	cout << "[INFO][EXTBOARD] init external devices.." << endl;
 	usleep(10000);
 	_initExtdev();
-	cout << "start handler.." << endl;
+	cout << "[INFO][EXTBOARD] start handler.." << endl;
 	pthread_create(&_thread_id, NULL, _handler, NULL);
 	_operations = fifo_create(32, sizeof(Handle));
 	_isInit = true;
