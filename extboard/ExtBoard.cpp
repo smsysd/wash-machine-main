@@ -916,10 +916,14 @@ namespace {
 				} else
 				if (h->type == HandleType::START_EFFECT) {
 					fifo_pop(&_operations);
-					LightEffect* ef = _getEffect(h->data[0]);
-					ef->data[0] = h->data[1];
-					_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*5);
-					suspicion = 0;
+					try {
+						LightEffect* ef = _getEffect(h->data[0]);
+						ef->data[0] = h->data[1];
+						_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*5);
+						suspicion = 0;
+					} catch (exception& e) {
+						cout << "[WARNING][EXTBOARD]|HANDLER| fail to start effect: " << e.what() << endl;
+					}
 				} else {
 					fifo_pop(&_operations);
 					cout << "[WARNING][EXTBOARD]|HANDLER| undefined handle: " << (int)h->type << endl;
@@ -927,7 +931,7 @@ namespace {
 			} catch (exception& e) {
 				cout << "[WARNING][EXTBOARD]|HANDLER| fail handle: " << e.what() << endl;
 				suspicion++;
-				sleep(2);
+				sleep(1);
 			}
 			_mutex.unlock();
 			if (suspicion > 10) {
