@@ -3,10 +3,7 @@
 DIR=${PWD##*/}
 
 if [[ $1 = "-c" ]] ; then
-rm -f -r ./build
-rm -f -r ./CMakeFiles
-rm -f CMakeCache.txt
+bash clean.sh
 fi
-
-cmake --clean-first ../$DIR
+echo 1111111111111111
 cmake --build ../$DIR
