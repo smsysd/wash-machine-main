@@ -37,6 +37,8 @@ struct Program {
 	int useTimeSec;
 	double spendMoney;
 	int effect;
+	bool releivePressure;
+	bool flap;
 };
 
 struct Session {
@@ -66,7 +68,7 @@ void init(
 	void (*onServiceEnd)());
 
 void setGiveMoneyMode();
-void setServiceMode(uint64_t cardid);
+void setServiceMode();
 void setProgram(int id);
 void setServiceProgram(int id);
 

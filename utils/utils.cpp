@@ -48,17 +48,19 @@ namespace {
 	Timer* _wdtimer = nullptr;
 	mutex _moneyMutex;
 	bool _terminate = false;
+	bool _normalwork = false;
 
 	vector<Program> _programs;
 	vector<Program> _servicePrograms;
 	vector<CardInfo> _cards;
 	Session _session;
 	int _currentProgram = -1;
-	int _releivePressureProgram = -1;
 
 	double _nMoney = 0;
 	time_t _tOffServiceMode = 0;
 	int _tServiceMode = 0;
+	char errort[32];
+	char errord[64];
 
 	Program* _getProgram(vector<Program>& programs, int id) {
 		for (int i = 0; i < programs.size(); i++) {
@@ -133,7 +135,7 @@ namespace {
 
 	Timer::Action _withdraw(timer_t) {
 		// cout << "withdraw " << time(NULL) % 100 << endl;
-		if(!_session.isBegin) {
+		if(!_session.isBegin || !_normalwork) {
 			return Timer::Action::CONTINUE;
 		}
 		_moneyMutex.lock();
@@ -167,6 +169,9 @@ namespace {
 	ReturnCode _handler(uint16_t id, void* arg) {
 		static int borehole = 0;
 		static double previousk = 0;
+		if (!_normalwork) {
+			return OK;
+		}
 
 		if (mode == Mode::SERVICE && _tServiceMode > 0) {
 			if (time(NULL) > _tOffServiceMode) {
@@ -174,7 +179,7 @@ namespace {
 			}
 		}
 		
-		if (borehole % 30 == 0) {
+		if (mode == Mode::GIVE_MONEY && borehole % 30 == 0) {
 			double k = bonus::getCoef();
 			if (previousk > 1 && k <= 1) {
 				previousk = k;
@@ -208,13 +213,25 @@ namespace {
 		string ets;
 		switch (et) {
 		case extboard::ErrorType::NONE:
-			cout << "[INFO][EXTBOARD] restored " << text << endl; 
+			switch (mode) {
+			case Mode::GIVE_MONEY: setGiveMoneyMode(); break;
+			case Mode::PROGRAM: setProgram(_currentProgram); break;
+			case Mode::SERVICE: setServiceMode();
+			}
+			cout << "[INFO][EXTBOARD] restored " << text << endl;
+			_normalwork = true;
 			return;
 		case extboard::ErrorType::DISCONNECT_DEV: ets = "DISCONNECT DEV"; break;
-		case extboard::ErrorType::INTERNAL: ets = "INTERNAL ERROR";break;
+		case extboard::ErrorType::INTERNAL: ets = "INTERNAL"; break;
 		default: break;
 		}
+		_normalwork = false;
 		_log->log(Logger::Type::ERROR, "EXTBOARD", ets + ": " + text);
+		memset(errort, 0, sizeof(errort));
+		memset(errord, 0, sizeof(errord));
+		snprintf(errort, sizeof(errort), "%s", ets.c_str());
+		snprintf(errord, sizeof(errord), "%s", text.c_str());
+		render::showFrame(render::SpecFrame::INTERNAL_ERROR);
 	}
 
 }
@@ -270,7 +287,6 @@ void init(
 	// get other config fields..
 	cout << "get other config fields.." << endl;
 	_tServiceMode = _config->get("service-time");
-	_releivePressureProgram = _config->get("releive-pressure-program");
 
 	// fill programs
 	try {
@@ -288,6 +304,8 @@ void init(
 			sp.rate = JParser::getf(jp, "rate", "program at [" + to_string(i) + "]");
 			sp.rate /= 60;
 			sp.effect = JParser::getf(jp, "effect", "program at [" + to_string(i) + "]");
+			sp.releivePressure = JParser::getf(jp, "releive", "program at [" + to_string(i) + "]");
+			sp.flap = JParser::getf(jp, "flap", "program at [" + to_string(i) + "]");
 			_programs.push_back(sp);
 		}
 	} catch (exception& e) {
@@ -351,6 +369,8 @@ void init(
 		render::init(display, _frames->get("frames"), sf, go, bg, fonts);
 		render::regVar(&_nMoney, L"money", 0);
 		render::regVar(&_session.k100, L"sbonus");
+		render::regVar(errort, L"errort");
+		render::regVar(errord, L"errord");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		throw runtime_error("fail to init render core: " + string(e.what()));
@@ -462,7 +482,7 @@ void init(
 	_wdtimer = new Timer(1, 0, _withdraw);
 
 	cout << "initialize complete." << endl;
-	// extboard::up_cash();
+	_normalwork = true;
 }
 
 void setGiveMoneyMode() {
@@ -473,6 +493,7 @@ void setGiveMoneyMode() {
 	extboard::setRelayGroup(0);
 	extboard::relievePressure();
 	extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, 0);
+	extboard::flap(true);
 	render::SpecFrame f = render::SpecFrame::GIVE_MONEY;
 	if (bonus::getCoef() > 1) {
 		f = render::SpecFrame::GIVE_MONEY_BONUS;
@@ -488,11 +509,12 @@ void setGiveMoneyMode() {
 	mode = Mode::GIVE_MONEY;
 }
 
-void setServiceMode(uint64_t cardid) {
+void setServiceMode() {
 	if (_terminate) {
 		return;
 	}
 	extboard::setRelayGroup(0);
+	extboard::flap(false);
 	render::showFrame(render::SpecFrame::SERVICE);
 
 	extboard::startLightEffect(extboard::SpecEffect::SERVICE_EFFECT, 0);
@@ -515,8 +537,9 @@ void setProgram(int id) {
 	}
 
 	extboard::startLightEffect(p->effect, 0);
+	extboard::flap(p->flap);
 	extboard::setRelayGroup(p->relayGroup);
-	if (id == _releivePressureProgram) {
+	if (p->releivePressure) {
 		extboard::relievePressure();
 	}
 

@@ -104,7 +104,7 @@ void _handleCard() {
 		dropSession();
 		if (cmode() != Mode::SERVICE) {
 			beginSession(Session::Type::SERVICE, card.id);
-			setServiceMode(card.id);
+			setServiceMode();
 		} else {
 			setGiveMoneyMode();
 		}
@@ -155,7 +155,7 @@ void onCard(uint64_t cardid) {
 			dropSession();
 			if (cmode() != Mode::SERVICE) {
 				beginSession(Session::Type::SERVICE, card.id);
-				setServiceMode(card.id);
+				setServiceMode();
 			} else {
 				setGiveMoneyMode();
 			}

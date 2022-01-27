@@ -27,10 +27,10 @@
 	],
 
 	"programs": [
-		{"id": 0, "name": "choose", "frame": 10, "bonus-frame": 11, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 1},
-		{"id": 1, "name": "pause", "frame": 12, "bonus-frame": 13, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 1},
-		{"id": 2, "name": "water", "frame": 14, "bonus-frame": 15, "relay-group": 1, "free-use-time": 2, "rate": 20, "effect": 1},
-		{"id": 3, "name": "foam", "frame": 16, "bonus-frame": 17, "relay-group": 2, "free-use-time": 2, "rate": 60, "effect": 1}
+		{"id": 0, "name": "choose", "frame": 10, "bonus-frame": 11, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0, "releive": false, "flap": true},
+		{"id": 1, "name": "pause", "frame": 12, "bonus-frame": 13, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0, "releive": true, "flap": true},
+		{"id": 2, "name": "water", "frame": 14, "bonus-frame": 15, "relay-group": 1, "free-use-time": 2, "rate": 20, "effect": 0, "releive": false, "flap": false},
+		{"id": 3, "name": "foam", "frame": 16, "bonus-frame": 17, "relay-group": 2, "free-use-time": 2, "rate": 60, "effect": 0, "releive": false, "flap": false}
 	],
 
 	"service-programs": [
@@ -49,7 +49,5 @@
 		{"id": 1017090366, "type": "service", "owner": "test user"}
 	],
 
-	"service-time": 300,
-
-	"releive-pressure-program": 1
+	"service-time": 300
 }

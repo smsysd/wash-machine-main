@@ -215,7 +215,8 @@ namespace {
 		RESET_EFFECT,		// data: effect_index
 		RELEIVE_PRESSURE,	// data: none
 		SET_RELAY_GROUP,	// data: group_id 
-		DIRECT_SET_RELAYS	// data: addr, states
+		DIRECT_SET_RELAYS,	// data: addr, states
+		FLAP				// data: state
 	};
 
 	struct Handle {
@@ -549,35 +550,36 @@ namespace {
 		f.close();
 	}
 
-	void _getErrorAndThrow(string when) {
+	void _getErrorAndThrow() {
 		uint8_t buf[128];
 		memset(buf, 0, sizeof(buf));
 		
 		try {
 			_mspi->read((int)Addr::ERROR_DESC, buf, 64);
 		} catch (exception& e) {
-			throw runtime_error("fail " + when + ", and fail read error description");
+			throw runtime_error("FRED");
 		}
 		
 		if (buf[0] == (uint8_t)ErrorCode::INTERNAL) {
-			throw runtime_error("fail " + when + ": " + string((char*)&buf[1]));
+			throw runtime_error((char*)&buf[1]);
 		} else
 		if (buf[0] == (uint8_t)ErrorCode::NONE) {
-			throw runtime_error("fail " + when + ": NONE ERROR");
+			throw runtime_error("NONE");
 		} else
 		if (buf[0] == (uint8_t)ErrorCode::NO_BUTTON_MODULE) {
-			throw runtime_error("fail " + when + ": no button module at addr " + to_string((int)buf[1]));
+			throw runtime_error("NO BM " + to_string((int)buf[1]));
 		} else
 		if (buf[0] == (uint8_t)ErrorCode::NO_PERFORMER) {
-			throw runtime_error("fail " + when + ": no performer unit at addr " + to_string((int)buf[1]));
+			throw runtime_error("NO PERF " + to_string((int)buf[1]));
 		}
 
-		throw runtime_error("fail " + when + ": unknown error");
+		throw runtime_error("UNKNOWN");
 	}
 
 	void _connect () {
 		uint8_t buf[8];
 		int tries = 0;
+		int timeout;
 
 		try {
 			if (_nrstPin > 0) {
@@ -588,7 +590,7 @@ namespace {
 			} else {
 				_mspi->cmd((int)Cmd::RESET, 0);
 			}
-			usleep(400000);
+			sleep(1); // bootloader
 			_mspi->read((int)Addr::WIA, buf, 3);
 			_mspi->read((int)Addr::VERSION, &buf[3], 2);
 		} catch (exception& e) {
@@ -599,6 +601,18 @@ namespace {
 			}
 		}
 		cout << "extboard connected, WIA_PRJ: " << (int)(buf[0] << 8 | buf[1]) << ", WIA_SUB: " << (int)buf[2] << ", VERSION: [" << (int)buf[3] << ", " << (int)buf[4] << "]" << endl;
+		timeout = 0;
+		while (true) {
+			usleep(100000);
+			_mspi->read((int)Addr::STATUS, buf, 1);
+			if (buf[0] == (uint8_t)Status::LOAD_OPT) {
+				break;
+			}
+			timeout++;
+			if (timeout > 100) {
+				throw runtime_error("too long self init");
+			}
+		}
 	}
 
 	void _uploadAllOptions() {
@@ -668,12 +682,12 @@ namespace {
 			if (buf[0] == (uint8_t)Status::INIT_EXTDEV) {
 				timeout++;
 				if (timeout > 400) { // ~20 seconds
-					throw ("fail to init external devices: timeout");
+					throw ("TIMEOUT");
 				}
 			} else if (buf[0] == (uint8_t)Status::ERROR) {
-				_getErrorAndThrow("init external devices");
+				_getErrorAndThrow();
 			} else {
-				throw runtime_error("fail to init external devices: incorrect status " + to_string((int)buf[0]));
+				throw runtime_error("INC STATUS " + to_string((int)buf[0]));
 			}
 		}
 	}
@@ -860,7 +874,7 @@ namespace {
 			try {
 				Handle* h = (Handle*)fifo_get(&_operations);
 				if (h != nullptr) {
-					cout << "[INFO][EXTBOARD]|HANDLER| handling " << (int)h->type << ", total fifo size " << _operations.nElements << endl;
+					cout << "[INFO][EXTBOARD] handling " << (int)h->type << ", total fifo size " << _operations.nElements << endl;
 				}
 				if (h == nullptr) {
 					usleep(10000);
@@ -911,6 +925,11 @@ namespace {
 						throw runtime_error(e.what());
 					}
 					_mspi->cmd((int)Cmd::APPLAY_RGROUP, rgi);
+					fifo_pop(&_operations);
+					suspicion = 0;
+				} else
+				if (h->type == HandleType::FLAP) {
+					_mspi->cmd((int)Cmd::FLAP, h->data[0]);
 					fifo_pop(&_operations);
 					suspicion = 0;
 				} else
@@ -1205,28 +1224,6 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	// connect to extboard
 	cout << "[INFO][EXTBOARD] connect to extboard.." << endl;
 	_connect();
-	
-	// wait for extboard self init
-	cout << "[INFO][EXTBOARD] wait for extboard self init.." << endl;
-	int timeout = 0;
-	while (true) {
-		usleep(100000);
-		_mspi->read((int)Addr::STATUS, buf, 1);
-		if (buf[0] == (uint8_t)Status::LOAD_OPT) {
-			break;
-		} else
-		if (buf[0] == (uint8_t)Status::INIT_SELF) {
-			timeout++;
-			if (timeout > 500) { // ~5 seconds
-				throw ("fail self init: timeout");
-			}
-		} else
-		if (buf[0] == (uint8_t)Status::ERROR) {
-			_getErrorAndThrow("self init");
-		} else {
-			throw runtime_error("fail self init: incorrect status " + to_string((int)buf[0]));
-		}
-	}
 
 	cout << "[INFO][EXTBOARD] upload options.." << endl;
 	_uploadAllOptions();
@@ -1292,6 +1289,14 @@ void setRelaysState(int address, int states) {
 	h.type = HandleType::DIRECT_SET_RELAYS;
 	h.data[0] = address;
 	h.data[1] = states;
+	fifo_put(&_operations, &h);
+}
+
+/* Other control functions */
+void flap(bool state) {
+	Handle h;
+	h.type = HandleType::FLAP;
+	h.data[0] = state ? 1 : 0;
 	fifo_put(&_operations, &h);
 }
 

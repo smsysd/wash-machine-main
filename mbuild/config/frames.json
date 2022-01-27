@@ -24,13 +24,10 @@
 		{
 			"id": 0,
 			"font": 1,
-			"bg": "none",
+			"bg": 1,
 			"mode": "center",
 			"color": 7,
-			"lines": [
-				"",
-				"{c6:AQUANTER}"
-			]
+			"lines": []
 		},
 		{
 			"id": 1,
@@ -75,7 +72,8 @@
 			"color": 4,
 			"lines": [
 				"ОШИБКА",
-				"СИСТЕМЫ"
+				"$errort",
+				"$errord"
 			]
 		},
 		{
@@ -233,6 +231,10 @@
 		{
 			"id": 0,
 			"name": "1.bmp"
+		},
+		{
+			"id": 1,
+			"name": "logo.bmp"
 		}
 
 	],
