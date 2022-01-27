@@ -842,8 +842,10 @@ namespace {
 		int suspicion = 0;
 		int borehole = 0;
 		bool hpos;
+		int tries;
 		while (true) {
 			_mutex.lock();
+			tries = 0;
 			while (!_isInit) {
 				try {
 					cout << "[WARNING][EXTBOARD] extboard was reset during operations - reinit.." << endl;
@@ -862,12 +864,15 @@ namespace {
 						setRelayGroup(_currentRelayGroupId);
 					}
 				} catch (exception& e) {
-					sleep(5);
+					tries++;
+					sleep(2);
 					cout << "[ERROR][EXTBOARD] fail to reinit: " << e.what() << endl;
-					if (hpos) {
-						_onError(ErrorType::DISCONNECT_DEV, string(e.what()));
-					} else {
-						_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
+					if (tries > 3) {
+						if (hpos) {
+							_onError(ErrorType::DISCONNECT_DEV, string(e.what()));
+						} else {
+							_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
+						}
 					}
 				}
 			}
@@ -950,10 +955,10 @@ namespace {
 			} catch (exception& e) {
 				cout << "[WARNING][EXTBOARD]|HANDLER| fail handle: " << e.what() << endl;
 				suspicion++;
-				sleep(1);
+				usleep(100000);
 			}
 			_mutex.unlock();
-			if (suspicion > 10) {
+			if (suspicion > 5) {
 				suspicion = 0;
 				_isInit = false;
 				_mspi->disableInt();

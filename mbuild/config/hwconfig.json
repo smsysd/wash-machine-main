@@ -15,7 +15,7 @@
 		"int-pin": 2,
 		"cs-pin": 15,
 		"nrst-pin": 16,
-		"speed": 32000
+		"speed": 22000
 	},
 
 	"performing-units": [
