@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-project(wash-machine)
+project(wash-machine-main)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY mbuild)
 
@@ -20,6 +20,6 @@ add_subdirectory(utils)
 add_subdirectory(linux-stdsiga)
 
 
-add_executable(wash-machine main.cpp)
+add_executable(wash-machine-main main.cpp)
 
-target_link_libraries(wash-machine utils extboard general-tools logger jparser)
+target_link_libraries(wash-machine-main utils extboard general-tools logger jparser)
