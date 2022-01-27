@@ -3,25 +3,29 @@
 		{
 			"id": 0,
 			"performers": [
-				{"address": 48, "state": 0}
+				{"address": 48, "state": 0},
+				{"address": 51, "state": 0}
 			]
 		},
 		{
 			"id": 1,
 			"performers": [
-				{"address": 48, "state": 1}
+				{"address": 48, "state": 1},
+				{"address": 51, "state": 1}
 			]
 		},
 		{
 			"id": 2,
 			"performers": [
-				{"address": 48, "state": 2}
+				{"address": 48, "state": 2},
+				{"address": 51, "state": 2}
 			]
 		},
 		{
 			"id": 4,
 			"performers": [
-				{"address": 48, "state": 4}
+				{"address": 48, "state": 4},
+				{"address": 51, "state": 63}
 			]
 		}
 	],

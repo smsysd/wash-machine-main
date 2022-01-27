@@ -19,7 +19,8 @@
 	},
 
 	"performing-units": [
-		{"address": 48, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]}
+		{"address": 48, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]},
+		{"address": 51, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]}
 	],
 
 	"releive-instructions": [
