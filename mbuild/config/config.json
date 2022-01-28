@@ -24,8 +24,7 @@
 		{
 			"id": 4,
 			"performers": [
-				{"address": 48, "state": 4},
-				{"address": 51, "state": 63}
+				{"address": 48, "state": 4}
 			]
 		}
 	],
