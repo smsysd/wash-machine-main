@@ -901,7 +901,7 @@ namespace {
 							break;
 						}
 						timeout++;
-						if (timeout > 400) {
+						if (timeout > 200) {
 							suspicion++;
 							break;
 						}
@@ -930,6 +930,19 @@ namespace {
 						throw runtime_error(e.what());
 					}
 					_mspi->cmd((int)Cmd::APPLAY_RGROUP, rgi);
+					_mutex.unlock();
+					int timeout = 0;
+					while (true) {
+						usleep(100000);
+						if (_getLor() == ((uint8_t)LOR::OP_SETRELGR | (uint8_t)LOR::ST_OK)) {
+							break;
+						}
+						timeout++;
+						if (timeout > 100) {
+							suspicion++;
+							break;
+						}
+					}
 					fifo_pop(&_operations);
 					suspicion = 0;
 				} else
