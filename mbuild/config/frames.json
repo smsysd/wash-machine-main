@@ -189,7 +189,7 @@
 			"color": 7,
 			"lines": [
 				"ПЕНА",
-				"$money  RUB"
+				"$money"
 			]
 		},
 		{
@@ -200,7 +200,7 @@
 			"color": 7,
 			"lines": [
 				"ПЕНА",
-				"{c5:$money}  RUB"
+				"{c5:$money}"
 			]
 		},
 		{
