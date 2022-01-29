@@ -5,29 +5,25 @@
 		{
 			"id": 0,
 			"performers": [
-				{"address": 48, "state": 0},
-				{"address": 51, "state": 0}
+				{"address": 48, "state": 0}
 			]
 		},
 		{
 			"id": 1,
 			"performers": [
-				{"address": 48, "state": 1},
-				{"address": 51, "state": 1}
+				{"address": 48, "state": 1}
 			]
 		},
 		{
 			"id": 2,
 			"performers": [
-				{"address": 48, "state": 2},
-				{"address": 51, "state": 2}
+				{"address": 48, "state": 2}
 			]
 		},
 		{
 			"id": 4,
 			"performers": [
-				{"address": 48, "state": 4},
-				{"address": 51, "state": 2}
+				{"address": 48, "state": 4}
 			]
 		}
 	],
@@ -47,11 +43,7 @@
 	"buttons": [
 		{"id": 0, "type": "eb", "index": 0, "purpose": "end"},
 		{"id": 1, "type": "bm", "bm": 0, "index": 4, "purpose": "program", "program": 1, "service-program": 2},
-		{"id": 2, "type": "bm", "bm": 1, "index": 4, "purpose": "program", "program": 2, "service-program": 2},
-		{"id": 3, "type": "bm", "bm": 2, "index": 4, "purpose": "program", "program": 3, "service-program": 5},
-		{"id": 3, "type": "bm", "bm": 3, "index": 4, "purpose": "program", "program": 3, "service-program": 5},
-		{"id": 3, "type": "bm", "bm": 4, "index": 4, "purpose": "program", "program": 3, "service-program": 5},
-		{"id": 3, "type": "bm", "bm": 5, "index": 4, "purpose": "program", "program": 3, "service-program": 5}
+		{"id": 2, "type": "bm", "bm": 1, "index": 4, "purpose": "program", "program": 2, "service-program": 2}
 	],
 
 	"cards": [

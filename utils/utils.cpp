@@ -357,11 +357,14 @@ void init(
 		_log->log(Logger::Type::WARNING, "LOCAL CARDS", "fail to fill cards: " + string(e.what()));
 	}
 
+	bool rendcrit = true;
+
 	// render
 	try {
 		cout << "init render module.." << endl;
 		_frames = new JParser("./config/frames.json");
 		json& display = _hwconfig->get("display");
+		rendcrit = JParser::getf(display, "critical", "hwdisplay");
 		json& sf = _frames->get("spec-frames");
 		json& go = _frames->get("general-option");
 		json& bg = _frames->get("backgrounds");
@@ -373,7 +376,9 @@ void init(
 		render::regVar(errord, L"errord");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
-		throw runtime_error("fail to init render core: " + string(e.what()));
+		if (rendcrit) {
+			throw runtime_error("fail to init render core: " + string(e.what()));
+		}
 	}
 
 	// extboard

@@ -6,11 +6,7 @@
 		},
 		"modules": [
 			{"address": 32, "active-levels": 0, "io-mask": 239},
-			{"address": 33, "active-levels": 0, "io-mask": 239},
-			{"address": 34, "active-levels": 0, "io-mask": 239},
-			{"address": 35, "active-levels": 0, "io-mask": 239},
-			{"address": 36, "active-levels": 0, "io-mask": 239},
-			{"address": 37, "active-levels": 0, "io-mask": 239}
+			{"address": 33, "active-levels": 0, "io-mask": 239}
 		]
 	},
 
@@ -23,8 +19,7 @@
 	},
 
 	"performing-units": [
-		{"address": 48, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]},
-		{"address": 51, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]}
+		{"address": 48, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]}
 	],
 
 	"releive-instructions": [
@@ -41,7 +36,8 @@
 		"driver": "/dev/ttyS5",
 		"baud-rate": 9600,
 		"handler-delay": 10000,
-		"redraw-borehole": 500
+		"redraw-borehole": 500,
+		"critical": false
 	},
 
 	"range-finder": {
