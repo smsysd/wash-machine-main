@@ -256,41 +256,44 @@ void init(
 	_onCashRunout = onCashRunout;
 	_onServiceEnd = onServiceEnd;
 
-	cout << "init general-tools.." << endl;
+	cout << "[INFO][UTILS] init general-tools.." << endl;
+	DIR* dir = opendir("./statistics");
+	if (dir) {
+		closedir(dir);
+	} else if (ENOENT == errno) {
+		system("mkdir ./statistics");
+	} else {
+		throw runtime_error("[ERROR][LOGGER] fail to open statistics dir: " + to_string(errno));
+		return;
+	}
+	try {
+		_log = new Logger("./statistics/log.txt");
+	} catch (exception& e) {
+		throw runtime_error("[ERROR][LOGGER] fail to create logger: " + string(e.what()));
+	}
+
 	stdsiga_init(_softTerminate);
 	general_tools_init();
 	int wprc = wiringPiSetup();
 	if (wprc != 0) {
-		_log->log(Logger::Type::ERROR, "INIT", "fail setup wiringPi: " + to_string(wprc));
-		throw runtime_error("fail setup wiringPi: " + to_string(wprc));
-	}
-
-	try {
-		_log = new Logger("./log.txt");
-	} catch (exception& e) {
-		throw runtime_error("fail to create logger: " + string(e.what()));
+		_log->log(Logger::Type::ERROR, "GEN", "fail setup wiringPi: " + to_string(wprc));
+		exit(-1);
 	}
 
 	// load necessary config
-	cout << "load necessary config files.." << endl;
+	cout << "[INFO][UTILS] load necessary config.." << endl;
 	try {
 		_hwconfig = new JParser("./config/hwconfig.json");
 		_config = new JParser("./config/config.json");
+		_tServiceMode = _config->get("service-time");
 	} catch (exception& e) {
-		throw runtime_error("fail to load necessary config files: " + string(e.what()));
+		_log->log(Logger::Type::ERROR, "CONFIG", "fail to load necessary config files: " + string(e.what()));
+		exit(-1);
 	}
-
-	// get necessary config fields..
-	cout << "get necessary config fields.." << endl;
-
-
-	// get other config fields..
-	cout << "get other config fields.." << endl;
-	_tServiceMode = _config->get("service-time");
 
 	// fill programs
 	try {
-		cout << "fill client programs.." << endl;
+		cout << "[INFO][UTILS] fill client programs.." << endl;
 		json& programs = _config->get("programs");
 		for (int i = 0; i < programs.size(); i++) {
 			json& jp = programs[i];
@@ -309,12 +312,12 @@ void init(
 			_programs.push_back(sp);
 		}
 	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to fill programs: " + string(e.what()));
-		throw runtime_error("fail to fill programs: " + string(e.what()));
+		_log->log(Logger::Type::ERROR, "CONFIG", "fail to fill programs: " + string(e.what()));
+		exit(-1);
 	}
 	
 	try {
-		cout << "fil service programs.." << endl;
+		cout << "[INFO][UTILS] fil service programs.." << endl;
 		json& programs = _config->get("service-programs");
 		for (int i = 0; i < programs.size(); i++) {
 			json& jp = programs[i];
@@ -329,39 +332,43 @@ void init(
 			_servicePrograms.push_back(sp);
 		}
 	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "UTILS INIT", "fail to fill programs: " + string(e.what()));
-		throw runtime_error("fail to fill programs: " + string(e.what()));
+		_log->log(Logger::Type::ERROR, "CONFIG", "fail to fill programs: " + string(e.what()));
+		exit(-1);
 	}
 
 	// fill cards
 	try {
-		cout << "fill cards.." << endl;
+		cout << "[INFO][UTILS] fill cards.." << endl;
 		json& cards = _config->get("cards");
 		for (int i = 0; i < cards.size(); i++) {
-			json& jp = cards[i];
-			CardInfo sp;
-			sp.id = JParser::getf(jp, "id", "card at [" + to_string(i) + "]");
-			string ct = JParser::getf(jp, "type", "card at [" + to_string(i) + "]");
-			sp.owner = JParser::getf(jp, "owner", "card at [" + to_string(i) + "]");
-			if (ct == "service") {
-				sp.type = CardInfo::SERVICE;
-			} else
-			if (ct == "bonus") {
-				sp.type = CardInfo::BONUS_PERS;
-			} else {
-				sp.type = CardInfo::UNKNOWN;
+			try {
+				json& jp = cards[i];
+				CardInfo sp;
+				sp.id = JParser::getf(jp, "id", "card at [" + to_string(i) + "]");
+				string ct = JParser::getf(jp, "type", "card at [" + to_string(i) + "]");
+				sp.owner = JParser::getf(jp, "owner", "card at [" + to_string(i) + "]");
+				if (ct == "service") {
+					sp.type = CardInfo::SERVICE;
+				} else
+				if (ct == "bonus") {
+					sp.type = CardInfo::BONUS_PERS;
+				} else {
+					sp.type = CardInfo::UNKNOWN;
+				}
+				_cards.push_back(sp);
+			} catch (exception& e) {
+				_log->log(Logger::Type::WARNING, "CONFIG", "fail to fill card " + to_string(i) + ": " + string(e.what()));
 			}
-			_cards.push_back(sp);
 		}
 	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "LOCAL CARDS", "fail to fill cards: " + string(e.what()));
+		_log->log(Logger::Type::WARNING, "CONFIG", "fail to fill cards: " + string(e.what()));
 	}
 
 	bool rendcrit = true;
 
 	// render
 	try {
-		cout << "init render module.." << endl;
+		cout << "[INFO][UTILS] init render module.." << endl;
 		_frames = new JParser("./config/frames.json");
 		json& display = _hwconfig->get("display");
 		rendcrit = JParser::getf(display, "critical", "hwdisplay");
@@ -377,12 +384,12 @@ void init(
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		if (rendcrit) {
-			throw runtime_error("fail to init render core: " + string(e.what()));
+			exit(-2);
 		}
 	}
 
 	// extboard
-	cout << "init extboard.." << endl;
+	cout << "[INFO][UTILS] init extboard.." << endl;
 	try {
 		json& extBoardCnf = _hwconfig->get("ext-board");
 		json& relaysGroups = _config->get("relays-groups");
@@ -396,12 +403,12 @@ void init(
 		try {
 			ledsCnf = _hwconfig->get("leds");
 		} catch (exception& e) {
-			_log->log(Logger::Type::WARNING, "UTILS INIT", "fail to load leds: " + string(e.what()));
+			_log->log(Logger::Type::WARNING, "CONFIG", "fail to load leds: " + string(e.what()));
 		}
 		try {
 			_effects = new JParser("./config/effects.json");
 		} catch (exception& e) {
-			_log->log(Logger::Type::WARNING, "UTILS", "fail to load effects: " + string(e.what()));
+			_log->log(Logger::Type::WARNING, "CONFIG", "fail to load effects: " + string(e.what()));
 		}
 		json effects;
 		json specef;
@@ -417,22 +424,22 @@ void init(
 		extboard::registerOnErrorHandler(_extboardError);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
-		throw runtime_error("fail to init expander board: " + string(e.what()));
+		exit(-3);
 	}
 
 	// button
 	try {
-		cout << "init button driver.." << endl;
+		cout << "[INFO][UTILS] init button driver.." << endl;
 		json& buttons = _config->get("buttons");
 		bd::init(buttons, onButtonPushed);
 	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "INIT", "fail to init button driver: " + string(e.what()));
-		throw runtime_error("fail to init button driver: " + string(e.what()));
+		_log->log(Logger::Type::ERROR, "BUTTON", "fail to init button driver: " + string(e.what()));
+		exit(-4);
 	}
 
 	// qr scaner
 	try {
-		cout << "init qr scanner.." << endl;
+		cout << "[INFO][UTILS] init qr scanner.." << endl;
 		json& qrscnf = _hwconfig->get("qr-scaner");
 		bool en = JParser::getf(qrscnf, "enable", "qr-scaner");
 		if (en) {
@@ -460,33 +467,33 @@ void init(
 				throw runtime_error(to_string(rc));
 			}
 		} else {
-			cout << "qr scaner disabled" << endl;
+			cout << "[INFO][UTILS] qr scaner disabled" << endl;
 		}
 	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "INIT", "fail to init qr-scaner: " + string(e.what()));
+		_log->log(Logger::Type::WARNING, "QRSCANER", "fail to init qr-scaner: " + string(e.what()));
 	}
 
 	// bonus system
 	try {
-		cout << "init bonus system module.." << endl;
+		cout << "[INFO][UTILS] init bonus system module.." << endl;
 		_bonuscnf = new JParser("./config/bonus.json");
 		bonus::init(_bonuscnf->get("bonus-sys"), _bonuscnf->get("promotions"));
 	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "INIT", "fail to init bonus system: " + string(e.what()));
+		_log->log(Logger::Type::WARNING, "BONUS", "fail to init bonus system: " + string(e.what()));
 	}
 
 	// extboard callbacks
-	cout << "register exboard callbacks.." << endl;
+	cout << "[INFO][UTILS] register exboard callbacks.." << endl;
 	extboard::registerOnMoneyAddedHandler(_onCashAdd);
 	extboard::registerOnCardReadHandler(onCard);
 
-	cout << "register genereal handler.." << endl;
+	cout << "[INFO][UTILS] register genereal handler.." << endl;
 	callHandler(_handler, NULL, 500, 0);
 
-	cout << "start withdraw timer.." << endl;
+	cout << "[INFO][UTILS] start withdraw timer.." << endl;
 	_wdtimer = new Timer(1, 0, _withdraw);
 
-	cout << "initialize complete." << endl;
+	cout << "[INFO][UTILS] initialize complete." << endl;
 	_normalwork = true;
 }
 
