@@ -351,7 +351,7 @@ void init(
 					sp.type = CardInfo::SERVICE;
 				} else
 				if (ct == "bonus") {
-					sp.type = CardInfo::BONUS_PERS;
+					sp.type = CardInfo::BONUS;
 				} else {
 					sp.type = CardInfo::UNKNOWN;
 				}
@@ -514,9 +514,9 @@ void setGiveMoneyMode() {
 	render::showFrame(f);
 
 	if (isBonus) {
-		cout << "'give money' mode applied with bonus frame" << endl;
+		cout << "[INFO][UTILS] 'give money' mode applied with bonus frame" << endl;
 	} else {
-		cout << "'give money' mode applied" << endl;
+		cout << "[INFO][UTILS] 'give money' mode applied" << endl;
 	}
 	mode = Mode::GIVE_MONEY;
 }
@@ -530,7 +530,7 @@ void setServiceMode() {
 	render::showFrame(render::SpecFrame::SERVICE);
 
 	extboard::startLightEffect(extboard::SpecEffect::SERVICE_EFFECT, 0);
-	cout << "'service' mode applied" << endl;
+	cout << "[INFO][UTILS] 'service' mode applied" << endl;
 	_tOffServiceMode = time(NULL) + _tServiceMode;
 	mode = Mode::SERVICE;
 }
@@ -555,17 +555,13 @@ void setProgram(int id) {
 		extboard::relievePressure();
 	}
 
-	try {
-		if (_session.k > 1) {
-			render::showFrame(p->bonusFrame);
-		} else {
-			render::showFrame(p->frame);
-		}
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "RENDER", "fail to show frame: " + string(e.what()));
+	if (_session.k > 1) {
+		render::showFrame(p->bonusFrame);
+	} else {
+		render::showFrame(p->frame);
 	}
 
-	cout << "program '" << p->name << "' set" << endl;
+	cout << "[INFO][UTILS] program '" << p->name << "' set" << endl;
 	mode = Mode::PROGRAM;
 }
 
@@ -582,26 +578,11 @@ void setServiceProgram(int id) {
 		return;
 	}
 
-	try {
-		extboard::startLightEffect(p->effect, 0);
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to start effect: " + string(e.what()));
-	}
+	extboard::startLightEffect(p->effect, 0);
+	extboard::setRelayGroup(p->relayGroup);
+	render::showFrame(p->frame);
 
-	try {
-		extboard::setRelayGroup(p->relayGroup);
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to set service program");
-		return;
-	}
-
-	try {
-		render::showFrame(p->frame);
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "RENDER", "fail to show frame: " + string(e.what()));
-	}
-
-	cout << "service program '" << p->name << "' set" << endl;
+	cout << "[INFO][UTILS] service program '" << p->name << "' set" << endl;
 	if (mode != Mode::SERVICE) {
 		_tOffServiceMode = time(NULL) + _tServiceMode;
 		mode = Mode::SERVICE;
@@ -643,7 +624,6 @@ void beginSession(Session::Type type, uint64_t id) {
 }
 
 void dropSession() {
-	// TODO ? what ??
 	if (!_session.isBegin) {
 		return;
 	}
@@ -693,9 +673,6 @@ void dropSession() {
 }
 
 bool writeOffBonuses() {
-	if (_terminate) {
-		return false;
-	}
 	try {
 		double realWriteoff = bonus::writeoff();
 		_nMoney += realWriteoff;
@@ -712,14 +689,10 @@ bool writeOffBonuses() {
 }
 
 void accrueRemainBonusesAndClose() {
-	if (_terminate) {
-		return;
-	}
 	double acrue = _nMoney;
 	if (_session.isBegin) {
-		// acrue = _nMoney / _session.k;
+		acrue = _nMoney / _session.k;
 	} else {
-		// cout << "[WARNING][UTILS] fail close transaction with " << _nMoney << " money: session not begin" << endl;
 		_log->log(Logger::Type::WARNING, "BONUS", "close transaction with " + to_string(_nMoney) + " money, but session not begin");
 	}
 

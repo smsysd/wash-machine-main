@@ -19,6 +19,11 @@ using json = nlohmann::json;
 namespace bonus {
 
 namespace {
+	enum class APIRC {
+		OK = -1,
+		ACCESS_DENIED = -3
+	};
+
 	vector<string> _split(const string& s, char delim) {
 		vector<string> elems;
 		stringstream ss;
@@ -191,11 +196,6 @@ namespace {
 		} catch (exception& e) {
 			throw runtime_error("fail to parse result from 'point_api.py': " + string(e.what()) + "\noutput: '" + buf + "'");
 		}
-		rc = JParser::getf(data, "rc", "'point_api.py'");
-		string rt = JParser::getf(data, "rt", "'point_api.py'");
-		if (rc < 0) {
-			throw runtime_error("error response '" + to_string(rc) + "': " + rt);
-		}
 		return data;
 	}
 }
@@ -291,16 +291,27 @@ bool open(CardInfo& card, const char* access) {
 	ci.type = CardInfo::UNKNOWN;
 	try {
 		json res = _japi("open");
-		int ct = JParser::getf(res, "type", "server response");
+		int rc = JParser::getf(res, "rc", "server response");
+		string rt = JParser::getf(res, "rt", "server response");
+		if (rc == (int)APIRC::ACCESS_DENIED) {
+			return true;
+		} else if (rc != (int)APIRC::OK) {
+			throw runtime_error(rt);
+		}
+
+		string ct = JParser::getf(res, "type", "server response");
 		double cnt = JParser::getf(res, "count", "server response");
 		uint64_t cid = JParser::getf(res, "id", "server response");
-		if (ct == 0) {
-			ci.type = CardInfo::BONUS_PERS;
+		if (ct == "p") {
+			ci.type = CardInfo::BONUS;
 		} else
-		if (ct == 1) {
-			ci.type = CardInfo::BONUS_ORG;
+		if (ct == "o") {
+			ci.type = CardInfo::BONUS;
 		} else
-		if (ct == 5) {
+		if (ct == "t") {
+			ci.type = CardInfo::ONETIME;
+		} else
+		if (ct == "s") {
 			ci.type = CardInfo::SERVICE;
 		} else {
 			ci.type = CardInfo::UNKNOWN;
@@ -309,45 +320,28 @@ bool open(CardInfo& card, const char* access) {
 		ci.count = cnt;
 		card = ci;
 	} catch (exception& e) {
-		cout << "[INFO][BONUS] can't open transaction: " << e.what() << endl;
+		cout << "[WARNING][BONUS] can't open transaction: " << e.what() << endl;
 		return false;
 	}
 	_isOpen = true;
+	if (ci.type == CardInfo::ONETIME) {
+		try {
+			writeoff();
+			close(0);
+		} catch (exception& e) {
+			cout << "[WARNING][BONUS] fail produce onetime operation: " << e.what() << endl;
+			return false;
+		}
+		_isOpen = false;
+	}
 	return true;
 }
 
 bool open(CardInfo& card, uint64_t access) {
 	memset(_access, 0, sizeof(_access));
 	char straccess[32] = {0};
-	sprintf(straccess, "SAK%X", access);
-	strcpy(_access, straccess);
-	CardInfo ci = {.id = 0, .count = 0};
-	ci.type = CardInfo::UNKNOWN;
-	try {
-		json res = _japi("open");
-		int ct = JParser::getf(res, "type", "server response");
-		double cnt = JParser::getf(res, "count", "server response");
-		uint64_t cid = JParser::getf(res, "id", "server response");
-		if (ct == 0) {
-			ci.type = CardInfo::BONUS_PERS;
-		} else
-		if (ct == 1) {
-			ci.type = CardInfo::BONUS_ORG;
-		} else
-		if (ct == 5) {
-			ci.type = CardInfo::SERVICE;
-		} else {
-			ci.type = CardInfo::UNKNOWN;
-		}
-		ci.id = cid;
-		ci.count = cnt;
-		card = ci;
-	} catch (exception& e) {
-		cout << "[INFO][BONUS] can't open transaction: " << e.what() << endl;
-		return false;
-	}
-	_isOpen = true;
-	return true;
+	sprintf(straccess, "SCA%X", access);
+	return open(card, straccess);
 }
 
 double writeoff() {
@@ -355,6 +349,13 @@ double writeoff() {
 		throw runtime_error("transaction is not open");
 	}
 	json res = _japi("writeoff " + to_string(_desiredWriteoff));
+	int rc = JParser::getf(res, "rc", "server response");
+	string rt = JParser::getf(res, "rt", "server response");
+	if (rc == (int)APIRC::ACCESS_DENIED) {
+		throw runtime_error("access denied");
+	} else if (rc != (int)APIRC::OK) {
+		throw runtime_error(rt);
+	}
 	return JParser::getf(res, "count", "server response");
 }
 
@@ -362,8 +363,8 @@ void close(double acrue) {
 	if (!_isOpen) {
 		throw runtime_error("transaction is not open");
 	}
-	_japi("close " + to_string(acrue));
 	_isOpen = false;
+	_japi("close " + to_string(acrue));
 }
 
 double getCoef() {

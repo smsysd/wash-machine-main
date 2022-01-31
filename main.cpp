@@ -34,7 +34,6 @@ void onQr(const char* qr);
 void onServiceEnd();
 
 int main(int argc, char const *argv[]) {
-
 	init(onCashAppeared, onCashRunout, onButtonPushed, onQr, onCard, onServiceEnd);
 	render::showTempFrame(render::SpecFrame::LOGO, tLogoFrame);
 	setGiveMoneyMode();
@@ -109,7 +108,7 @@ void _handleCard() {
 			setGiveMoneyMode();
 		}
 	} else
-	if (card.type == CardInfo::BONUS_ORG || card.type == CardInfo::BONUS_PERS) {
+	if (card.type == CardInfo::BONUS) {
 		if (isBonusBegin) {
 			if (bonus::ismultibonus()) {
 				rc = writeOffBonuses();
@@ -142,9 +141,13 @@ void _handleCard() {
 void onQr(const char* qr) {
 	bool rc = bonus::open(card, qr);
 	if (rc) {
-		_handleCard();
+		if (card.type != bonus::CardInfo::UNKNOWN) {
+			_handleCard();
+		} else {
+			render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		}
 	} else {
-		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
 	}
 }
 
@@ -167,9 +170,13 @@ void onCard(uint64_t cardid) {
 
 	rc = bonus::open(card, cardid);
 	if (rc) {
-		_handleCard();
+		if (card.type != bonus::CardInfo::UNKNOWN) {
+			_handleCard();
+		} else {
+			render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		}
 	} else {
-		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
 	}
 }
 

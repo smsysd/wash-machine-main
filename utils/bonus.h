@@ -21,8 +21,7 @@ enum Type {
 
 struct CardInfo {
 	enum Type {
-		BONUS_PERS,
-		BONUS_ORG,
+		BONUS,
 		ONETIME,
 		SERVICE,
 		UNKNOWN
