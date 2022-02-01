@@ -89,8 +89,16 @@ void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
 			string purpose = JParser::getf(buttons[i], "purpose", "");
 			if (purpose == "program") {
 				b.purpose = Button::Purpose::PROGRAM;
-				b.prog = JParser::getf(buttons[i], "program", "");
-				b.serviceProg = JParser::getf(buttons[i], "service-program", "");
+				try {
+					b.prog = JParser::getf(buttons[i], "program", "");
+				} catch (exception& e) {
+					b.prog = -1;
+				}
+				try {
+					b.serviceProg = JParser::getf(buttons[i], "service-program", "");
+				} catch (exception& e) {
+					b.serviceProg = -1;
+				}
 			} else
 			if (purpose == "end") {
 				b.purpose = Button::Purpose::END;

@@ -39,7 +39,7 @@ int main(int argc, char const *argv[]) {
 	setGiveMoneyMode();
 	
 	while (true) {
-
+		sleep(5);
 	}
 
 	return 0;

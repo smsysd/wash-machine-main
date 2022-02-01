@@ -539,6 +539,9 @@ void setProgram(int id) {
 	if (_terminate) {
 		return;
 	}
+	if (id < 0) {
+		return;
+	}
 	Program* p;
 	try {
 		p = _getProgram(_programs, id);
@@ -567,6 +570,9 @@ void setProgram(int id) {
 
 void setServiceProgram(int id) {
 	if (_terminate) {
+		return;
+	}
+	if (id < 0) {
 		return;
 	}
 	Program* p;

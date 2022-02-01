@@ -912,7 +912,7 @@ namespace {
 				if (h->type == HandleType::RESET_EFFECT) {
 					_mspi->cmd((int)Cmd::RESET_EFFECT, h->data[0]);
 					while (true) {
-						usleep(10000);
+						usleep(20000);
 						_mspi->read((int)Addr::LOR, buf, 1);
 						if (buf[0] != (uint8_t)OKC) {
 							break;
@@ -983,7 +983,7 @@ namespace {
 					setRelayGroup(_currentRelayGroupId);
 				}
 			}
-			usleep(10000);
+			usleep(20000);
 			borehole++;
 		}
 	}
