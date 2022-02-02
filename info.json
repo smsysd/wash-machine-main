@@ -1,5 +1,9 @@
 {
-	"type": "exec",
-	"version": [0, 5, 5],
-	"repository": "bitbucket.org/sm-sys/wash-machine-main"
+    "version": [
+        0,
+        5,
+        8
+    ],
+    "repository": "bitbucket.org/sm-sys/wash-machine-main",
+    "type": "exec"
 }
