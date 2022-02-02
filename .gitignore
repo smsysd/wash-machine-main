@@ -3,10 +3,12 @@
 # Learn more about .gitignore:
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
-# Cash files
-CMakeFiles/
-CMakeCache.txt
-.cmake
+# Temp-Cash files
+**/CMakeFiles
+**/CMakeCache.txt
+*.cmake
+*.a
+*.o
 
 # Node artifact files
 node_modules/
