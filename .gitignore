@@ -9,6 +9,7 @@
 *.cmake
 *.a
 *.o
+Makefile
 
 # Node artifact files
 node_modules/
