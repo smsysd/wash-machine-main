@@ -162,6 +162,9 @@ void onCard(uint64_t cardid) {
 			} else {
 				setGiveMoneyMode();
 			}
+		} else
+		if (card.type == CardInfo::BONUS) {
+			addMoney(card.count);
 		} else {
 			render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
 		}

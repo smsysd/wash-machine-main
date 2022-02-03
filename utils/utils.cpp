@@ -110,27 +110,30 @@ namespace {
 		f.close();
 	}
 
-	void _onCashAdd(double nMoney) {
+	void _onMoneyAdd(double nMoney, bool asBonus = false) {
 		cout << "money received: " << nMoney << endl;
 		_moneyMutex.lock();
 		if (_nMoney == 0) {
 			_onCashAppeared();
 		}
 		if (_session.isBegin) {
-			_nMoney += nMoney * _session.k;
-			_session.depositedMoney += nMoney;
-		} else {
-			cout << "[WARNING][UTILS] money received, but session is not begin" << endl;
-			_onCashAppeared();
-			if (_session.isBegin) {
+			if (asBonus) {
+				_nMoney += nMoney;
+				_session.acrueBonuses += nMoney;
+			} else {
 				_nMoney += nMoney * _session.k;
 				_session.depositedMoney += nMoney;
-			} else {
-				_nMoney += nMoney;
 			}
+		} else {
+			cout << "[WARNING][UTILS] money received, but session is not begin" << endl;
+			_nMoney += nMoney;
 		}
 		_moneyMutex.unlock();
 		render::redraw();
+	}
+
+	void _onExtCashAdd(double nMoney) {
+		_onMoneyAdd(nMoney);
 	}
 
 	Timer::Action _withdraw(timer_t) {
@@ -352,6 +355,7 @@ void init(
 				} else
 				if (ct == "bonus") {
 					sp.type = CardInfo::BONUS;
+					sp.count = JParser::getf(jp, "bonus", "card at [" + to_string(i) + "]");
 				} else {
 					sp.type = CardInfo::UNKNOWN;
 				}
@@ -484,7 +488,7 @@ void init(
 
 	// extboard callbacks
 	cout << "[INFO][UTILS] register exboard callbacks.." << endl;
-	extboard::registerOnMoneyAddedHandler(_onCashAdd);
+	extboard::registerOnMoneyAddedHandler(_onExtCashAdd);
 	extboard::registerOnCardReadHandler(onCard);
 
 	cout << "[INFO][UTILS] register genereal handler.." << endl;
@@ -681,12 +685,7 @@ void dropSession() {
 bool writeOffBonuses() {
 	try {
 		double realWriteoff = bonus::writeoff();
-		_nMoney += realWriteoff;
-		if (_session.isBegin) {
-			_session.writeoffBonuses += realWriteoff;
-		} else {
-			cout << "[WARNING][UTILS] boneses writeoff, but session is not begin" << endl;
-		}
+		_onMoneyAdd(realWriteoff, true);
 		return true;
 	} catch (exception& e) {
 		_log->log(Logger::Type::WARNING, "BONUS", "fail writeoff bonuses: " + string(e.what()));
@@ -724,17 +723,7 @@ bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid) {
 }
 
 void addMoney(double nMoney, bool asBonus) {
-	_moneyMutex.lock();
-	_nMoney += nMoney;
-	if (_session.isBegin) {
-		if (asBonus) {
-			_session.writeoffBonuses += nMoney;
-		} else {
-			_session.depositedMoney += nMoney;
-		}
-	}
-	_moneyMutex.unlock();
-	render::redraw();
+	_onMoneyAdd(nMoney, asBonus);
 }
 
 }
