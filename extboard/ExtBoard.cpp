@@ -135,7 +135,9 @@ namespace {
 		};
 		Mode mode;
 		double rate;
+		bool usedbillcodes[32];
 		double billcodes[32];
+		int maxbillcode;
 	};
 
 	struct PerformerUnit {
@@ -493,14 +495,22 @@ namespace {
 		if (mode == "bill-code") {
 			dst.mode = Payment::BILL_CODE;
 			json& bcs = JParser::getf(src, "bill-codes", "payment " + name);
+			dst.maxbillcode = 0;
+			for (int i = 0; i < 32; i++) {
+				dst.usedbillcodes[i] = false;
+			}
 			for (int i = 0; i < bcs.size(); i++) {
 				try {
 					int bc = bcs[i][0];
 					int bn = bcs[i][1];
 					if (bc < 1 || bc > 31) {
-						throw runtime_error("incorrect bill code");
+						throw runtime_error("incorrect bill code, must be [1:31]");
 					}
+					dst.usedbillcodes[bc] = true;
 					dst.billcodes[bc] = bn;
+					if (bc > dst.maxbillcode) {
+						dst.maxbillcode = bc;
+					}
 				} catch (exception& e) {
 					throw runtime_error("fail load '" + to_string(i) + "' bill code for " + name + ": " + string(e.what()));
 				}
@@ -518,8 +528,19 @@ namespace {
 			return (double)val * pm.rate;
 		} else
 		if (pm.mode == Payment::BILL_CODE) {
-			if (val > 31) {
-				cout << "!!! BILL CODE ERROR !!!" << endl;
+			if (val > pm.maxbillcode) {
+				cout << "[WARNING][EXTBOARD] received " << val << " bill code number, it is overflow, set max bill code: " << pm.maxbillcode << endl;
+				return pm.billcodes[pm.maxbillcode];
+			}
+			if (!pm.usedbillcodes[val]) {
+				int nextbc = pm.maxbillcode;
+				for (int i = val; i < 32; i++) {
+					if (pm.usedbillcodes[i]) {
+						nextbc = i;
+					}
+				}
+				cout << "[WARNING][EXTBOARD] received " << val << " bill code number, it is not used, set next bill code: " << nextbc << endl;
+				return pm.billcodes[nextbc];
 			}
 			return pm.billcodes[val];
 		} else {
