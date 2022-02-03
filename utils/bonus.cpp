@@ -384,13 +384,20 @@ double getCoef() {
 		_bonus = round(_promotions[vap[0]].k*100);
 		return _promotions[vap[0]].k;
 	} else {
-		int k = 0;
-		cout << vap.size() << " is active, them id: ";
+		int maxprior = 0;
 		for (int i = 0; i < vap.size(); i++) {
-			k += _promotions[vap[i]].sk;
-			cout << _promotions[vap[i]].id << " ";
+			if (_promotions[vap[i]].priority > maxprior) {
+				maxprior = _promotions[vap[i]].priority;
+			}
 		}
-		cout << ", summary k: " << k << endl;
+		int k = 0;
+		for (int i = 0; i < vap.size(); i++) {
+			if (_promotions[vap[i]].priority == maxprior) {
+				k += _promotions[vap[i]].sk;
+				cout << _promotions[vap[i]].id << " ";	
+			}
+		}
+		cout << " ids promotions is active, summary k: " << k << endl;
 		_bonus = round(k*100);
 		return k;
 	}
