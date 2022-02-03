@@ -49,12 +49,15 @@ namespace {
 	mutex _moneyMutex;
 	bool _terminate = false;
 	bool _normalwork = false;
+	bool _normalextb = true;
+	bool _normalrend = true;
 
 	vector<Program> _programs;
 	vector<Program> _servicePrograms;
 	vector<CardInfo> _cards;
 	Session _session;
 	int _currentProgram = -1;
+	bool _rendcrit = true;
 
 	double _nMoney = 0;
 	time_t _tOffServiceMode = 0;
@@ -172,16 +175,26 @@ namespace {
 	ReturnCode _handler(uint16_t id, void* arg) {
 		static int borehole = 0;
 		static double previousk = 0;
+
+		_normalrend = render::getState();
+		if (!_normalrend && _rendcrit) {
+			_normalwork = false;
+		}
 		if (!_normalwork) {
+			if ((_normalrend || !_rendcrit) && _normalextb) {
+				_normalwork = true;
+			}
 			return OK;
 		}
 
+		// Off service mode
 		if (mode == Mode::SERVICE && _tServiceMode > 0) {
 			if (time(NULL) > _tOffServiceMode) {
 				_onServiceEnd();
 			}
 		}
 		
+		// Check coef while inaction
 		if (mode == Mode::GIVE_MONEY && borehole % 30 == 0) {
 			double k = bonus::getCoef();
 			if (previousk > 1 && k <= 1) {
@@ -222,12 +235,13 @@ namespace {
 			case Mode::SERVICE: setServiceMode();
 			}
 			cout << "[INFO][EXTBOARD] restored " << text << endl;
-			_normalwork = true;
+			_normalextb = true;
 			return;
 		case extboard::ErrorType::DISCONNECT_DEV: ets = "DISCONNECT DEV"; break;
 		case extboard::ErrorType::INTERNAL: ets = "INTERNAL"; break;
 		default: break;
 		}
+		_normalextb = false;
 		_normalwork = false;
 		_log->log(Logger::Type::ERROR, "EXTBOARD", ets + ": " + text);
 		memset(errort, 0, sizeof(errort));
@@ -235,6 +249,7 @@ namespace {
 		snprintf(errort, sizeof(errort), "%s", ets.c_str());
 		snprintf(errord, sizeof(errord), "%s", text.c_str());
 		render::showFrame(render::SpecFrame::INTERNAL_ERROR);
+		sleep(2);
 	}
 
 }
@@ -368,14 +383,13 @@ void init(
 		_log->log(Logger::Type::WARNING, "CONFIG", "fail to fill cards: " + string(e.what()));
 	}
 
-	bool rendcrit = true;
 
 	// render
 	try {
 		cout << "[INFO][UTILS] init render module.." << endl;
 		_frames = new JParser("./config/frames.json");
 		json& display = _hwconfig->get("display");
-		rendcrit = JParser::getf(display, "critical", "hwdisplay");
+		_rendcrit = JParser::getf(display, "critical", "hwdisplay");
 		json& sf = _frames->get("spec-frames");
 		json& go = _frames->get("general-option");
 		json& bg = _frames->get("backgrounds");
@@ -387,7 +401,7 @@ void init(
 		render::regVar(errord, L"errord");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
-		if (rendcrit) {
+		if (_rendcrit) {
 			exit(-2);
 		}
 	}
@@ -424,8 +438,8 @@ void init(
 				_log->log(Logger::Type::WARNING, "CONFIG", "fail get load effects: " + string(e.what()));
 			}
 		}
-		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, specef, relIns);
 		extboard::registerOnErrorHandler(_extboardError);
+		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, specef, relIns);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
 		exit(-3);

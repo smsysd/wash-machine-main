@@ -41,6 +41,8 @@ namespace render {
 	void showTempFrame(int idFrame, int tSec);
 
 	void redraw();
+
+	bool getState();
 }
 
 #endif

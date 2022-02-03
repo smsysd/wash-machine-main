@@ -65,7 +65,8 @@ namespace {
 	int _redrawBorehole = 200;
 	int _handlerDelay = 10000;
 	bool _pushedRedraw = false;
-	
+	bool _state = false;
+
 	int _giveMoneyFrame = -1;
 	int _bonusGiveMoneyFrame = -1;
 	int _logoFrame = -1;
@@ -157,6 +158,7 @@ namespace {
 
 	void _handler() {
 		int i = 0;
+		int suspicion = 0;
 		while (true) {
 			try {
 				if (_tempFrameQueue.size() > 0) {
@@ -187,9 +189,15 @@ namespace {
 				}
 				usleep(_handlerDelay);
 				i++;
+				suspicion = 0;
+				_state = true;
 			} catch (exception& e) {
+				suspicion++;
 				cout << "[WARNING][RENDER]|HANDLER| " << e.what() << endl;
 				usleep(10000);
+				if (suspicion > 10) {
+					_state = false;
+				}
 			}
 		}
 	}
@@ -561,6 +569,10 @@ void showTempFrame(int idFrame, int tSec) {
 
 void redraw() {
 	_pushedRedraw = true;
+}
+
+bool getState() {
+	return _state;
 }
 
 }

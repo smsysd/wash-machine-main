@@ -1133,14 +1133,15 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 			if (lt == "bm") {
 				led.type = Led::BUTTONMODULE;
 				led.addr = JParser::getf(leds[i], "address", "");
-				// cout << "bm led.addr " << led.addr;
+				if (led.i > 7) {
+					throw runtime_error("index on button module must be 0..7");
+				}
 			} else
 			if (lt == "eb") {
 				led.type = Led::EXTBOARD;
 			} else {
 				throw runtime_error("unknown type '" + lt + "', must be 'lp', 'bm' or 'eb'");
 			}
-			// cout << "load led " << i << ", type " << led.type << ", index " << led.i << ", id " << led.id << ", addr " << led.addr << endl;
 			_leds.push_back(led);
 		} catch (exception& e) {
 			throw runtime_error("fail to load '" + to_string(i) + "' led: " + string(e.what()));
@@ -1239,15 +1240,27 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	cout << "[INFO][EXTBOARD] create MSPI connection.." << endl;
 	_mspi = new Mspi(driver, speed, csPin, intPin, _int);
 	
-	// connect to extboard
-	cout << "[INFO][EXTBOARD] connect to extboard.." << endl;
-	_connect();
+	try {
+		// connect to extboard
+		cout << "[INFO][EXTBOARD] connect to extboard.." << endl;
+		_connect();
 
-	cout << "[INFO][EXTBOARD] upload options.." << endl;
-	_uploadAllOptions();
-	cout << "[INFO][EXTBOARD] init external devices.." << endl;
-	usleep(10000);
-	_initExtdev();
+		cout << "[INFO][EXTBOARD] upload options.." << endl;
+		_uploadAllOptions();
+		cout << "[INFO][EXTBOARD] init external devices.." << endl;
+		usleep(10000);		
+	} catch (exception& e) {
+		_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
+		throw runtime_error(e.what());
+	}
+
+
+	try {
+		_initExtdev();
+	} catch (exception& e) {
+		_onError(ErrorType::DISCONNECT_DEV, e.what());
+		throw runtime_error(e.what());
+	}
 	cout << "[INFO][EXTBOARD] start handler.." << endl;
 	pthread_create(&_thread_id, NULL, _handler, NULL);
 	_operations = fifo_create(32, sizeof(Handle));
