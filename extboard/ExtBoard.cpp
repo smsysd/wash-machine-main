@@ -660,12 +660,6 @@ namespace {
 		}
 		_mspi->write((int)Addr::RELAY_GROUPS, buf, 192);
 
-		memset(buf, 0, 6);
-		buf[0] = (uint8_t)_cash.mode;
-		buf[1] = (uint8_t)_coin.mode;
-		buf[2] = (uint8_t)_terminal.mode;
-		_mspi->write((int)Addr::PAYMENT_OPT, buf, 3);
-
 		memset(buf, 0, 26);
 		buf[0] = _buttoneb.io;
 		buf[1] = _buttoneb.activeLevels;
