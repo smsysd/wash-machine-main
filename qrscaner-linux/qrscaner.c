@@ -89,20 +89,27 @@ int qrscaner_init(const char* camPath, int width, int height, int readDelayMs, i
 	memset(_qrs_camPath, 0, sizeof(_qrs_camPath));
 	strncpy(_qrs_camPath, camPath, sizeof(_qrs_camPath));
 
-	// snprintf(_qrs_command, sizeof(buf), "zbarcam --raw --prescale=%ix%i --nodisplay --oneshot -Sdisable -Sqrcode.enable %s", width, height, camPath);
-	snprintf(_qrs_command, sizeof(buf), "zbarcam --raw --prescale=%ix%i --oneshot -Sdisable -Sqrcode.enable %s", width, height, camPath);
+	snprintf(_qrs_command, sizeof(buf), "zbarcam --raw --prescale=%ix%i --nodisplay -Sdisable -Sqrcode.enable %s", width, height, camPath);
+	// snprintf(_qrs_command, sizeof(buf), "zbarcam --raw --prescale=%ix%i --oneshot -Sdisable -Sqrcode.enable %s", width, height, camPath);
     memset(_qrs_qr_old, 0, sizeof(buf));
 	_qrs_callback = callback;
 	return 0;
 }
 
 static void *_qrs_thread(void *param) {
-    char qr_data[7168];
+    char qr_data[512];
+	int resplen;
     while (1) {
 		_qrs_ctrlcam();
+		memset(qr_data, 0, sizeof(qr_data));
+		system(_qrs_command);
         FILE *fp = popen(_qrs_command, "r");
-		usleep(1000);
-        fread(qr_data, 7168, 1, fp);
+		usleep(5000);
+        fread(qr_data, sizeof(qr_data - 1), 1, fp);
+		resplen = strlen(qr_data);
+		if (resplen < 4 || resplen > 64) {
+			continue;
+		}
         pclose(fp);
 		if (_qrs_equal_blocking) {
 			if (strncmp(qr_data, _qrs_qr_old, sizeof(_qrs_qr_old))) {

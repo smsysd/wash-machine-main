@@ -270,55 +270,6 @@ void init(
 	void (*onCard)(uint64_t cardid),
 	void (*onServiceEnd)())
 {
-	// load necessary config
-	cout << "[INFO][UTILS] load necessary config.." << endl;
-	try {
-		_hwconfig = new JParser("./config/hwconfig.json");
-		_config = new JParser("./config/config.json");
-		_tServiceMode = _config->get("service-time");
-	} catch (exception& e) {
-		_log->log(Logger::Type::ERROR, "CONFIG", "fail to load necessary config files: " + string(e.what()));
-		exit(-1);
-	}
-	// qr scaner
-	try {
-		cout << "[INFO][UTILS] init qr scanner.." << endl;
-		json& qrscnf = _hwconfig->get("qr-scaner");
-		bool en = JParser::getf(qrscnf, "enable", "qr-scaner");
-		if (en) {
-			string driver = JParser::getf(qrscnf, "driver", "qr-scaner");
-			int width = JParser::getf(qrscnf, "width", "qr-scaner");
-			int height = JParser::getf(qrscnf, "height", "qr-scaner");
-			int bright = JParser::getf(qrscnf, "bright", "qr-scaner");
-			int contrast = JParser::getf(qrscnf, "contrast", "qr-scaner");
-			json sexpos = JParser::getf(qrscnf, "expos", "qr-scaner");
-			json sfocus = JParser::getf(qrscnf, "focus", "qr-scaner");
-			int readDelay = JParser::getf(qrscnf, "read-delay", "qr-scaner");
-			bool equalb = JParser::getf(qrscnf, "equal-blocking", "qr-scaner");
-			int expos = QRSCANER_AUTO;
-			int focus = QRSCANER_AUTO;
-			if (sexpos.is_number()) {
-				expos = sexpos;
-			}
-			if (sfocus.is_number()) {
-				focus = sfocus;
-			}
-			int rc = qrscaner_init(driver.c_str(), width, height, readDelay, bright, expos, focus, contrast, equalb ? 1 : 0, onQr);
-			if (rc == 0) {
-				qrscaner_start();
-			} else {
-				throw runtime_error(to_string(rc));
-			}
-		} else {
-			cout << "[INFO][UTILS] qr scaner disabled" << endl;
-		}
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "QRSCANER", "fail to init qr-scaner: " + string(e.what()));
-	}
-	while (true) {
-		usleep(100000);
-	}
-
 	_onCashAppeared = onCashAppeared;
 	_onCashRunout = onCashRunout;
 	_onServiceEnd = onServiceEnd;
