@@ -49,6 +49,7 @@ struct Session {
 	Type type;
 	double k;
 	int k100;
+	int rk100;
 	time_t tBegin;
 	time_t tEnd;
 	uint64_t cardid;

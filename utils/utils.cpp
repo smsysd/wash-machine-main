@@ -397,6 +397,7 @@ void init(
 		render::init(display, _frames->get("frames"), sf, go, bg, fonts);
 		render::regVar(&_nMoney, L"money", 0);
 		render::regVar(&_session.k100, L"sbonus");
+		render::regVar(&_session.rk100, L"srbonus");
 		render::regVar(errort, L"errort");
 		render::regVar(errord, L"errord");
 	} catch (exception& e) {
@@ -620,6 +621,7 @@ void beginSession(Session::Type type, uint64_t id) {
 	double k = bonus::getCoef();
 	_session.k = k;
 	_session.k100 = round(k*100);
+	_session.rk100 = _session.k100 - 100;
 	_session.type = type;
 	_session.cardid = id;
 	_session.totalSpent = 0;

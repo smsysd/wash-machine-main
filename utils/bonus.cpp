@@ -171,6 +171,7 @@ namespace {
 
 	vector<Promotion> _promotions;
 	int _bonus = 0;
+	int _rbonus = 0;
 	Type _type;
 	string _cert;
 	char _access[256];
@@ -203,6 +204,7 @@ namespace {
 void init(json& bonusSysCnf, json& promotions) {
 	// link with render
 	render::regVar(&_bonus, L"gbonus");
+	render::regVar(&_rbonus, L"grbonus");
 	
 	// general init
 	string bt = JParser::getf(bonusSysCnf, "type", "bonus-system");
@@ -377,11 +379,13 @@ double getCoef() {
 	if (vap.size() == 0) {
 		cout << "[INFO][BONUS] no one promotions is active" << endl;
 		_bonus = 100;
+		_rbonus = 0;
 		return 1;
 	} else
 	if (vap.size() == 1) {
 		cout << "one promotions is active, type: " << _promotions[vap[0]].type << ", k: " << _promotions[vap[0]].k << endl;
 		_bonus = round(_promotions[vap[0]].k*100);
+		_rbonus = _bonus - 100;
 		return _promotions[vap[0]].k;
 	} else {
 		int maxprior = 0;
@@ -399,6 +403,7 @@ double getCoef() {
 		}
 		cout << " ids promotions is active, summary k: " << k << endl;
 		_bonus = round(k*100);
+		_rbonus = _bonus - 100;
 		return k;
 	}
 }
