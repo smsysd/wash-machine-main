@@ -5,8 +5,7 @@
 			"used-mask": 3
 		},
 		"modules": [
-			{"address": 32, "active-levels": 0, "io-mask": 239},
-			{"address": 33, "active-levels": 0, "io-mask": 239}
+			{"address": 32, "active-levels": 0, "io-mask": 239}
 		]
 	},
 
@@ -72,7 +71,8 @@
 	},
 
 	"qr-scaner": {
-		"enable": false,
+		"enable": true,
+		"equal-blocking": false,
 		"width": 800,
 		"height": 640,
 		"focus": 620,
@@ -85,10 +85,13 @@
 	},
 
 	"leds": [
-		{"id": 1, "type": "bm", "address": 32, "index": 2},
-		{"id": 2, "type": "bm", "address": 32, "index": 3},
-		{"id": 3, "type": "bm", "address": 33, "index": 2},
-		{"id": 4, "type": "bm", "address": 33, "index": 3},
+		{"id": 1, "type": "bm", "address": 32, "index": 0},
+		{"id": 2, "type": "bm", "address": 32, "index": 1},
+		{"id": 3, "type": "bm", "address": 32, "index": 2},
+		{"id": 4, "type": "bm", "address": 32, "index": 3},
+		{"id": 5, "type": "bm", "address": 32, "index": 5},
+		{"id": 6, "type": "bm", "address": 32, "index": 6},
+		{"id": 7, "type": "bm", "address": 32, "index": 7},
 		{"id": 10, "type": "lp", "index": 0},
 		{"id": 11, "type": "lp", "index": 1},
 		{"id": 12, "type": "lp", "index": 2},

@@ -470,7 +470,7 @@ void init(
 			json sexpos = JParser::getf(qrscnf, "expos", "qr-scaner");
 			json sfocus = JParser::getf(qrscnf, "focus", "qr-scaner");
 			int readDelay = JParser::getf(qrscnf, "read-delay", "qr-scaner");
-			bool equalb = JParser::getf(qrscnf, "eqal-blocking", "qr-scaner");
+			bool equalb = JParser::getf(qrscnf, "equal-blocking", "qr-scaner");
 			int expos = QRSCANER_AUTO;
 			int focus = QRSCANER_AUTO;
 			if (sexpos.is_number()) {
@@ -695,6 +695,7 @@ void dropSession() {
 		_log->log(Logger::Type::ERROR, "MONITOR", "not defined session type");
 	}
 	_nMoney = 0;
+	qrscaner_clear();
 	_session.isBegin =  false;
 }
 

@@ -15,16 +15,25 @@ static int _qrs_equal_blocking;
 
 int qrscaner_init(const char* camPath, int width, int height, int readDelayMs, int bright, int expos, int focus, int contrast, int equalBlocking, void (*callback)(const char* qr_code)) {
 	char buf[256];
+	memset(buf, 0, sizeof(buf));
+	FILE* tzbc = popen("zbarcam --version", "r");
+	fread(buf, sizeof(buf), 1, tzbc);
+	fclose(tzbc);
+	int resplen = strlen(buf);
+	if (resplen > 12 || resplen < 5) {
+		printf("[ERROR][QRSCANER]: no zbarcam\n");
+		return -2;
+	}
 	if (width == QRSCANER_AUTO || height == QRSCANER_AUTO) {
-		printf("[QRSCANER]: width and height must be no auto\n");
+		printf("[ERROR][QRSCANER]: width and height must be no auto\n");
 		return -1;
 	}
 	if (bright == QRSCANER_AUTO) {
-		printf("[QRSCANER]: bright must be no auto\n");
+		printf("[ERROR][QRSCANER]: bright must be no auto\n");
 		return -1;
 	}
 	if (contrast == QRSCANER_AUTO) {
-		printf("[QRSCANER]: contrast must be no auto\n");
+		printf("[ERROR][QRSCANER]: contrast must be no auto\n");
 		return -1;
 	}
 
