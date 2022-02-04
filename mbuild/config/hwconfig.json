@@ -73,14 +73,14 @@
 	"qr-scaner": {
 		"enable": true,
 		"equal-blocking": false,
-		"width": 800,
-		"height": 640,
+		"width": 640,
+		"height": 480,
 		"focus": 620,
-		"bright": -20,
+		"bright": 0,
 		"contrast": 63,
-		"expos": 100,
+		"expos": 150,
 
-		"driver": "/dev/video0",
+		"driver": "/dev/v4l/by-id/usb-Sonix_Technology_Co.__Ltd._A4tech_FHD_1080P_PC_Camera_SN0001-video-index0",
 		"read-delay": 2000
 	},
 
