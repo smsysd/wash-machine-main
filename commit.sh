@@ -1,7 +1,14 @@
 #!/bin/bash
-VER="$(python3 increment.py $1)"
+
+if [[ $2 = "-l" ]] ; then
+VER="$(python3 increment.py $1 -l)"
 echo $VER
 echo "edit log and press key.."
 read -n1 x
-git commit -a -m "$VER $2"
+else
+VER="$(python3 increment.py $1)"
+echo $VER
+fi
+
+git commit -a -m "$VER"
 git push
