@@ -5,12 +5,13 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 
+static FILE *_qrs_pipe = NULL;
 static pthread_t _qrs_thread_id;
-static char _qrs_command[512];
+static char _qrs_command[1024];
 static void (*_qrs_callback)(const char* qr_code);
 static char _qrs_qr_old[256];
-static int _qrs_read_delay;
 static int _qrs_equal_blocking;
 static char _qrs_camPath[1024];
 static int _qrs_bright;
@@ -56,14 +57,14 @@ void _qrs_ctrlcam() {
 	}
 }
 
-int qrscaner_init(const char* camPath, int width, int height, int readDelayMs, int bright, int expos, int focus, int contrast, int equalBlocking, void (*callback)(const char* qr_code)) {
+int qrscaner_init(const char* camPath, int width, int height, int bright, int expos, int focus, int contrast, int equalBlocking, void (*callback)(const char* qr_code)) {
 	char buf[256];
 	memset(buf, 0, sizeof(buf));
 	FILE* tzbc = popen("zbarcam --version", "r");
 	fread(buf, sizeof(buf), 1, tzbc);
 	pclose(tzbc);
 	int resplen = strlen(buf);
-	if (resplen > 12 || resplen < 5) {
+	if (resplen > 12 || resplen < 3) {
 		printf("[ERROR][QRSCANER]: no zbarcam\n");
 		return -2;
 	}
@@ -80,7 +81,6 @@ int qrscaner_init(const char* camPath, int width, int height, int readDelayMs, i
 		return -1;
 	}
 
-	_qrs_read_delay = readDelayMs;
 	_qrs_equal_blocking = equalBlocking;
 	_qrs_bright = bright;
 	_qrs_contrast = contrast;
@@ -90,8 +90,8 @@ int qrscaner_init(const char* camPath, int width, int height, int readDelayMs, i
 	strncpy(_qrs_camPath, camPath, sizeof(_qrs_camPath));
 
 	snprintf(_qrs_command, sizeof(buf), "zbarcam --raw --prescale=%ix%i --nodisplay -Sdisable -Sqrcode.enable %s", width, height, camPath);
-	// snprintf(_qrs_command, sizeof(buf), "zbarcam --raw --prescale=%ix%i --oneshot -Sdisable -Sqrcode.enable %s", width, height, camPath);
     memset(_qrs_qr_old, 0, sizeof(buf));
+	_qrs_ctrlcam();
 	_qrs_callback = callback;
 	return 0;
 }
@@ -99,30 +99,49 @@ int qrscaner_init(const char* camPath, int width, int height, int readDelayMs, i
 static void *_qrs_thread(void *param) {
     char qr_data[512];
 	int resplen;
-    while (1) {
-		_qrs_ctrlcam();
+	int suspision = 0;
+	time_t tlterm = 0;
+	_qrs_pipe = popen(_qrs_command, "r");
+    char* ptr;
+	while (1) {
 		memset(qr_data, 0, sizeof(qr_data));
-		system(_qrs_command);
-        FILE *fp = popen(_qrs_command, "r");
-		usleep(5000);
-        fread(qr_data, sizeof(qr_data - 1), 1, fp);
-		resplen = strlen(qr_data);
-		if (resplen < 4 || resplen > 64) {
-			continue;
-		}
-        pclose(fp);
-		if (_qrs_equal_blocking) {
-			if (strncmp(qr_data, _qrs_qr_old, sizeof(_qrs_qr_old))) {
-				_qrs_callback(qr_data);
-				strncpy(_qrs_qr_old, qr_data, sizeof(_qrs_qr_old));
+		ptr = fgets(qr_data, sizeof(qr_data), _qrs_pipe);
+		if (ptr != NULL) {
+			resplen = strlen(qr_data);
+			if (resplen < 4 || resplen > 128) {
+				printf("[WARNING][QRSCANER] incorrect size of qr code\n");
+				continue;
 			}
+			if (_qrs_equal_blocking) {
+				if (strncmp(qr_data, _qrs_qr_old, sizeof(_qrs_qr_old)) != 0) {
+					_qrs_callback(qr_data);
+					strncpy(_qrs_qr_old, qr_data, sizeof(_qrs_qr_old));
+				}
+			} else {
+				_qrs_callback(qr_data);
+			}
+			usleep(10000);
 		} else {
-			_qrs_callback(qr_data);
+			printf("[WARNING][QRSCANER] zbarcam was terminate\n");
+			pclose(_qrs_pipe);
+			if (time(NULL) - tlterm < 10) {
+				suspision++;
+				if (suspision > 3) {
+					pthread_exit(NULL);
+					return NULL;
+				}
+			} else {
+				suspision = 0;
+			}
+			tlterm = time(NULL);
+			_qrs_pipe = popen(_qrs_command, "r");
 		}
-		usleep(1000*_qrs_read_delay);
     }
-    pthread_exit(0);
+	pclose(_qrs_pipe);
+    pthread_exit(NULL);
+	return NULL;
 }
+
 void qrscaner_start() {
     pthread_create(&_qrs_thread_id, NULL, _qrs_thread, NULL);
 }
@@ -132,5 +151,5 @@ void qrscaner_stop() {
 }
 
 void qrscaner_clear() {
-	memset(_qrs_qr_old, 0, 256);
+	memset(_qrs_qr_old, 0, sizeof(_qrs_qr_old));
 }

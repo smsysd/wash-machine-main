@@ -1,2 +1,2 @@
-/usr/bin/ar qc libqrscaner.a CMakeFiles/qrscaner.dir/qrscaner.c.o
+/usr/bin/ar qc libqrscaner.a  CMakeFiles/qrscaner.dir/qrscaner.c.o
 /usr/bin/ranlib libqrscaner.a

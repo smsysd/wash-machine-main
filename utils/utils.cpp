@@ -469,7 +469,6 @@ void init(
 			int contrast = JParser::getf(qrscnf, "contrast", "qr-scaner");
 			json sexpos = JParser::getf(qrscnf, "expos", "qr-scaner");
 			json sfocus = JParser::getf(qrscnf, "focus", "qr-scaner");
-			int readDelay = JParser::getf(qrscnf, "read-delay", "qr-scaner");
 			bool equalb = JParser::getf(qrscnf, "equal-blocking", "qr-scaner");
 			int expos = QRSCANER_AUTO;
 			int focus = QRSCANER_AUTO;
@@ -479,7 +478,7 @@ void init(
 			if (sfocus.is_number()) {
 				focus = sfocus;
 			}
-			int rc = qrscaner_init(driver.c_str(), width, height, readDelay, bright, expos, focus, contrast, equalb ? 1 : 0, onQr);
+			int rc = qrscaner_init(driver.c_str(), width, height, bright, expos, focus, contrast, equalb ? 1 : 0, onQr);
 			if (rc == 0) {
 				qrscaner_start();
 			} else {

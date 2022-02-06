@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/qrscaner.c" "/home/elpi/workspace/sm-sys/wash-machine-main/qrscaner-linux/CMakeFiles/qrscaner.dir/qrscaner.c.o"
+  "/home/jodzik/projects/finish/wash-machine-main/qrscaner-linux/qrscaner.c" "/home/jodzik/projects/finish/wash-machine-main/qrscaner-linux/CMakeFiles/qrscaner.dir/qrscaner.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/home/elpi/workspace/sm-sys/wash-machine-main/linux-stdsiga/stdsiga.c
+/home/jodzik/projects/finish/wash-machine-main/linux-stdsiga/stdsiga.c
 stdsiga.h
-/home/elpi/workspace/sm-sys/wash-machine-main/linux-stdsiga/stdsiga.h
+/home/jodzik/projects/finish/wash-machine-main/linux-stdsiga/stdsiga.h
 signal.h
 -
 pthread.h
@@ -16,7 +16,7 @@ pthread.h
 stdlib.h
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/linux-stdsiga/stdsiga.h
+/home/jodzik/projects/finish/wash-machine-main/linux-stdsiga/stdsiga.h
 stdint.h
 -
 

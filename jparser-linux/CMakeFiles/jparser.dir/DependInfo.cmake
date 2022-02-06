@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.cpp" "/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/CMakeFiles/jparser.dir/JParser.cpp.o"
+  "/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.cpp" "/home/jodzik/projects/finish/wash-machine-main/jparser-linux/CMakeFiles/jparser.dir/JParser.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

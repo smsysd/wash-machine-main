@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/mspi.dir/Mspi.cpp.o"
-  "libmspi.a"
   "libmspi.pdb"
+  "libmspi.a"
 )
 
 # Per-language clean rules from dependency scanning.

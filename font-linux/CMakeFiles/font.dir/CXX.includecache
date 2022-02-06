@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.cpp
+/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.cpp
 Font.h
-/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
+/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.h
 ../rgb332/rgb332.h
-/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
+/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 string
 -
 stdint.h
@@ -30,11 +30,11 @@ locale
 codecvt
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/font-linux/Font.h
+/home/jodzik/projects/finish/wash-machine-main/font-linux/Font.h
 ../rgb332/rgb332.h
-/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
+/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
 ../jparser-linux/JParser.h
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 string
 -
 stdint.h
@@ -42,13 +42,13 @@ stdint.h
 vector
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/jparser-linux/JParser.h
+/home/jodzik/projects/finish/wash-machine-main/jparser-linux/JParser.h
 ../json.h
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 string
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/json.h
+/home/jodzik/projects/finish/wash-machine-main/json.h
 algorithm
 -
 cstddef
@@ -400,7 +400,7 @@ vector
 string_view
 -
 
-/home/elpi/workspace/sm-sys/wash-machine-main/rgb332/rgb332.h
+/home/jodzik/projects/finish/wash-machine-main/rgb332/rgb332.h
 stdint.h
 -
 

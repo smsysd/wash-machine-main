@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/stdsiga.dir/stdsiga.c.o"
-  "libstdsiga.a"
   "libstdsiga.pdb"
+  "libstdsiga.a"
 )
 
 # Per-language clean rules from dependency scanning.
