@@ -4,6 +4,7 @@ if [[ $2 = "-l" ]] ; then
 VER="$(python3 increment.py $1 -l)"
 echo $VER
 echo "edit log and press key.."
+code ./changelog.md
 read -n1 x
 else
 VER="$(python3 increment.py $1)"
