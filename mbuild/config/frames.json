@@ -17,7 +17,8 @@
 		"error-internal": 4,
 		"unknown-card": 5,
 		"repair": 6,
-		"service": 8
+		"service": 8,
+		"nomoney": 7
 	},
 
 	"frames": [
@@ -96,6 +97,17 @@
 			"lines": [
 				"ТЕХ.",
 				"РАБОТЫ"
+			]
+		},
+		{
+			"id": 7,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 4,
+			"lines": [
+				"НЕТ",
+				"СРЕДСТВ"
 			]
 		},
 		{

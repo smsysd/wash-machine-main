@@ -10,7 +10,7 @@ import time
 # run as independet python module
 # run options passed in argv, argv description:
 # [1]: path to point certificate, issued by owner of bonus system
-# [2]: access token, dynamic token, convey client of current session (by QR code or any)
+# [2]: access token, dynamic token, convey client of current session (by QR code or any), may be static access, receipt text or promo code
 # [3]: command, may be 'open', 'close', 'writeoff', each command can have additional args
 #	open: open transaction, return card info
 #	close: close transaction
@@ -20,16 +20,16 @@ import time
 # conditional example:
 # ..$ python3 point_api.py localhost path_to_point_certificate access_val cmd additional_arg
 # real examples:
-# ..$ python3 point_api.py ../config/point_cert.json -8594632929236741037+999135 open
-# ..$ python3 point_api.py ../config/point_cert.json -8594632929236741037+999135 writeoff 120
+# ..$ python3 point_api.py ../config/point_cert.json -DYN8594632929236741037+5 open
+# ..$ python3 point_api.py ../config/point_cert.json -DYN8594632929236741037+5 writeoff 120
 # result will be written in stdout as json
 # result format dpend of perform command
-# result fields for 'open': 'rc', 'rt', 'type', 'count', 'id'
+# result fields for 'open': 'rc', 'rt', 'type', 'count', 'uid'
 #	rc: int, return code, see it before any
 #	rt: string, return text - clarification of return code
 #	type: int, type of card
 #	count: double, number of available bonuses
-#	id: id of card
+#	id: uint64 uid of card
 # result fields for 'close': 'rc', 'rt'
 #	rc: int, return code, see it before any
 #	rt: string, return text - clarification of return code
@@ -43,17 +43,18 @@ import time
 # 3. close transaction
 # return codes:
 # 	0: OK
-#	6: OK, but desired bonuses to be debit and real debited is different
 #	-1: ERROR, no necessary arg
 #	-2: ERROR, incorrect arg
-#	-3: ERROR, permission denied
+#	-3: ERROR, access denied
 #	-4: ERROR, internal error
 #	-5: ERROR, request fault
+#	-7: ERROR, conditions not met
 #	-32: ERROR, parsing error
 # card types:
-#	0: standard, personal
-#	1: standard, from organization
-#	5: service card
+#	p: bonus, personal
+#	o: bonus, from organization
+#	s: service card
+#	t: onetime
 
 
 def rete(rc, rt):
@@ -61,18 +62,18 @@ def rete(rc, rt):
 	exit(rc)
 
 
-def reto(type, count, uid):
-	print('{"rc": 0, "rt": " ", "type": ' + str(type) + ', "count": ' + str(count) + ', "uid": "' + str(uid) + '"}')
+def reto(type, count, id):
+	print('{"rc": 0, "rt": null, "type": "' + str(type) + '", "count": ' + str(count) + ', "id": ' + str(id) + '}')
 	exit(0)
 
 
 def retc():
-	print('{"rc": 0, "rt": " "}')
+	print('{"rc": 0, "rt": null}')
 	exit(0)
 
 
 def retwoff(count):
-	print('{"rc": 0, "rt": " ", "count": ' + str(count) + '}')
+	print('{"rc": 0, "rt": null, "count": ' + str(count) + '}')
 	exit(0)
 
 
@@ -119,18 +120,18 @@ def req(hn, cert, id, acs, cmd, count, save = False):
 			push_save(hn, cert, id, acs, cmd, count)
 			return None
 		else:
-			rete(-5, "request fault: server is unavailable")
+			rete(-5, "request fault")
 	if r.status_code != 200:
 		if save:
 			push_save(hn, cert, id, acs, cmd, count)
 			return None
 		else:
-			rete(-5, "requset fault: " + r.status_code)
+			rete(-5, "requset fault: " + str(r.status_code))
 	
 	try:
 		jr = r.json()
 	except:
-		rete(-32, "parse error")
+		rete(-32, "parse error, resp text: " + r.text)
 	if jr["rc"] == None:
 		rete(-32, "parse error: no 'rc'")
 	if jr["rc"] != 0:
@@ -163,19 +164,19 @@ acs = sys.argv[2]
 cmd = sys.argv[3]
 
 if cmd == "open":
-	r = req(hostname, id, cert, acs, 1, None)
-	if r["type"] == None or r["count"] == None or r["uid"] == None:
+	r = req(hostname, cert, id, acs, 1, None)
+	if r["type"] == None or r["count"] == None or r["id"] == None:
 		rete(-5, "parse error: incorrect response")
-	reto(r["type"], r["count"], r["uid"])
+	reto(r["type"], r["count"], r["id"])
 elif cmd == "close":
 	if len(sys.argv) < 5:
 		rete(-1, "too less args: no count")
-	req(hostname, id, cert, acs, 3, sys.argv[4], True)
+	req(hostname, cert, id, acs, 3, sys.argv[4], True)
 	retc()
 elif cmd == "writeoff":
 	if len(sys.argv) < 5:
 		rete(-1, "too less args: no count")
-	r = req(hostname, id, cert, acs, 2, sys.argv[4])
+	r = req(hostname, cert, id, acs, 2, sys.argv[4])
 	if r["count"] == None:
 		rete(-5, "parse error: incorrect response")
 	retwoff(r["count"])

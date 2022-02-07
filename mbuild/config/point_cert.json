@@ -1,5 +1,5 @@
 {
-	"hostname": "http://localhost",
+	"hostname": "http://192.168.5.4/web",
 	"id": 1,
 	"cert": "test-test"
 }

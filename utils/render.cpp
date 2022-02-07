@@ -75,6 +75,7 @@ namespace {
 	int _internalErrorFrame = -1;
 	int _serviceFrame = -1;
 	int _repairFrame = -1;
+	int _nomoneyFrame = -1;
 	int _disconnectBg = -1;
 	int _disconnectFrameTimeout = -1;
 	char _encode[32] = {0};
@@ -302,6 +303,7 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 	_logoFrame = JParser::getf(specFrames, "logo", "spec-frames");
 	_serviceFrame = JParser::getf(specFrames, "service", "spec-frames");
 	_repairFrame = JParser::getf(specFrames, "repair", "spec-frames");
+	_nomoneyFrame = JParser::getf(specFrames, "nomoney", "spec-frames");
 
 	if (dt == "ledmatrix") {
 		cout << "[INFO][RENDER] display type is 'ledmatrix'" << endl;
@@ -423,6 +425,11 @@ void init(json& displaycnf, json& frames, json& specFrames, json& option, json& 
 		} catch (exception& e) {
 			throw runtime_error("no repair frame (" + to_string(_repairFrame) + ") in frames");
 		}
+		try {
+			_getFrame(_nomoneyFrame);
+		} catch (exception& e) {
+			throw runtime_error("no repair frame (" + to_string(_nomoneyFrame) + ") in frames");
+		}
 
 		// init hardware
 		cout << "[INFO][RENDER] init hardware" << endl;
@@ -520,6 +527,7 @@ void showFrame(SpecFrame frame) {
 	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame; break;
 	case SpecFrame::SERVICE: f = _serviceFrame; break;
 	case SpecFrame::REPAIR: f = _repairFrame; break;
+	case SpecFrame::NOMONEY: f = _nomoneyFrame; break;
 	}
 
 	try {
@@ -550,6 +558,7 @@ void showTempFrame(SpecFrame frame, int tSec) {
 	case SpecFrame::GIVE_MONEY_BONUS: f = _bonusGiveMoneyFrame; break;
 	case SpecFrame::SERVICE: f = _serviceFrame; break;
 	case SpecFrame::REPAIR: f = _repairFrame; break;
+	case SpecFrame::NOMONEY: f = _nomoneyFrame; break;
 	}
 	
 	try {

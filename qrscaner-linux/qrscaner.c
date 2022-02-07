@@ -113,6 +113,9 @@ static void *_qrs_thread(void *param) {
 				printf("[WARNING][QRSCANER] incorrect size of qr code\n");
 				continue;
 			}
+			if (qr_data[resplen-1] == '\n') {
+				qr_data[resplen-1] = 0;
+			}
 			printf("[INFO][QRSCANER] QR: %s\n", qr_data);
 			if (_qrs_equal_blocking) {
 				if (strncmp(qr_data, _qrs_qr_old, sizeof(_qrs_qr_old)) != 0) {
@@ -135,6 +138,7 @@ static void *_qrs_thread(void *param) {
 			} else {
 				suspision = 0;
 			}
+			sleep(4);
 			_qrs_ctrlcam();
 			tlterm = time(NULL);
 			_qrs_pipe = popen(_qrs_command, "r");

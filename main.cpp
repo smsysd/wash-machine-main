@@ -111,12 +111,20 @@ void _handleCard() {
 	if (card.type == CardInfo::BONUS) {
 		if (isBonusBegin) {
 			if (bonus::ismultibonus()) {
+				if (card.count <= 0) {
+					render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+					return;
+				}
 				rc = writeOffBonuses();
 				if (!rc) {
 					render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
 				}
 			}
 		} else {
+			if (card.count <= 0) {
+				render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+				return;
+			}
 			rc = writeOffBonuses();
 			if (!rc) {
 				render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
@@ -126,25 +134,26 @@ void _handleCard() {
 		}
 	} else
 	if (card.type == CardInfo::ONETIME) {
-		if (isBonusBegin) {
-			if (bonus::ismultibonus()) {
-				addMoney(card.count);
-			}
-		} else {
-			isBonusBegin = true;
-		}
+		addMoney(card.count);
 	} else {
 		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
 	}
 }
 
 void onQr(const char* qr) {
+	if (isBonusBegin && !bonus::ismultibonus()) {
+		cout << "[INFO][MAIN] multibonus is disable" << endl;
+		return;
+	}
 	bool rc = bonus::open(card, qr);
 	if (rc) {
-		if (card.type != bonus::CardInfo::UNKNOWN) {
-			_handleCard();
-		} else {
+		if (card.type == bonus::CardInfo::UNKNOWN) {
 			render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		} else
+		if (card.type == bonus::CardInfo::NOT_MET) {
+			render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+		} else {
+			_handleCard();
 		}
 	} else {
 		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);

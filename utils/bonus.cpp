@@ -20,8 +20,9 @@ namespace bonus {
 
 namespace {
 	enum class APIRC {
-		OK = -1,
-		ACCESS_DENIED = -3
+		OK = 0,
+		ACCESS_DENIED = -3,
+		COND_NOT_MET = -7
 	};
 
 	vector<string> _split(const string& s, char delim) {
@@ -180,17 +181,19 @@ namespace {
 	bool _isOpen = false;
 
 	json _japi(string ucmd) {
-		char buf[4096] = {0};
-		string cmd  = "python3 ./point_api.py " + _cert + " " + string(_access) + " " + ucmd;
+		char buf[2048] = {0};
+		string cmd  = "python3 ./point_api.py '" + _cert + "' '" + string(_access) + "' " + ucmd;
+		cout << "[DEBUG][BONUS] cmd: " << cmd << endl;
 		FILE* pp = popen(cmd.c_str(), "r");
 		if (pp == NULL) {
 			throw runtime_error("fail to open pipe to 'point_api.py'");
 		}
-		int rc = fread(buf, 2, 2048, pp);
-		if (rc < 1) {
+		int rc = fread(buf, 2, sizeof(buf), pp);
+		if (rc < 0) {
 			throw runtime_error("fail to read out from 'point_api.py'");
 		}
 		pclose(pp);
+		cout << "[DEBUG][BONUS] response dump: " << buf << endl;
 		json data;
 		try {
 			data = json::parse(buf);
@@ -294,10 +297,22 @@ bool open(CardInfo& card, const char* access) {
 	try {
 		json res = _japi("open");
 		int rc = JParser::getf(res, "rc", "server response");
-		string rt = JParser::getf(res, "rt", "server response");
+		string rt = "";
+		try {
+			rt = JParser::getf(res, "rt", "server response");
+		} catch (exception& e) {
+			rt = "None";
+		}
+
 		if (rc == (int)APIRC::ACCESS_DENIED) {
+			card.type = CardInfo::UNKNOWN;
 			return true;
-		} else if (rc != (int)APIRC::OK) {
+		} else
+		if (rc == (int)APIRC::COND_NOT_MET) {
+			card.type = CardInfo::NOT_MET;
+			return true;
+		} else
+		if (rc != (int)APIRC::OK) {
 			throw runtime_error(rt);
 		}
 
@@ -352,7 +367,12 @@ double writeoff() {
 	}
 	json res = _japi("writeoff " + to_string(_desiredWriteoff));
 	int rc = JParser::getf(res, "rc", "server response");
-	string rt = JParser::getf(res, "rt", "server response");
+	string rt = "";
+	try {
+		rt = JParser::getf(res, "rt", "server response");
+	} catch (exception& e) {
+		rt = "None";
+	}
 	if (rc == (int)APIRC::ACCESS_DENIED) {
 		throw runtime_error("access denied");
 	} else if (rc != (int)APIRC::OK) {
