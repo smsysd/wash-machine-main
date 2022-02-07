@@ -279,7 +279,7 @@ void init(json& bonusSysCnf, json& promotions) {
 				throw runtime_error("unknown type '" + pt + "'");
 			}
 			_promotions.push_back(sp);
-			cout << "[INFO][BONUS] add promotion " << sp.id << endl;
+			cout << "[INFO][BONUS] add promotion " << sp.id << ", k: " << sp.k << ", sk: " << sp.sk << endl;
 		} catch (exception& e) {
 			throw runtime_error("fail to load promomtion " + to_string(i) + ": " + string(e.what()));
 		}
@@ -384,9 +384,9 @@ double getCoef() {
 	} else
 	if (vap.size() == 1) {
 		cout << "one promotions is active, type: " << _promotions[vap[0]].type << ", k: " << _promotions[vap[0]].k << endl;
-		_bonus = round(_promotions[vap[0]].k*100);
+		_bonus = round((_promotions[vap[0]].k+1)*100);
 		_rbonus = _bonus - 100;
-		return _promotions[vap[0]].k;
+		return _promotions[vap[0]].k + 1;
 	} else {
 		int maxprior = 0;
 		for (int i = 0; i < vap.size(); i++) {
@@ -394,17 +394,17 @@ double getCoef() {
 				maxprior = _promotions[vap[i]].priority;
 			}
 		}
-		int k = 0;
+		double k = 0;
 		for (int i = 0; i < vap.size(); i++) {
 			if (_promotions[vap[i]].priority == maxprior) {
 				k += _promotions[vap[i]].sk;
-				cout << _promotions[vap[i]].id << " ";	
+				cout << _promotions[vap[i]].id << " " << _promotions[vap[i]].sk << " | ";
 			}
 		}
-		cout << " ids promotions is active, summary k: " << k << endl;
-		_bonus = round(k*100);
+		cout << "ids promotions is active, summary k: " << k << endl;
+		_bonus = round((1+k)*100);
 		_rbonus = _bonus - 100;
-		return k;
+		return k + 1;
 	}
 }
 

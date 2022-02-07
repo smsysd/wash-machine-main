@@ -1,2 +1,0 @@
-/usr/bin/ar qc libextboard.a  CMakeFiles/extboard.dir/ExtBoard.cpp.o
-/usr/bin/ranlib libextboard.a

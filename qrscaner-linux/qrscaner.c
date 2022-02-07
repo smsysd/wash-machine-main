@@ -101,6 +101,7 @@ static void *_qrs_thread(void *param) {
 	int resplen;
 	int suspision = 0;
 	time_t tlterm = 0;
+	system("sudo pkill zbarcam");
 	_qrs_pipe = popen(_qrs_command, "r");
     char* ptr;
 	while (1) {
@@ -112,6 +113,7 @@ static void *_qrs_thread(void *param) {
 				printf("[WARNING][QRSCANER] incorrect size of qr code\n");
 				continue;
 			}
+			printf("[INFO][QRSCANER] QR: %s\n", qr_data);
 			if (_qrs_equal_blocking) {
 				if (strncmp(qr_data, _qrs_qr_old, sizeof(_qrs_qr_old)) != 0) {
 					_qrs_callback(qr_data);
@@ -133,6 +135,7 @@ static void *_qrs_thread(void *param) {
 			} else {
 				suspision = 0;
 			}
+			_qrs_ctrlcam();
 			tlterm = time(NULL);
 			_qrs_pipe = popen(_qrs_command, "r");
 		}
