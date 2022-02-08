@@ -48,7 +48,7 @@ void init(json& bonusSysCnf, json& promotions);
 // OK, FAIL, NOT_FOUND, TR_ALREADY_OPEN
 Result open(CardInfo& card);
 
-// OK, FAIL, NOT_FOUND
+// OK, FAIL, NOT_FOUND, COND_NOT_MET
 Result info(CardInfo& card, const char* access);
 Result info(CardInfo& card, uint64_t access);
 

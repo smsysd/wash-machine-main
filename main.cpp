@@ -86,6 +86,10 @@ void writeoffBonus() {
 	double count = 0;
 	bonus::Result rc = bonus::writeoff(count);
 	if (rc == bonus::Result::OK) {
+		if (count <= 0) {
+			render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+			return;
+		}
 		addMoney(count, true);
 	} else {
 		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
@@ -154,7 +158,6 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 		} else {
 			render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
 		}
-		addMoney(card.count);
 	} else {
 		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
 	}
@@ -165,6 +168,9 @@ void onQr(const char* qr) {
 	bonus::Result rc = bonus::info(newcard, qr);
 	if (rc == bonus::Result::OK) {
 		_handleCard(newcard);
+	} else
+	if (rc == bonus::Result::COND_NOT_MET) {
+		render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
 	} else
 	if (rc == bonus::Result::NOT_FOUND) {
 		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
@@ -184,6 +190,9 @@ void onCard(uint64_t cardid) {
 	bonus::Result rc = bonus::info(newcard, cardid);
 	if (rc == bonus::Result::OK) {
 		_handleCard(newcard);
+	} else
+	if (rc == bonus::Result::COND_NOT_MET) {
+		render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
 	} else
 	if (rc == bonus::Result::NOT_FOUND) {
 		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);

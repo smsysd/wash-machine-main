@@ -114,6 +114,9 @@ namespace {
 	}
 
 	void _onMoneyAdd(double nMoney, bool asBonus = false) {
+		if (nMoney == 0) {
+			return;
+		}
 		cout << "money received: " << nMoney << endl;
 		_moneyMutex.lock();
 		if (_nMoney == 0) {

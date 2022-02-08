@@ -186,7 +186,7 @@ namespace {
 		char buf[2048] = {0};
 		string cmd;
 		if (access != nullptr) {
-			cmd = "python3 ./point_api.py '" + _cert + "' " + ucmd + " " + string(access) + " " + args;
+			cmd = "python3 ./point_api.py '" + _cert + "' " + ucmd + " '" + string(access) + "' " + args;
 		} else {
 			cmd  = "python3 ./point_api.py '" + _cert + "' " + ucmd + " " + args;
 		}
