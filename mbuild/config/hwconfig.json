@@ -78,6 +78,7 @@
 		"focus": 580,
 		"bright": 0,
 		"contrast": 20,
+		"reinit-period": 300,
 		"expos": "auto",
 		"driver": "/dev/v4l/by-id/usb-Sonix_Technology_Co.__Ltd._A4tech_FHD_1080P_PC_Camera_SN0001-video-index0"
 	},

@@ -6,9 +6,11 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
+#include <time.h>
 
 static FILE *_qrs_pipe = NULL;
 static pthread_t _qrs_thread_id;
+static pthread_t _qrs_camctrl_th_id;
 static char _qrs_command[1024];
 static void (*_qrs_callback)(const char* qr_code);
 static char _qrs_qr_old[256];
@@ -18,6 +20,8 @@ static int _qrs_bright;
 static int _qrs_contrast;
 static int _qrs_expos;
 static int _qrs_focus;
+static int _qrs_reinit_period = 300;
+static time_t _qrs_tlreinit = 40;
 
 void _qrs_ctrlcam() {
 	char buf[1024];
@@ -55,9 +59,11 @@ void _qrs_ctrlcam() {
 		snprintf(buf, sizeof(buf), "v4l2-ctl --set-ctrl=focus_auto=1 --device %s", _qrs_camPath);
 		system(buf);
 	}
+	sleep(2);
+	_qrs_tlreinit = time(NULL);
 }
 
-int qrscaner_init(const char* camPath, int width, int height, int bright, int expos, int focus, int contrast, int equalBlocking, void (*callback)(const char* qr_code)) {
+int qrscaner_init(const char* camPath, int width, int height, int bright, int expos, int focus, int contrast, int equalBlocking, int camReinitPeriod, void (*callback)(const char* qr_code)) {
 	char buf[256];
 	memset(buf, 0, sizeof(buf));
 	FILE* tzbc = popen("zbarcam --version", "r");
@@ -86,13 +92,15 @@ int qrscaner_init(const char* camPath, int width, int height, int bright, int ex
 	_qrs_contrast = contrast;
 	_qrs_expos = expos;
 	_qrs_focus = focus;
+	_qrs_reinit_period = camReinitPeriod;
 	memset(_qrs_camPath, 0, sizeof(_qrs_camPath));
 	strncpy(_qrs_camPath, camPath, sizeof(_qrs_camPath));
 
 	snprintf(_qrs_command, sizeof(buf), "zbarcam --raw --prescale=%ix%i --nodisplay -Sdisable -Sqrcode.enable %s", width, height, camPath);
     memset(_qrs_qr_old, 0, sizeof(buf));
-	_qrs_ctrlcam();
+	
 	_qrs_callback = callback;
+
 	return 0;
 }
 
@@ -102,6 +110,8 @@ static void *_qrs_thread(void *param) {
 	int suspision = 0;
 	time_t tlterm = 0;
 	system("sudo pkill zbarcam");
+	sleep(2);
+	_qrs_ctrlcam();
 	_qrs_pipe = popen(_qrs_command, "r");
     char* ptr;
 	while (1) {
@@ -125,7 +135,7 @@ static void *_qrs_thread(void *param) {
 			} else {
 				_qrs_callback(qr_data);
 			}
-			usleep(10000);
+			usleep(50000);
 		} else {
 			printf("[WARNING][QRSCANER] zbarcam was terminate\n");
 			pclose(_qrs_pipe);
@@ -140,6 +150,7 @@ static void *_qrs_thread(void *param) {
 			}
 			sleep(4);
 			_qrs_ctrlcam();
+			usleep(100000);
 			tlterm = time(NULL);
 			_qrs_pipe = popen(_qrs_command, "r");
 		}
@@ -149,12 +160,27 @@ static void *_qrs_thread(void *param) {
 	return NULL;
 }
 
+void* _qrs_camctrl_th (void* arg) {
+	while (1) {
+		sleep(_qrs_reinit_period + 10);
+		_qrs_ctrlcam();
+		printf("[INFO][QRSCANER] camera reinit\n");
+	}
+	
+}
+
 void qrscaner_start() {
     pthread_create(&_qrs_thread_id, NULL, _qrs_thread, NULL);
+	if (_qrs_reinit_period > 0) {
+		pthread_create(&_qrs_camctrl_th_id, NULL, _qrs_camctrl_th, NULL);
+	}
 }
 
 void qrscaner_stop() {
     pthread_cancel(_qrs_thread_id);
+	if (_qrs_reinit_period > 0) {
+		pthread_cancel(_qrs_camctrl_th_id);
+	}
 }
 
 void qrscaner_clear() {
