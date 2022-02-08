@@ -698,17 +698,6 @@ void dropSession() {
 	_session.isBegin =  false;
 }
 
-bool writeOffBonuses() {
-	try {
-		double realWriteoff = bonus::writeoff();
-		_onMoneyAdd(realWriteoff, true);
-		return true;
-	} catch (exception& e) {
-		_log->log(Logger::Type::WARNING, "BONUS", "fail writeoff bonuses: " + string(e.what()));
-	}
-	return false;
-}
-
 void accrueRemainBonusesAndClose() {
 	double acrue = _nMoney;
 	if (_session.isBegin) {

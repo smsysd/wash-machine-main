@@ -19,28 +19,47 @@ enum Type {
 	GAZOIL
 };
 
+enum class Result {
+	OK,
+	FAIL,
+	NOT_FOUND,
+	COND_NOT_MET,
+	TR_ALREADY_OPEN
+};
+
 struct CardInfo {
 	enum Type {
 		BONUS,
 		ONETIME,
 		SERVICE,
-		UNKNOWN,
-		NOT_MET
+		UNKNOWN
 	};
 	Type type;
 	uint64_t id;
 	double count;
 	string owner;
+	char access_str[256];
+	uint64_t access_int;
 };
 
 void init(json& bonusSysCnf, json& promotions);
 
-// no throwable
-bool open(CardInfo& card, const char* access);
-bool open(CardInfo& card, uint64_t access);
+// No throwable below
+// OK, FAIL, NOT_FOUND, TR_ALREADY_OPEN
+Result open(CardInfo& card);
 
-double writeoff();
+// OK, FAIL, NOT_FOUND
+Result info(CardInfo& card, const char* access);
+Result info(CardInfo& card, uint64_t access);
+
+// OK, FAIL, NOT_FOUND, COND_NOT_MET (tr not open)
+Result writeoff(double& count);
+
 void close(double acrue);
+
+// OK, FAIL, NOT_FOUND, COND_NOT_MET, if OK in card.count will be count of bonuses
+Result onetime(CardInfo& card);
+
 double getCoef();
 bool ismultibonus();
 

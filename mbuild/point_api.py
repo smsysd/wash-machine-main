@@ -1,43 +1,43 @@
-from os import access
-import os
 import requests
 import sys
 import json
-import time
 
 # # # # # # # # # # # # # # # # # # # # # # # # # #		DESCRIPTION		# # # # # # # # # # # # # # # # # # # # # # # #
 # point API for bonus system 'AQUANTER'
 # run as independet python module
 # run options passed in argv, argv description:
 # [1]: path to point certificate, issued by owner of bonus system
-# [2]: access token, dynamic token, convey client of current session (by QR code or any), may be static access, receipt text or promo code
-# [3]: command, may be 'open', 'close', 'writeoff', each command can have additional args
+# [2]: command, may be 'open', 'close', 'writeoff', each command can have additional args
+#	info: info about acrd
+#		argv [3]: access token, convey client of current session (by QR code or any), may be static access, receipt text or promo code
 #	open: open transaction, return card info
+#		argv [3]: access token, convey client of current session (by QR code or any), may be static access, receipt text or promo code
 #	close: close transaction
-#		argv[4]: number of bonuses for acrue
+#		argv[3]: number of bonuses for acrue
 #	writeoff: write off specefied count of bonuses
-#		argv[4]: desired number of bonuses to be debited, real debited number of bonuses may be different
+#		argv[3]: desired number of bonuses to be debited, real debited number of bonuses may be different
+#	onetime: perform onetime card, this used only once for one card, it may be receipt or promo code
+#		argv [3]: access token, convey client of current session (by QR code or any), may be static access, receipt text or promo code
 # conditional example:
-# ..$ python3 point_api.py localhost path_to_point_certificate access_val cmd additional_arg
+# ..$ python3 point_api.py localhost path_to_point_certificate cmd additional_arg
 # real examples:
-# ..$ python3 point_api.py ../config/point_cert.json -DYN8594632929236741037+5 open
-# ..$ python3 point_api.py ../config/point_cert.json -DYN8594632929236741037+5 writeoff 120
+# ..$ python3 point_api.py ../config/point_cert.json open -DCA8594632929236741037+5
+# ..$ python3 point_api.py ../config/point_cert.json writeoff 120
 # result will be written in stdout as json
-# result format dpend of perform command
-# result fields for 'open': 'rc', 'rt', 'type', 'count', 'uid'
+# result format dpend of perform command, but always exists:
 #	rc: int, return code, see it before any
 #	rt: string, return text - clarification of return code
-#	type: int, type of card
+# result fields for 'info': 'type', 'count', 'id'
+#	type: string, type of card
 #	count: double, number of available bonuses
 #	id: uint64 uid of card
-# result fields for 'close': 'rc', 'rt'
-#	rc: int, return code, see it before any
-#	rt: string, return text - clarification of return code
-# result fields for 'writeoff': 'rc', 'rt', 'count'
-#	rc: int, return code, see it before any
-#	rt: string, return text - clarification of return code
+# result fields for 'open': none
+# result fields for 'close': none
+# result fields for 'writeoff': 'count'
 #	count: double, number of real debited bonuses
-# sequence:
+# result fields for 'onetime': 'count'
+#	count: double, number of bonuses
+# sequence bonus cards:
 # 1. open transaction
 # 2. optionaly several times perform 'writeoff' cmd
 # 3. close transaction
@@ -49,6 +49,8 @@ import time
 #	-4: ERROR, internal error
 #	-5: ERROR, request fault
 #	-7: ERROR, conditions not met
+#	-8: ERROR, transaction for this point already open and not close
+#	-9: ERROR, not found
 #	-32: ERROR, parsing error
 # card types:
 #	p: bonus, personal
@@ -62,12 +64,12 @@ def rete(rc, rt):
 	exit(rc)
 
 
-def reto(type, count, id):
+def retinfo(type, count, id):
 	print('{"rc": 0, "rt": null, "type": "' + str(type) + '", "count": ' + str(count) + ', "id": ' + str(id) + '}')
 	exit(0)
 
 
-def retc():
+def retok():
 	print('{"rc": 0, "rt": null}')
 	exit(0)
 
@@ -77,57 +79,20 @@ def retwoff(count):
 	exit(0)
 
 
-def push_save(hn, cert, id, acs, cmd, count):
+def req(hn, cert, id, cmd, acs = None, count = None):
+	data = {"cert": cert, "id": id, "cmd": cmd}
+	if acs != None:
+		data["access"] = acs
+	if count != None:
+		data["count"] = count
+
 	try:
-		if count == None:
-			sd = {"hostname": hn, "req": {"cert": cert, "id": id, "access": acs, "cmd": cmd}}
-		else:
-			sd = {"hostname": hn, "req": {"cert": cert, "id": id, "access": acs, "cmd": cmd, "count": count}}
-		if (not os.path.isdir("./.bonus_temp")):
-			os.makedirs("./.bonus_temp")
-		sf = open("./.bonus_temp/do_" + str(time.time()), 'w')
-		sf.write(json.dumps(sd))
-		sf.close()
+		r = requests.post(hn, json=data)
 	except:
-		rete(-4, "fail to push save")
-
-
-def send_saves():
-	try:
-		if not os.path.isdir("./.bonus_temp"):
-			return
-		files = os.listdir("./.bonus_temp")
-		for f in files:
-			if 'do_' in f:
-				jdo = open("./.bonus_temp/" + f, "r")
-				do = json.loads(jdo.read())
-				jdo.close()
-				r = requests.post(do["hostname"], json=do["req"])
-				if r.status_code == 200:
-					os.remove("./.bonus_temp/" + f)
-	except:
-		return
-
-
-def req(hn, cert, id, acs, cmd, count, save = False):
-	try:
-		if count == None:
-			r = requests.post(hn, json={"cert": cert, "id": id, "access": acs, "cmd": cmd})
-		else:
-			r = requests.post(hn, json={"cert": cert, "id": id, "access": acs, "cmd": cmd, "count": count})
-	except:
-		if save:
-			push_save(hn, cert, id, acs, cmd, count)
-			return None
-		else:
-			rete(-5, "request fault")
+		rete(-5, "request fault")
 	if r.status_code != 200:
-		if save:
-			push_save(hn, cert, id, acs, cmd, count)
-			return None
-		else:
-			rete(-5, "requset fault: " + str(r.status_code))
-	
+		rete(-5, "requset fault: " + str(r.status_code))
+
 	try:
 		jr = r.json()
 	except:
@@ -139,13 +104,17 @@ def req(hn, cert, id, acs, cmd, count, save = False):
 	return jr
 
 
-send_saves()
+def getarg(index, name):
+	if len(sys.argv) <= index:
+		rete(-1, "too less args: no " + name)
+	return sys.argv[index]
 
-if len(sys.argv) < 4:
+
+if len(sys.argv) < 3:
 	rete(-1, "too less args")
 
 try:
-	f = open(sys.argv[1], "r")
+	f = open(sys.argv[1], "r")	
 	data = f.read()
 	f.close()
 except:
@@ -160,23 +129,31 @@ except:
 	rete(-32, "fail to parse point certificate")
 
 hostname = hostname + "/bonus/point.php"
-acs = sys.argv[2]
-cmd = sys.argv[3]
+cmd = sys.argv[2]
 
-if cmd == "open":
-	r = req(hostname, cert, id, acs, 1, None)
+if cmd == "info":
+	acs = getarg(3, 'access')
+	r = req(hostname, cert, id, 4, acs)
 	if r["type"] == None or r["count"] == None or r["id"] == None:
 		rete(-5, "parse error: incorrect response")
-	reto(r["type"], r["count"], r["id"])
+	retinfo(r["type"], r["count"], r["id"])
+if cmd == "open":
+	acs = getarg(3, 'access')
+	r = req(hostname, cert, id, 1, acs)
+	retok()
 elif cmd == "close":
-	if len(sys.argv) < 5:
-		rete(-1, "too less args: no count")
-	req(hostname, cert, id, acs, 3, sys.argv[4], True)
-	retc()
+	count = getarg(3, 'count')
+	req(hostname, cert, id, 3, None, count)
+	retok()
 elif cmd == "writeoff":
-	if len(sys.argv) < 5:
-		rete(-1, "too less args: no count")
-	r = req(hostname, cert, id, acs, 2, sys.argv[4])
+	count = getarg(3, 'count')
+	r = req(hostname, cert, id, 2, None, count)
+	if r["count"] == None:
+		rete(-5, "parse error: incorrect response")
+	retwoff(r["count"])
+elif cmd == "onetime":
+	acs = getarg(3, 'access')
+	r = req(hostname, cert, id, 5, acs)
 	if r["count"] == None:
 		rete(-5, "parse error: incorrect response")
 	retwoff(r["count"])

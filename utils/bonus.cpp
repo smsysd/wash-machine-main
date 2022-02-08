@@ -22,7 +22,9 @@ namespace {
 	enum class APIRC {
 		OK = 0,
 		ACCESS_DENIED = -3,
-		COND_NOT_MET = -7
+		COND_NOT_MET = -7,
+		TR_ALREADY_OPEN = -8,
+		NOT_FOUND = -9
 	};
 
 	vector<string> _split(const string& s, char delim) {
@@ -180,9 +182,14 @@ namespace {
 	bool _multibonus = false;
 	bool _isOpen = false;
 
-	json _japi(string ucmd) {
+	json _japi(string ucmd, string args, const char* access = nullptr) {
 		char buf[2048] = {0};
-		string cmd  = "python3 ./point_api.py '" + _cert + "' '" + string(_access) + "' " + ucmd;
+		string cmd;
+		if (access != nullptr) {
+			cmd = "python3 ./point_api.py '" + _cert + "' " + ucmd + " " + string(access) + " " + args;
+		} else {
+			cmd  = "python3 ./point_api.py '" + _cert + "' " + ucmd + " " + args;
+		}
 		cout << "[DEBUG][BONUS] cmd: " << cmd << endl;
 		FILE* pp = popen(cmd.c_str(), "r");
 		if (pp == NULL) {
@@ -289,13 +296,13 @@ void init(json& bonusSysCnf, json& promotions) {
 	}
 }
 
-bool open(CardInfo& card, const char* access) {
-	memset(_access, 0, sizeof(_access));
-	strcpy(_access, access);
-	CardInfo ci = {.id = 0, .count = 0};
-	ci.type = CardInfo::UNKNOWN;
+// OK, FAIL, NOT_FOUND
+Result open(CardInfo& card) {
+	if (_isOpen) {
+		return Result::TR_ALREADY_OPEN;
+	}
 	try {
-		json res = _japi("open");
+		json res = _japi("open", "", card.access_str);
 		int rc = JParser::getf(res, "rc", "server response");
 		string rt = "";
 		try {
@@ -304,16 +311,44 @@ bool open(CardInfo& card, const char* access) {
 			rt = "None";
 		}
 
-		if (rc == (int)APIRC::ACCESS_DENIED) {
-			card.type = CardInfo::UNKNOWN;
-			return true;
-		} else
-		if (rc == (int)APIRC::COND_NOT_MET) {
-			card.type = CardInfo::NOT_MET;
-			return true;
+		if (rc == (int)APIRC::ACCESS_DENIED || rc == (int)APIRC::NOT_FOUND) {
+			return Result::NOT_FOUND;
 		} else
 		if (rc != (int)APIRC::OK) {
-			throw runtime_error(rt);
+			throw runtime_error(to_string(rc) + ": " + rt);
+		}
+	} catch (exception& e) {
+		cout << "[WARNING][BONUS] can't open transaction: " << e.what() << endl;
+		return Result::FAIL;
+	}
+
+	_isOpen = true;
+	return Result::OK;
+}
+
+Result info(CardInfo& card, const char* access) {
+	CardInfo ci = {.id = 0, .count = 0, .access_int = card.access_int};
+	ci.type = CardInfo::UNKNOWN;
+	memset(ci.access_str, 0, sizeof(card.access_str));
+	strncpy(ci.access_str, access, sizeof(ci.access_str));
+	try {
+		json res = _japi("info", "", access);
+		int rc = JParser::getf(res, "rc", "server response");
+		string rt = "";
+		try {
+			rt = JParser::getf(res, "rt", "server response");
+		} catch (exception& e) {
+			rt = "None";
+		}
+
+		if (rc == (int)APIRC::ACCESS_DENIED || rc == (int)APIRC::NOT_FOUND) {
+			return Result::NOT_FOUND;
+		} else
+		if (rc == (int)APIRC::COND_NOT_MET) {
+			return Result::COND_NOT_MET;
+		} else
+		if (rc != (int)APIRC::OK) {
+			throw runtime_error(to_string(rc) + ": " + rt);
 		}
 
 		string ct = JParser::getf(res, "type", "server response");
@@ -337,56 +372,88 @@ bool open(CardInfo& card, const char* access) {
 		ci.count = cnt;
 		card = ci;
 	} catch (exception& e) {
-		cout << "[WARNING][BONUS] can't open transaction: " << e.what() << endl;
-		return false;
+		cout << "[WARNING][BONUS] can't read info: " << e.what() << endl;
+		return Result::FAIL;
 	}
-	_isOpen = true;
-	if (ci.type == CardInfo::ONETIME) {
-		try {
-			writeoff();
-			close(0);
-		} catch (exception& e) {
-			cout << "[WARNING][BONUS] fail produce onetime operation: " << e.what() << endl;
-			return false;
-		}
-		_isOpen = false;
-	}
-	return true;
+	
+	return Result::OK;
 }
 
-bool open(CardInfo& card, uint64_t access) {
-	memset(_access, 0, sizeof(_access));
-	char straccess[32] = {0};
-	sprintf(straccess, "SCA%X", access);
-	return open(card, straccess);
+Result info(CardInfo& card, uint64_t access) {
+	card.access_int = access;
+	memset(card.access_str, 0, sizeof(card.access_str));
+	sprintf(card.access_str, "SCA%X", access);
+	return info(card, card.access_str);
 }
 
-double writeoff() {
+// OK, FAIL, NOT_FOUND
+Result writeoff(double& count) {
 	if (!_isOpen) {
-		throw runtime_error("transaction is not open");
+		return Result::COND_NOT_MET;
 	}
-	json res = _japi("writeoff " + to_string(_desiredWriteoff));
-	int rc = JParser::getf(res, "rc", "server response");
-	string rt = "";
 	try {
-		rt = JParser::getf(res, "rt", "server response");
+		json res = _japi("writeoff", to_string(_desiredWriteoff));
+		int rc = JParser::getf(res, "rc", "server response");
+		string rt = "";
+		try {
+			rt = JParser::getf(res, "rt", "server response");
+		} catch (exception& e) {
+			rt = "None";
+		}
+		if (rc != (int)APIRC::OK) {
+			throw runtime_error(to_string(rc) + ": " + rt);
+		}
+
+		count = JParser::getf(res, "count", "server response");
 	} catch (exception& e) {
-		rt = "None";
+		cout << "[WARNING][BONUS] can't writeoff: " << e.what() << endl;
+		return Result::FAIL;
 	}
-	if (rc == (int)APIRC::ACCESS_DENIED) {
-		throw runtime_error("access denied");
-	} else if (rc != (int)APIRC::OK) {
-		throw runtime_error(rt);
-	}
-	return JParser::getf(res, "count", "server response");
+
+	return Result::OK;
 }
 
 void close(double acrue) {
 	if (!_isOpen) {
-		throw runtime_error("transaction is not open");
+		return;
 	}
+	try {
+		_japi("close", to_string(acrue));
+	} catch (exception& e) {
+		cout << "[ERROR][BONUS] FAIL TO CLOSE TRANSACTION: " << e.what() << endl;
+	}
+	
 	_isOpen = false;
-	_japi("close " + to_string(acrue));
+}
+
+// OK, FAIL, NOT_FOUND, COND_NOT_MET
+Result onetime(CardInfo& card) {
+	try {
+		json res = _japi("onetime", "", card.access_str);
+		int rc = JParser::getf(res, "rc", "server response");
+		string rt = "";
+		try {
+			rt = JParser::getf(res, "rt", "server response");
+		} catch (exception& e) {
+			rt = "None";
+		}
+		if (rc == (int)APIRC::ACCESS_DENIED || rc == (int)APIRC::NOT_FOUND) {
+			return Result::NOT_FOUND;
+		} else
+		if (rc == (int)APIRC::COND_NOT_MET) {
+			return Result::COND_NOT_MET;
+		}
+		if (rc != (int)APIRC::OK) {
+			throw runtime_error(to_string(rc) + ": " + rt);
+		}
+
+		card.count = JParser::getf(res, "count", "server response");
+	} catch (exception& e) {
+		cout << "[WARNING][BONUS] can't writeoff onetime: " << e.what() << endl;
+		return Result::FAIL;
+	}
+
+	return Result::OK;
 }
 
 double getCoef() {

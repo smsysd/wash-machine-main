@@ -78,7 +78,6 @@ void beginSession(Session::Type type, uint64_t id);
 void dropSession();
 
 /* bonus macros */
-bool writeOffBonuses();
 void accrueRemainBonusesAndClose();
 bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid);
 
