@@ -621,7 +621,7 @@ namespace {
 				throw runtime_error("fail to connect");
 			}
 		}
-		cout << "extboard connected, WIA_PRJ: " << (int)(buf[0] << 8 | buf[1]) << ", WIA_SUB: " << (int)buf[2] << ", VERSION: [" << (int)buf[3] << ", " << (int)buf[4] << "]" << endl;
+		cout << "[INFO][EXTBOARD] connected, WIA_PRJ: " << (int)(buf[0] << 8 | buf[1]) << ", WIA_SUB: " << (int)buf[2] << ", VERSION: [" << (int)buf[3] << ", " << (int)buf[4] << "]" << endl;
 		timeout = 0;
 		while (true) {
 			usleep(100000);

@@ -190,7 +190,7 @@ namespace {
 		} else {
 			cmd  = "python3 ./point_api.py '" + _cert + "' " + ucmd + " " + args;
 		}
-		cout << "[DEBUG][BONUS] cmd: " << cmd << endl;
+		// cout << "[DEBUG][BONUS] cmd: " << cmd << endl;
 		FILE* pp = popen(cmd.c_str(), "r");
 		if (pp == NULL) {
 			throw runtime_error("fail to open pipe to 'point_api.py'");
@@ -200,7 +200,7 @@ namespace {
 			throw runtime_error("fail to read out from 'point_api.py'");
 		}
 		pclose(pp);
-		cout << "[DEBUG][BONUS] response dump: " << buf << endl;
+		// cout << "[DEBUG][BONUS] response dump: " << buf << endl;
 		json data;
 		try {
 			data = json::parse(buf);
@@ -470,11 +470,12 @@ double getCoef() {
 		return 1;
 	} else
 	if (vap.size() == 1) {
-		cout << "one promotions is active, type: " << _promotions[vap[0]].type << ", k: " << _promotions[vap[0]].k << endl;
+		cout << "[INFO][BONUS] one promotions is active, type: " << _promotions[vap[0]].type << ", k: " << _promotions[vap[0]].k << endl;
 		_bonus = round((_promotions[vap[0]].k+1)*100);
 		_rbonus = _bonus - 100;
 		return _promotions[vap[0]].k + 1;
 	} else {
+		cout << "[INFO][BONUS] ";
 		int maxprior = 0;
 		for (int i = 0; i < vap.size(); i++) {
 			if (_promotions[vap[i]].priority > maxprior) {
