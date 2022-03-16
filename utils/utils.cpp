@@ -60,6 +60,7 @@ namespace {
 
 	double _nMoney = 0;
 	time_t _tOffServiceMode = 0;
+	int _tRemainFreeUseTime = 0;
 	int _tServiceMode = 0;
 	char errort[32];
 	char errord[64];
@@ -165,6 +166,10 @@ namespace {
 			_session.totalSpent += oldv - _nMoney;
 			_programs[_currentProgram].spendMoney += oldv - _nMoney;
 			_programs[_currentProgram].useTimeSec++;
+			_tRemainFreeUseTime = _programs[_currentProgram].freeUseTimeSec - _programs[_currentProgram].useTimeSec;
+			if (_tRemainFreeUseTime < 0) {
+				_tRemainFreeUseTime = 0;
+			}
 
 		} else
 		if (mode == Mode::SERVICE) {
@@ -397,7 +402,8 @@ void init(
 			render::regVar(&_session.k100, L"sbonus");
 			render::regVar(&_session.rk100, L"srbonus");
 			render::regVar(errort, L"errort");
-			render::regVar(errord, L"errord");	
+			render::regVar(errord, L"errord");
+			render::regVar(&_tRemainFreeUseTime, L"rfut");
 		}
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
@@ -552,10 +558,15 @@ void setServiceMode() {
 }
 
 void setProgram(int id) {
-	if (_terminate) {
+	int previous = _currentProgram;
+	if (_terminate || !_normalwork) {
 		return;
 	}
 	if (id < 0) {
+		return;
+	}
+	if (!_session.isBegin) {
+		cout << "[WARNING][LOGIC] call 'setProgram' without session" << endl;
 		return;
 	}
 	Program* p;
@@ -570,8 +581,12 @@ void setProgram(int id) {
 	extboard::startLightEffect(p->effect, 0);
 	extboard::flap(p->flap);
 	extboard::setRelayGroup(p->relayGroup);
-	if (p->releivePressure) {
+	if (p->releivePressure && _currentProgram != previous) {
 		extboard::relievePressure();
+	}
+	_tRemainFreeUseTime = _programs[_currentProgram].freeUseTimeSec - _programs[_currentProgram].useTimeSec;
+	if (_tRemainFreeUseTime < 0) {
+		_tRemainFreeUseTime = 0;
 	}
 
 	if (_session.k > 1) {
