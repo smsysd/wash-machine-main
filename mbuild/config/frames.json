@@ -5,7 +5,7 @@
 		"default-cursor": [0, 2],
 		"default-mode": "center",
 		"encode": "UTF-8",
-		"disconnect-frame-timeout": 120,
+		"disconnect-frame-timeout": 10,
 		"disconnect-bg": 0
 	},
 

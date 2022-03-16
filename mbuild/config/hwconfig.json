@@ -35,8 +35,7 @@
 		"driver": "/dev/ttyS5",
 		"baud-rate": 9600,
 		"handler-delay": 10000,
-		"redraw-borehole": 500,
-		"critical": false
+		"redraw-borehole": 500
 	},
 
 	"range-finder": {

@@ -2,7 +2,7 @@
     "version": [
         0,
         7,
-        3
+        4
     ],
     "repository": "bitbucket.org/sm-sys/wash-machine-main",
     "type": "exec"

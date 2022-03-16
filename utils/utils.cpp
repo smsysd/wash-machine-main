@@ -57,7 +57,6 @@ namespace {
 	vector<CardInfo> _cards;
 	Session _session;
 	int _currentProgram = -1;
-	bool _rendcrit = true;
 
 	double _nMoney = 0;
 	time_t _tOffServiceMode = 0;
@@ -180,11 +179,11 @@ namespace {
 		static double previousk = 0;
 
 		_normalrend = render::getState();
-		if (!_normalrend && _rendcrit) {
+		if (!_normalrend) {
 			_normalwork = false;
 		}
 		if (!_normalwork) {
-			if ((_normalrend || !_rendcrit) && _normalextb) {
+			if (_normalrend && _normalextb) {
 				_normalwork = true;
 			}
 			return OK;
@@ -390,24 +389,19 @@ void init(
 	// render
 	try {
 		cout << "[INFO][UTILS] init render module.." << endl;
-		_frames = new JParser("./config/frames.json");
 		json& display = _hwconfig->get("display");
-		_rendcrit = JParser::getf(display, "critical", "hwdisplay");
-		json& sf = _frames->get("spec-frames");
-		json& go = _frames->get("general-option");
-		json& bg = _frames->get("backgrounds");
-		json& fonts = _frames->get("fonts");
-		render::init(display, _frames->get("frames"), sf, go, bg, fonts);
-		render::regVar(&_nMoney, L"money", 0);
-		render::regVar(&_session.k100, L"sbonus");
-		render::regVar(&_session.rk100, L"srbonus");
-		render::regVar(errort, L"errort");
-		render::regVar(errord, L"errord");
+		string rendtype = JParser::getf(display, "type", "hwdisplay");
+		if (rendtype != "none") {
+			render::init(display);
+			render::regVar(&_nMoney, L"money", 0);
+			render::regVar(&_session.k100, L"sbonus");
+			render::regVar(&_session.rk100, L"srbonus");
+			render::regVar(errort, L"errort");
+			render::regVar(errord, L"errord");	
+		}
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
-		if (_rendcrit) {
-			exit(-2);
-		}
+		exit(-2);
 	}
 
 	// extboard

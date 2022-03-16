@@ -35,7 +35,7 @@ namespace render {
 	void regVar(const double* var, wstring name, int precision);
 	void regVar(const char* var, wstring name);
 
-	void init(json& displaycnf, json& frames, json& specFrames, json& option, json& bg, json& fonts);
+	void init(json& displaycnf);
 	void showFrame(SpecFrame frame);
 	void showFrame(int idFrame);
 	void showTempFrame(SpecFrame frame, int tSec);
