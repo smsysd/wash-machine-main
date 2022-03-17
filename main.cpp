@@ -79,6 +79,8 @@ void onButtonPushed(const Button& button) {
 			setServiceProgram(button.serviceProg);
 			break;
 		}
+	} else if (cmode() == Mode::WAIT) {
+		setGiveMoneyMode();
 	}
 }
 
@@ -158,6 +160,10 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 		} else {
 			render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
 		}
+	} else
+	if (card.type == CardInfo::COLLECTOR) {
+		beginSession(Session::Type::COLLECTION, card.id);
+		dropSession();
 	} else {
 		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
 	}

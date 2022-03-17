@@ -78,6 +78,7 @@ namespace {
 	int _serviceFrame = -1;
 	int _repairFrame = -1;
 	int _nomoneyFrame = -1;
+	int _waitFrame = -1;
 	int _disconnectBg = -1;
 	int _disconnectFrameTimeout = -1;
 	char _encode[32] = {0};
@@ -532,6 +533,11 @@ void _assertSpecFrames() {
 	} catch (exception& e) {
 		throw runtime_error("no repair frame (" + to_string(_nomoneyFrame) + ") in frames");
 	}
+	try {
+		_getFrame(_waitFrame);
+	} catch (exception& e) {
+		throw runtime_error("no wait frame (" + to_string(_waitFrame) + ") in frames");
+	}
 }
 
 }
@@ -553,6 +559,7 @@ void init(json& displaycnf) {
 	_serviceFrame = JParser::getf(specFrames, "service", "spec-frames");
 	_repairFrame = JParser::getf(specFrames, "repair", "spec-frames");
 	_nomoneyFrame = JParser::getf(specFrames, "nomoney", "spec-frames");
+	_waitFrame = JParser::getf(specFrames, "wait", "spec-frames");
 
 	if (_type == "none") {
 		return;
@@ -581,6 +588,7 @@ void showFrame(SpecFrame frame) {
 	case SpecFrame::SERVICE: f = _serviceFrame; break;
 	case SpecFrame::REPAIR: f = _repairFrame; break;
 	case SpecFrame::NOMONEY: f = _nomoneyFrame; break;
+	case SpecFrame::WAIT: f = _waitFrame; break;
 	}
 
 	try {
@@ -614,6 +622,7 @@ void showTempFrame(SpecFrame frame, int tSec) {
 	case SpecFrame::SERVICE: f = _serviceFrame; break;
 	case SpecFrame::REPAIR: f = _repairFrame; break;
 	case SpecFrame::NOMONEY: f = _nomoneyFrame; break;
+	case SpecFrame::WAIT: f = _waitFrame; break;
 	}
 	
 	try {

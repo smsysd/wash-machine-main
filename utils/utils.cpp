@@ -64,6 +64,8 @@ namespace {
 	int _tServiceMode = 0;
 	char errort[32];
 	char errord[64];
+	int _tGiveMoneyMode = 0;
+	int _tMaxGiveMoneyMode = 120;
 
 	Program* _getProgram(vector<Program>& programs, int id) {
 		for (int i = 0; i < programs.size(); i++) {
@@ -201,6 +203,12 @@ namespace {
 			}
 		}
 		
+		if (mode == Mode::GIVE_MONEY) {
+			_tGiveMoneyMode++;
+			if (_tGiveMoneyMode > _tMaxGiveMoneyMode) {
+
+			}
+		}
 		// Check coef while inaction
 		if (mode == Mode::GIVE_MONEY && borehole % 30 == 0) {
 			double k = bonus::getCoef();
@@ -378,6 +386,9 @@ void init(
 				if (ct == "bonus") {
 					sp.type = CardInfo::BONUS;
 					sp.count = JParser::getf(jp, "bonus", "card at [" + to_string(i) + "]");
+				} else
+				if (ct == "collector") {
+					sp.type = CardInfo::COLLECTOR;
 				} else {
 					sp.type = CardInfo::UNKNOWN;
 				}
@@ -541,6 +552,17 @@ void setGiveMoneyMode() {
 		cout << "[INFO][UTILS] 'give money' mode applied" << endl;
 	}
 	mode = Mode::GIVE_MONEY;
+	_tGiveMoneyMode = 0;
+}
+
+void setWaitMode() {
+	extboard::setRelayGroup(0);
+	extboard::startLightEffect(extboard::SpecEffect::WAIT, 0);
+	extboard::flap(false);
+	render::showFrame(render::SpecFrame::WAIT);
+
+	cout << "[INFO][MODE] 'wait' mode applied" << endl;
+	mode = Mode::WAIT;
 }
 
 void setServiceMode() {
@@ -657,6 +679,9 @@ void beginSession(Session::Type type, uint64_t id) {
 	} else
 	if (type == Session::Type::SERVICE) {
 		cout << "[INFO][UTILS] service session begin" << endl;
+	} else
+	if (type == Session::Type::COLLECTION) {
+		cout << "[INFO][UTILS] collection session begin" << endl;
 	}
 	_session.isBegin = true;
 }
@@ -702,6 +727,14 @@ void dropSession() {
 			pa[i] = p;
 		}
 		sd["programs"] = pa;
+		_putSession(sd);
+	} else
+	if (_session.type == Session::Type::COLLECTION) {
+		json sd;
+		sd["type"] = "collection";
+		if (_session.cardid != 0) {
+			sd["card"] = _session.cardid;
+		}
 		_putSession(sd);
 	} else {
 		_log->log(Logger::Type::ERROR, "MONITOR", "not defined session type");

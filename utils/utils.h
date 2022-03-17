@@ -23,7 +23,8 @@ enum class Mode {
 	INIT,
 	GIVE_MONEY,
 	PROGRAM,
-	SERVICE
+	SERVICE,
+	WAIT
 };
 
 struct Program {
@@ -44,7 +45,8 @@ struct Program {
 struct Session {
 	enum Type {
 		CLIENT,
-		SERVICE
+		SERVICE,
+		COLLECTION
 	};
 	Type type;
 	double k;
@@ -72,6 +74,7 @@ void setGiveMoneyMode();
 void setServiceMode();
 void setProgram(int id);
 void setServiceProgram(int id);
+void setWaitMode();
 
 /* Session for monitoring - setup bonus and session default values  */
 void beginSession(Session::Type type, uint64_t id);

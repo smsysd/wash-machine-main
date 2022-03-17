@@ -32,7 +32,8 @@ struct CardInfo {
 		BONUS,
 		ONETIME,
 		SERVICE,
-		UNKNOWN
+		UNKNOWN,
+		COLLECTOR
 	};
 	Type type;
 	uint64_t id;

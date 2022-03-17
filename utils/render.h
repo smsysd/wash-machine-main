@@ -19,7 +19,8 @@ namespace render {
 		GIVE_MONEY,
 		GIVE_MONEY_BONUS,
 		SERVICE,
-		NOMONEY
+		NOMONEY,
+		WAIT
 	};
 	enum DisplayType {
 		LEDMATRIX,

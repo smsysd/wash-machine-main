@@ -244,6 +244,7 @@ namespace {
 	uint64_t _tempSens2Addr = 0;
 	int _giveMoneyEffect = -1;
 	int _serviceEffect = -1;
+	int _waitEffect = -1;
 	bool _isInit = false;
 	pthread_t _thread_id;
 	Fifo _operations;
@@ -1237,6 +1238,7 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	}
 	_giveMoneyEffect = JParser::getf(specEffects, "give-money", "spec-effects");
 	_serviceEffect = JParser::getf(specEffects, "service", "spec-effects");
+	_waitEffect = JParser::getf(specEffects, "wait", "spec-effects");
 
 	cout << "[INFO][EXTBOARD] assert spec-effects.." << endl;
 	try {
@@ -1248,6 +1250,11 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 		_getEffect(_serviceEffect);
 	} catch (exception& e) {
 		throw runtime_error("spec effect 'service'(" + to_string(_serviceEffect) + ") not found in effects");
+	}
+	try {
+		_getEffect(_waitEffect);
+	} catch (exception& e) {
+		throw runtime_error("spec effect 'wait'(" + to_string(_waitEffect) + ") not found in effects");
 	}
 
 	// create mspi connection
@@ -1298,6 +1305,7 @@ void startLightEffect(SpecEffect effect, int index) {
 	switch (effect) {
 	case SpecEffect::GIVE_MONEY_EFFECT: id = _giveMoneyEffect; break;
 	case SpecEffect::SERVICE_EFFECT: id = _serviceEffect; break;
+	case SpecEffect::WAIT: id = _waitEffect; break;
 	}
 	startLightEffect(id, index);
 }

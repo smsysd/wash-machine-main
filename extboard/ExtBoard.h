@@ -17,7 +17,8 @@ namespace extboard {
 
 	enum class SpecEffect {
 		GIVE_MONEY_EFFECT,
-		SERVICE_EFFECT
+		SERVICE_EFFECT,
+		WAIT
 	};
 	enum class ErrorType {
 		NONE,
