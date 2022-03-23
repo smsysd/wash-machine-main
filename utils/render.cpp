@@ -82,6 +82,7 @@ namespace {
 	int _disconnectBg = -1;
 	int _disconnectFrameTimeout = -1;
 	char _encode[32] = {0};
+	bool _initRelease = false;
 	vector<int> _fontsId;
 	vector<int> _blocksId;
 
@@ -149,6 +150,7 @@ namespace {
 			}
 		}
 		string css = _ws2s(ss);
+		// cout << "[DEBUG][RENDER] write: " << css.c_str() << endl;
 		_lm->writeString(css.c_str(), _encode);
 	}
 
@@ -246,12 +248,12 @@ namespace {
 				}
 			} else
 			if (s.at(i) == L'}') {
-				return i + 1;
+				return i + 1 - b;
 			} else {
 				f.format += s.at(i);
 			}
 		}
-		return i;
+		return i - b;
 	}
 
 	int _parseCtrl(wstring& s, int b, Frame& f) {
@@ -271,7 +273,8 @@ namespace {
 			f.format += s.at(b+2);
 			int al = _parse(s, b + 4, f);
 			f.format.push_back((wchar_t)0x06);
-			return b + 4 + al;
+			cout << "insert color mark in " << f.id << " frame, with b: " << b << ", al: " << al << endl;
+			return 4 + al; // b +
 		} else
 		if (s.at(b+1) == 'f') {
 			if (mark != b + 3) {
@@ -281,7 +284,7 @@ namespace {
 			f.format += s.at(b+2);
 			int al = _parse(s, b + 4, f);
 			f.format.push_back((wchar_t)0x07);
-			return b + 4 + al;
+			return 4 + al; // b +
 		} else {
 			return 0;
 		}
@@ -448,7 +451,7 @@ void _init_ledmatrix() {
 
 	// prepare blocks
 	cout << "[INFO][RENDER] prepre blocks.." << endl;
-	json bg = _renderData->get("bg");
+	json bg = _renderData->get("backgrounds");
 	prepbg:
 	for (int i = 0; i < bg.size(); i++) {
 		try {
@@ -565,7 +568,7 @@ void init(json& displaycnf) {
 		return;
 	}
 	if (_type == "ledmatrix") {
-		_initthread = new thread(_init_ledmatrix);	
+		_init_ledmatrix();
 	} else
 	if (_type == "std") {
 		throw runtime_error("'std' display type still not supported");

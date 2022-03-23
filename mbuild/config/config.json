@@ -43,12 +43,15 @@
 	"buttons": [
 		{"id": 0, "type": "eb", "index": 0, "purpose": "end"},
 		{"id": 1, "type": "bm", "bm": 0, "index": 4, "purpose": "program", "program": 1, "service-program": 2},
-		{"id": 2, "type": "bm", "bm": 1, "index": 4, "purpose": "program", "program": 2, "service-program": 2}
+		{"id": 2, "type": "bm", "bm": 1, "index": 4, "purpose": "program", "program": 2, "service-program": 2},
+		{"id": 3, "type": "bm", "bm": 2, "index": 4, "purpose": "program", "program": 3, "service-program": 5}
 	],
 
 	"cards": [
-		{"id": 1017090366, "type": "service", "owner": "test user"}
+		{"id": 1017090366, "type": "service", "owner": "test user"},
+		{"id": 1017090366, "type": "collector", "owner": "test user"}
 	],
 
-	"service-time": 300
+	"service-time": 300,
+	"give-money-time": 120
 }

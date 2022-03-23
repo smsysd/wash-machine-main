@@ -5,7 +5,7 @@
 		"default-cursor": [0, 2],
 		"default-mode": "center",
 		"encode": "UTF-8",
-		"disconnect-frame-timeout": 10,
+		"disconnect-frame-timeout": 20,
 		"disconnect-bg": 0
 	},
 
@@ -18,7 +18,8 @@
 		"unknown-card": 5,
 		"repair": 6,
 		"service": 8,
-		"nomoney": 7
+		"nomoney": 7,
+		"wait": 9
 	},
 
 	"frames": [
@@ -122,6 +123,17 @@
 			]			
 		},
 		{
+			"id": 9,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"НАЖМИТЕ",
+				"КНОПКУ"
+			]			
+		},
+		{
 			"id": 10,
 			"font": 1,
 			"bg": "none",
@@ -153,7 +165,7 @@
 			"color": 7,
 			"lines": [
 				"ПАУЗА",
-				"$money"
+				"$money Р.   {c1:$rfut}"
 			]
 		},
 		{
@@ -164,7 +176,7 @@
 			"color": 7,
 			"lines": [
 				"ПАУЗА",
-				"{c5:$money}"
+				"{c5:$money Р.}    {c1:$rfut}"
 			]
 		},
 		{

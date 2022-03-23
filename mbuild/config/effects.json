@@ -1,9 +1,10 @@
 {
 "spec-effects": {
 	"give-money": 2,
-	"service": 2
+	"service": 2,
+	"wait": 2
 },
-	
+
 "effects": [
 	{
 		"id": 2,

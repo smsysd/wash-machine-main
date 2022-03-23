@@ -813,7 +813,7 @@ namespace {
 				_mspi->read((int)Addr::RFID_CARD, buf, 8);
 				suspicion = 0;
 				uint64_t cid = _collectn(buf, 8);
-				_onCard(cid);
+				_onCard(cid & 0xFFFFFFFF);
 			} catch (exception& e) {
 				cout << "fail to read card: " << e.what() << endl;
 				suspicion++;

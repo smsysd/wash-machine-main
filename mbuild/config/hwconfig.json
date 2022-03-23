@@ -5,7 +5,9 @@
 			"used-mask": 3
 		},
 		"modules": [
-			{"address": 32, "active-levels": 0, "io-mask": 239}
+			{"address": 32, "active-levels": 0, "io-mask": 239},
+			{"address": 33, "active-levels": 0, "io-mask": 239},
+			{"address": 34, "active-levels": 0, "io-mask": 239}
 		]
 	},
 
@@ -70,7 +72,7 @@
 	},
 
 	"qr-scaner": {
-		"enable": true,
+		"enable": false,
 		"equal-blocking": false,
 		"width": 640,
 		"height": 480,

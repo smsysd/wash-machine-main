@@ -161,8 +161,6 @@ namespace {
 					if (oldv > 0) {
 						_onCashRunout();
 					}
-				} else {
-					render::redraw();
 				}
 			}
 			_session.totalSpent += oldv - _nMoney;
@@ -172,7 +170,7 @@ namespace {
 			if (_tRemainFreeUseTime < 0) {
 				_tRemainFreeUseTime = 0;
 			}
-
+			render::redraw();
 		} else
 		if (mode == Mode::SERVICE) {
 			_servicePrograms[_currentProgram].useTimeSec++;
@@ -206,7 +204,7 @@ namespace {
 		if (mode == Mode::GIVE_MONEY) {
 			_tGiveMoneyMode++;
 			if (_tGiveMoneyMode > _tMaxGiveMoneyMode) {
-
+				setWaitMode();
 			}
 		}
 		// Check coef while inaction
@@ -232,7 +230,7 @@ namespace {
 	void _softTerminate() {
 		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal");
 		cout << "[INFO][UTILS] wait end of wash.." << endl;
-		while (mode != Mode::GIVE_MONEY) {
+		while (mode != Mode::GIVE_MONEY && mode != Mode::WAIT) {
 			usleep(10000);
 		}
 		_terminate = true;
@@ -248,6 +246,7 @@ namespace {
 			case Mode::GIVE_MONEY: setGiveMoneyMode(); break;
 			case Mode::PROGRAM: setProgram(_currentProgram); break;
 			case Mode::SERVICE: setServiceMode();
+			case Mode::WAIT: setWaitMode();
 			}
 			cout << "[INFO][EXTBOARD] restored " << text << endl;
 			_normalextb = true;
@@ -319,6 +318,7 @@ void init(
 		_hwconfig = new JParser("./config/hwconfig.json");
 		_config = new JParser("./config/config.json");
 		_tServiceMode = _config->get("service-time");
+		_tMaxGiveMoneyMode = _config->get("give-money-time");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "CONFIG", "fail to load necessary config files: " + string(e.what()));
 		exit(-1);
@@ -393,6 +393,7 @@ void init(
 					sp.type = CardInfo::UNKNOWN;
 				}
 				_cards.push_back(sp);
+				cout << "[INFO][UTILS] add card " << sp.id << " with type " << sp.type << endl;
 			} catch (exception& e) {
 				_log->log(Logger::Type::WARNING, "CONFIG", "fail to fill card " + to_string(i) + ": " + string(e.what()));
 			}
@@ -535,10 +536,10 @@ void setGiveMoneyMode() {
 		return;
 	}
 	bool isBonus = false;
-	extboard::setRelayGroup(0);
-	extboard::relievePressure();
 	extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, 0);
 	extboard::flap(true);
+	extboard::setRelayGroup(0);
+	extboard::relievePressure();
 	render::SpecFrame f = render::SpecFrame::GIVE_MONEY;
 	if (bonus::getCoef() > 1) {
 		f = render::SpecFrame::GIVE_MONEY_BONUS;
@@ -762,7 +763,7 @@ void accrueRemainBonusesAndClose() {
 }
 
 bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid) {
-	printf("find card %X..\n", cardid);
+	cout << "finding card " << cardid << endl;
 	for (int i = 0; i < _cards.size(); i++) {
 		if (_cards[i].id == cardid) {
 			cardInfo = _cards[i];
