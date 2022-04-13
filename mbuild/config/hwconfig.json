@@ -16,7 +16,9 @@
 		"int-pin": 2,
 		"cs-pin": 15,
 		"nrst-pin": 16,
-		"speed": 22000
+		"speed": 50000,
+		"max-handle-error": 5,
+		"max-reinit-tries": 5
 	},
 
 	"performing-units": [
@@ -35,7 +37,7 @@
 		"address": 64,
 		"dir-pin": 6,
 		"driver": "/dev/ttyS5",
-		"baud-rate": 9600,
+		"baud-rate": 115200,
 		"handler-delay": 10000,
 		"redraw-borehole": 500
 	},

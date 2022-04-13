@@ -19,6 +19,8 @@
 #include <cmath>
 
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -67,6 +69,12 @@ namespace {
 	int _tGiveMoneyMode = 0;
 	int _tMaxGiveMoneyMode = 120;
 
+	string _setprec(double v) {
+		v *= 100;
+		v = floor(v + 0.5);
+		return to_string(v / 100);
+	}
+
 	Program* _getProgram(vector<Program>& programs, int id) {
 		for (int i = 0; i < programs.size(); i++) {
 			if (programs[i].id == id) {
@@ -87,7 +95,7 @@ namespace {
 		throw runtime_error("program with id '" + to_string(id) + "' not found");
 	}
 
-	void _putSession(json& sd) {
+	void _putSession(json& sd, string name) {
 		DIR* dir = opendir("./statistics");
 		if (dir) {
 			closedir(dir);
@@ -106,7 +114,7 @@ namespace {
 			_log->log(Logger::Type::ERROR, "MONITOR", "fail open session dir: " + to_string(errno));
 			return;
 		}
-		ofstream f("./statistics/sessions/" + to_string(time(NULL)) + ".json", ios_base::out | ios_base::app);
+		ofstream f("./statistics/sessions/" + name + ".json", ios_base::out);
 		if (!f.is_open()) {
 			_log->log(Logger::Type::ERROR, "MONITOR", "fail open session file");
 			return;
@@ -115,33 +123,37 @@ namespace {
 		f.close();
 	}
 
-	void _onMoneyAdd(double nMoney, bool asBonus = false) {
-		if (nMoney == 0) {
+	void _onMoneyAdd(Pay pay) {
+		if (pay.count == 0) {
 			return;
 		}
-		cout << "money received: " << nMoney << endl;
+		cout << pay.count << " money received: " << pay.type << endl;
 		_moneyMutex.lock();
 		if (_nMoney == 0) {
 			_onCashAppeared();
 		}
 		if (_session.isBegin) {
-			if (asBonus) {
-				_nMoney += nMoney;
-				_session.acrueBonuses += nMoney;
-			} else {
-				_nMoney += nMoney * _session.k;
-				_session.depositedMoney += nMoney;
+			_session.pays.push_back(pay);
+			_nMoney += pay.count;
+			if (pay.type == Payment::Type::CASH || pay.type == Payment::Type::TERM || pay.type == Payment::Type::COIN) {				
+				if (_session.k > 1) {
+					Pay bonuspay;
+					bonuspay.type = Payment::Type::BONUS_LOCAL;
+					bonuspay.count = pay.count * _session.k;
+					_session.pays.push_back(pay);
+					_nMoney += bonuspay.count;
+				}	
 			}
 		} else {
-			cout << "[WARNING][UTILS] money received, but session is not begin" << endl;
-			_nMoney += nMoney;
+			_log->log(Logger::Type::WARNING, "MONEY", "money received, but session is not begin");
+			_nMoney += pay.count;
 		}
 		_moneyMutex.unlock();
 		render::redraw();
 	}
 
-	void _onExtCashAdd(double nMoney) {
-		_onMoneyAdd(nMoney);
+	void _onExtCashAdd(Pay pay) {
+		_onMoneyAdd(pay);
 	}
 
 	Timer::Action _withdraw(timer_t) {
@@ -152,10 +164,15 @@ namespace {
 		_moneyMutex.lock();
 		double oldv = _nMoney;
 		if (mode == Mode::PROGRAM) {
+			_programs[_currentProgram].useTimeSec++;
 			// cout << "withdraw, program " << _currentProgram << ", use time " <<_programs[_currentProgram].useTimeSec << ", free use time " << _programs[_currentProgram].freeUseTimeSec << endl;
 			if (_programs[_currentProgram].useTimeSec > _programs[_currentProgram].freeUseTimeSec) {
 				// cout << "withdraw " << _programs[_currentProgram].rate << " money" << endl;
 				_nMoney -= _programs[_currentProgram].rate;
+				if (_nMoney > 0) {
+					_programs[_currentProgram].spendMoney += oldv - _nMoney;
+				}
+				
 				if (_nMoney <= 0) {
 					_nMoney = 0;
 					if (oldv > 0) {
@@ -163,9 +180,7 @@ namespace {
 					}
 				}
 			}
-			_session.totalSpent += oldv - _nMoney;
-			_programs[_currentProgram].spendMoney += oldv - _nMoney;
-			_programs[_currentProgram].useTimeSec++;
+
 			_tRemainFreeUseTime = _programs[_currentProgram].freeUseTimeSec - _programs[_currentProgram].useTimeSec;
 			if (_tRemainFreeUseTime < 0) {
 				_tRemainFreeUseTime = 0;
@@ -300,6 +315,7 @@ void init(
 	}
 	try {
 		_log = new Logger("./statistics/log.txt");
+		_log->log(Logger::Type::INFO, "START", "");
 	} catch (exception& e) {
 		throw runtime_error("[ERROR][LOGGER] fail to create logger: " + string(e.what()));
 	}
@@ -322,6 +338,13 @@ void init(
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "CONFIG", "fail to load necessary config files: " + string(e.what()));
 		exit(-1);
+	}
+
+	try {
+		int loglevel = _config->get("log-level");
+		_log->setLogLevel(loglevel);
+	} catch (exception& e) {
+
 	}
 
 	// fill programs
@@ -455,7 +478,7 @@ void init(
 			}
 		}
 		extboard::registerOnErrorHandler(_extboardError);
-		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, specef, relIns);
+		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, specef, relIns, _log);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
 		exit(-3);
@@ -653,16 +676,16 @@ void beginSession(Session::Type type, uint64_t id) {
 	if (_terminate) {
 		return;
 	}
+	if (_session.isBegin) {
+		_log->log(Logger::Type::WARNING, "MONITOR", "try begin session when previous session not end");
+		dropSession(Session::EndType::NEW_SESSION);
+	}
 	double k = bonus::getCoef();
 	_session.k = k;
 	_session.k100 = round(k*100);
 	_session.rk100 = _session.k100 - 100;
 	_session.type = type;
 	_session.cardid = id;
-	_session.totalSpent = 0;
-	_session.depositedMoney = 0;
-	_session.writeoffBonuses = 0;
-	_session.acrueBonuses = 0;
 	
 	// clear programs
 	for (int i = 0; i < _programs.size(); i++) {
@@ -673,8 +696,10 @@ void beginSession(Session::Type type, uint64_t id) {
 	for (int i = 0; i < _servicePrograms.size(); i++) {
 		_servicePrograms[i].useTimeSec = 0;
 	}
-
+	_session.pays.clear();
 	_session.tBegin = time(NULL);
+	json sd;
+	_putSession(sd, to_string(_session.tBegin));
 	if (type == Session::Type::CLIENT) {
 		cout << "[INFO][UTILS] client session begin, k " << _session.k << endl;
 	} else
@@ -687,20 +712,44 @@ void beginSession(Session::Type type, uint64_t id) {
 	_session.isBegin = true;
 }
 
-void dropSession() {
+void dropSession(Session::EndType endType) {
 	if (!_session.isBegin) {
 		return;
 	}
 	if (_session.type == Session::Type::CLIENT) {
 		json sd;
 		sd["type"] = "client";
-		sd["total-spent"] = _session.totalSpent;
-		sd["deposited-money"] = _session.depositedMoney;
-		sd["acrue-bonuses"] = _session.acrueBonuses;
-		sd["writeoff-bonuses"] = _session.writeoffBonuses;
+		switch (endType)
+		{
+		case Session::EndType::BUTTON: sd["end-type"] = "button"; break;
+		case Session::EndType::MONEY_RUNOUT: sd["end-type"] = "money-runout"; break;
+		case Session::EndType::NEW_SESSION: sd["end-type"] = "new-session"; break;
+		default: sd["end-type"] = "none"; break;
+		}
+		
 		if (_session.cardid != 0) {
 			sd["card"] = _session.cardid;
 		}
+
+		json pays;
+		for (int i = 0; i < _session.pays.size(); i++) {
+			json p;
+			p["count"] = _session.pays[i].count;
+			switch (_session.pays[i].type)
+			{
+			case Payment::Type::CASH: p["type"] = "cash";  break;
+			case Payment::Type::TERM: p["type"] = "term";  break;
+			case Payment::Type::COIN: p["type"] = "coin";  break;
+			case Payment::Type::STORED: p["type"] = "stored";  break;
+			case Payment::Type::SERVICE: p["type"] = "service";  break;
+			case Payment::Type::BONUS_EXT: p["type"] = "bonus-ext";  break;
+			case Payment::Type::BONUS_LOCAL: p["type"] = "bonus-local";  break;
+			default: p["type"] = "unknown"; break;
+			}
+			pays[i] = p;
+		}
+		sd["pays"] = pays;
+
 		json pa;
 		for (int i = 0; i < _programs.size(); i++) {
 			json p;
@@ -711,7 +760,7 @@ void dropSession() {
 			pa[i] = p;
 		}
 		sd["programs"] = pa;
-		_putSession(sd);
+		_putSession(sd, to_string(_session.tBegin));
 	} else
 	if (_session.type == Session::Type::SERVICE) {
 		json sd;
@@ -728,7 +777,7 @@ void dropSession() {
 			pa[i] = p;
 		}
 		sd["programs"] = pa;
-		_putSession(sd);
+		_putSession(sd, to_string(_session.tBegin));
 	} else
 	if (_session.type == Session::Type::COLLECTION) {
 		json sd;
@@ -736,7 +785,7 @@ void dropSession() {
 		if (_session.cardid != 0) {
 			sd["card"] = _session.cardid;
 		}
-		_putSession(sd);
+		_putSession(sd, to_string(_session.tBegin));
 	} else {
 		_log->log(Logger::Type::ERROR, "MONITOR", "not defined session type");
 	}
@@ -755,7 +804,6 @@ void accrueRemainBonusesAndClose() {
 
 	try {
 		bonus::close(acrue);
-		_session.acrueBonuses += acrue;
 		_nMoney = 0;
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "BONUS", "fail close transaction with " + to_string(acrue) + " money: " + string(e.what()));
@@ -774,8 +822,11 @@ bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid) {
 	return false;
 }
 
-void addMoney(double nMoney, bool asBonus) {
-	_onMoneyAdd(nMoney, asBonus);
+void addMoney(double nMoney, Payment::Type type) {
+	Pay pay;
+	pay.count = nMoney;
+	pay.type = type;
+	_onMoneyAdd(pay);
 }
 
 }

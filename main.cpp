@@ -32,7 +32,7 @@ void onButtonPushed(const Button& button);
 void onCard(uint64_t cardid);
 void onQr(const char* qr);
 void onServiceEnd();
-void stop();
+void stop(Session::EndType endType);
 
 int main(int argc, char const *argv[]) {
 	init(onCashAppeared, onCashRunout, onButtonPushed, onQr, onCard, onServiceEnd);
@@ -56,14 +56,14 @@ void onCashAppeared() {
 }
 
 void onCashRunout() {
-	stop();
+	stop(Session::EndType::MONEY_RUNOUT);
 }
 
 void onButtonPushed(const Button& button) {
 	if (cmode() == Mode::PROGRAM) {
 		switch (button.purpose) {
 		case Button::Purpose::END:
-			stop();
+			stop(Session::EndType::BUTTON);
 			break;
 		case Button::Purpose::PROGRAM:
 			setProgram(button.prog);
@@ -73,7 +73,7 @@ void onButtonPushed(const Button& button) {
 	if (cmode() == Mode::SERVICE) {
 		switch (button.purpose) {
 		case Button::Purpose::END:
-			stop();
+			stop(Session::EndType::NEW_SESSION);
 			break;
 		case Button::Purpose::PROGRAM:
 			setServiceProgram(button.serviceProg);
@@ -92,7 +92,7 @@ void writeoffBonus() {
 			render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
 			return;
 		}
-		addMoney(count, true);
+		addMoney(count, Payment::Type::BONUS_EXT);
 	} else {
 		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
 	}	
@@ -113,21 +113,21 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 	bonus::Result rc;
 	if (card.type == CardInfo::SERVICE) {
 		if (cmode() == Mode::SERVICE) {
-			stop();
+			stop(Session::EndType::PROGRAM);
 		} else
 		if (cmode() == Mode::GIVE_MONEY) {
 			beginSession(Session::Type::SERVICE, card.id);
 			setServiceMode();
 		} else
 		if (cmode() == Mode::PROGRAM) {
-			stop();
+			stop(Session::EndType::NEW_SESSION);
 			beginSession(Session::Type::SERVICE, card.id);
 			setServiceMode();
 		}
 	} else
 	if (card.type == CardInfo::BONUS) {
 		if (local) {
-			addMoney(card.count);
+			addMoney(card.count, Payment::Type::SERVICE);
 			return;
 		}
 		if (card.count <= 0) {
@@ -140,7 +140,7 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 					writeoffBonus();
 				}
 			} else {
-				stop();
+				stop(Session::EndType::PROGRAM);
 				beginBonus(card);
 			}
 		} else {
@@ -153,7 +153,7 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 		}
 		rc = bonus::onetime(card);
 		if (rc == bonus::Result::OK) {
-			addMoney(card.count, true);
+			addMoney(card.count, Payment::Type::BONUS_EXT);
 		} else
 		if (rc == bonus::Result::COND_NOT_MET) {
 			render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
@@ -163,7 +163,7 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 	} else
 	if (card.type == CardInfo::COLLECTOR) {
 		beginSession(Session::Type::COLLECTION, card.id);
-		dropSession();
+		dropSession(Session::EndType::BUTTON);
 	} else {
 		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
 	}
@@ -208,14 +208,14 @@ void onCard(uint64_t cardid) {
 }
 
 void onServiceEnd() {
-	stop();
+	stop(Session::EndType::PROGRAM);
 }
 
-void stop() {
+void stop(Session::EndType endType) {
 	if (isBonusBegin) {
 		accrueRemainBonusesAndClose();
 		isBonusBegin = false;
 	}
-	dropSession();
+	dropSession(endType);
 	setGiveMoneyMode();
 }

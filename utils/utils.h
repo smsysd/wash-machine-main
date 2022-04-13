@@ -5,6 +5,7 @@
 #include "button_driver.h"
 #include "render.h"
 #include "bonus.h"
+#include "../extboard/ExtBoard.h"
 
 #include <stdint.h>
 #include <string>
@@ -42,24 +43,29 @@ struct Program {
 	bool flap;
 };
 
+
 struct Session {
 	enum Type {
 		CLIENT,
 		SERVICE,
 		COLLECTION
 	};
+	enum EndType {
+		PROGRAM,
+		BUTTON,
+		MONEY_RUNOUT,
+		NEW_SESSION
+	};
 	Type type;
+	EndType endType;
 	double k;
 	int k100;
 	int rk100;
 	time_t tBegin;
 	time_t tEnd;
 	uint64_t cardid;
+	vector<Pay> pays;
 	bool isBegin;
-	double totalSpent;
-	double depositedMoney;
-	double writeoffBonuses;
-	double acrueBonuses;
 };
 
 void init(
@@ -78,7 +84,7 @@ void setWaitMode();
 
 /* Session for monitoring - setup bonus and session default values  */
 void beginSession(Session::Type type, uint64_t id);
-void dropSession();
+void dropSession(Session::EndType endType);
 
 /* bonus macros */
 void accrueRemainBonusesAndClose();
@@ -89,7 +95,7 @@ Mode cmode();
 bool issession();
 
 /* extra control */
-void addMoney(double nMoney, bool asBonus = true);
+void addMoney(double nMoney, Payment::Type type);
 
 }
 

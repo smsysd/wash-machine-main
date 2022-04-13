@@ -12,15 +12,16 @@ using namespace std;
 
 Logger::Logger(string path) {
 	_path = path;
+	_level = 0;
 }
 
 Logger::~Logger() {
 
 }
 
-void Logger::log(Type type, string module, string message) {
+void Logger::log(Type type, string module, string message, int level) {
 	time_t theTime = time(NULL);
-	tm* ptm = gmtime(&theTime);
+	tm* ptm = localtime(&theTime);
 
 	_clearSpec(module);
 	_clearSpec(message);
@@ -36,7 +37,7 @@ void Logger::log(Type type, string module, string message) {
 	ostringstream strModule;
 	strYear << setfill('0') << setw(4) << 1900 + ptm->tm_year;
 	strMon << setfill('0') << setw(2) << ptm->tm_mon + 1;
-	strDay << setfill('0') << setw(2) << ptm->tm_mday + 1;
+	strDay << setfill('0') << setw(2) << ptm->tm_mday;
 	strHour << setfill('0') << setw(2) << ptm->tm_hour;
 	strMin << setfill('0') << setw(2) << ptm->tm_min;
 	strSec << setfill('0') << setw(2) << ptm->tm_sec;
@@ -48,15 +49,18 @@ void Logger::log(Type type, string module, string message) {
 	cout << strTime.str() << strType.str() << strModule.str() << " " << message << endl;
 	setConsoleFontColor(Color::DEFAULT);
 
-	ofstream f(_path.c_str(), ofstream::out | ofstream::app);
-
-	if (!f.is_open()) {
-		throw runtime_error("fail to open log file");
+	if (level <= _level) {
+		ofstream f(_path.c_str(), ofstream::out | ofstream::app);
+		if (!f.is_open()) {
+			throw runtime_error("fail to open log file");
+		}
+		f << strTime.str() << strType.str() << strModule.str() << " " << message << endl;
+		f.close();
 	}
+}
 
-	f << strTime.str() << strType.str() << strModule.str() << " " << message << endl;
-
-	f.close();
+void Logger::setLogLevel(int level) {
+	_level = level;
 }
 
 void Logger::setConsoleFontColor(Color color) {
@@ -91,6 +95,9 @@ string Logger::_typeToString(Type type) {
 	} else
 	if (type == Type::ERROR) {
 		return "ERROR";
+	} else
+	if (type == Type::DBG) {
+		return "DBG";
 	} else {
 		throw runtime_error("unknown log type");
 	}

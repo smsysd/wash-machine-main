@@ -127,19 +127,6 @@ namespace {
 		uint8_t data[1288];
 	};
 
-	struct Payment {
-		enum Mode {
-			NOT_USE = 0x00,
-			COUNTER = 0x01,
-			BILL_CODE = 0x02
-		};
-		Mode mode;
-		double rate;
-		bool usedbillcodes[32];
-		double billcodes[32];
-		int maxbillcode;
-	};
-
 	struct PerformerUnit {
 		int addr;
 		int normalStates;
@@ -252,10 +239,13 @@ namespace {
 	int _nrstPin = -1;
 	uint8_t _lor = (uint8_t)LOR::OP_NONE | (uint8_t)LOR::ST_OK;
 	mutex _mutex;
+	int _maxHandleErrors = 5;
+	int _maxReinitTries = 3;
+	Logger* _log;
 
 	void (*_onButton)(int iButton);
 	void (*_onCard)(uint64_t id);
-	void (*_onMoney)(double nMoney);
+	void (*_onMoney)(Pay pay);
 	void (*_onCloser)(bool state);
 	void (*_onError)(ErrorType et, string text);
 
@@ -530,7 +520,7 @@ namespace {
 		} else
 		if (pm.mode == Payment::BILL_CODE) {
 			if (val > pm.maxbillcode) {
-				cout << "[WARNING][EXTBOARD] received " << val << " bill code number, it is overflow, set max bill code: " << pm.maxbillcode << endl;
+				_log->log(Logger::Type::ERROR, "EXTBOARD", "received " + to_string(val) + " bill code number, it is overflow, set max bill code: " + to_string(pm.maxbillcode ), 2);
 				return pm.billcodes[pm.maxbillcode];
 			}
 			if (!pm.usedbillcodes[val]) {
@@ -540,7 +530,7 @@ namespace {
 						nextbc = i;
 					}
 				}
-				cout << "[WARNING][EXTBOARD] received " << val << " bill code number, it is not used, set next bill code: " << nextbc << endl;
+				_log->log(Logger::Type::WARNING, "EXTBOARD", "received " + to_string(val) + " bill code number, it is not used, set next bill code: " + to_string(nextbc), 2);
 				return pm.billcodes[nextbc];
 			}
 			return pm.billcodes[val];
@@ -549,21 +539,31 @@ namespace {
 		}
 	}
 
-	double _injectMoney(uint8_t* buf) {
+	vector<Pay> _injectMoney(uint8_t* buf) {
 		uint16_t ncash = _collectn(buf, 2);
 		uint16_t nterm = _collectn(&buf[2], 2);
 		uint16_t ncoin = _collectn(&buf[4], 2);
-		double money = 0;
+		vector<Pay> pays;
+		
 		if (ncash > 0) {
-			money += _injectMoney(_cash, ncash);
+			Pay pay;
+			pay.type = Payment::Type::CASH;
+			pay.count = _injectMoney(_cash, ncash);
+			pays.push_back(pay);
 		}
 		if (nterm > 0) {
-			money += _injectMoney(_terminal, nterm);
+			Pay pay;
+			pay.type = Payment::Type::TERM;
+			pay.count = _injectMoney(_terminal, nterm);
+			pays.push_back(pay);
 		}
 		if (ncoin > 0) {
-			money += _injectMoney(_coin, ncoin);
+			Pay pay;
+			pay.type = Payment::Type::COIN;
+			pay.count = _injectMoney(_coin, ncoin);
+			pays.push_back(pay);
 		}
-		return money;
+		return pays;
 	}
 
 	void _put_cash(double nMoney) {
@@ -762,6 +762,7 @@ namespace {
 		} else
 		if (reason == (int)IntReason::WAIT_OPT) {
 			_isInit = false;
+			_log->log(Logger::Type::WARNING, "EXTBOARD", "extboard was reset during operations - reinit..", 2);
 			_mspi->disableInt();
 		} else
 		if (reason == (int)IntReason::LOR) {
@@ -773,7 +774,7 @@ namespace {
 				cout << "[INFO][ETBOARD] LOR " << (int)buf[0] << endl;
 				_lor = buf[0];
 			} catch (exception& e) {
-				cout << "[WARNING][EXTBOARD]|INT| fail to read LOR: " << e.what() << endl;
+				_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to read LOR: " + string(e.what()), 4);
 				suspicion++;
 			}
 		} else
@@ -801,7 +802,7 @@ namespace {
 					}
 				}
 			} catch (exception& e) {
-				cout << "[WARNING][EXTBOARD]|INT| fail to read buttons: " << e.what() << endl;
+				_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to read buttons: " + string(e.what()), 4);
 				suspicion++;
 			}
 		} else
@@ -826,9 +827,9 @@ namespace {
 			try {
 				_mspi->read((int)Addr::PAYMENT, buf, 6);
 				suspicion = 0;
-				double money = _injectMoney(buf);
-				if (money > 0) {
-					_onMoney(money);
+				vector<Pay> pays = _injectMoney(buf);
+				for (int i = 0; i < pays.size(); i++) {
+					_onMoney(pays[i]);
 				}
 			} catch (exception& e) {
 				cout << "fail to read money: " << e.what() << endl;
@@ -848,7 +849,7 @@ namespace {
 			_onCloser(false);
 		}
 		_mutex.unlock();
-		if (suspicion > 10) {
+		if (suspicion > _maxHandleErrors) {
 			_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
 		}
 	}
@@ -864,7 +865,6 @@ namespace {
 			tries = 0;
 			while (!_isInit) {
 				try {
-					cout << "[WARNING][EXTBOARD] extboard was reset during operations - reinit.." << endl;
 					hpos = false;
 					_connect();
 					_uploadAllOptions();
@@ -882,8 +882,8 @@ namespace {
 				} catch (exception& e) {
 					tries++;
 					sleep(2);
-					cout << "[ERROR][EXTBOARD] fail to reinit: " << e.what() << endl;
-					if (tries > 3) {
+					_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to reinit: " + string(e.what()), 2);
+					if (tries > _maxReinitTries) {
 						if (hpos) {
 							_onError(ErrorType::DISCONNECT_DEV, string(e.what()));
 						} else {
@@ -975,23 +975,24 @@ namespace {
 						_mspi->write((int)Addr::EFFECT, ef->data, 8 + ef->nTotalInstructions*5);
 						suspicion = 0;
 					} catch (exception& e) {
-						cout << "[WARNING][EXTBOARD]|HANDLER| fail to start effect: " << e.what() << endl;
+						_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to start effect: " + string(e.what()), 4);
 					}
 				} else {
 					fifo_pop(&_operations);
-					cout << "[WARNING][EXTBOARD]|HANDLER| undefined handle: " << (int)h->type << endl;
+					_log->log(Logger::Type::WARNING, "EXTBOARD", "undefined handle: " + to_string((int)h->type), 4);
 				}
 			} catch (exception& e) {
-				cout << "[WARNING][EXTBOARD]|HANDLER| fail handle: " << e.what() << endl;
+				_log->log(Logger::Type::WARNING, "EXTBOARD", "fail handle: " + string(e.what()), 4);
 				suspicion++;
-				usleep(100000);
+				usleep(200000);
 			}
 			_mutex.unlock();
-			if (suspicion > 5) {
+			if (suspicion > _maxHandleErrors) {
 				suspicion = 0;
 				_isInit = false;
+				_log->log(Logger::Type::WARNING, "EXTBOARD", "extboard was not responding at commands - reinit..", 3);
 				_mspi->disableInt();
-				_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
+				// _onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
 			}
 			if (borehole % 1000 == 0) {
 				// add repetive handles
@@ -1005,7 +1006,8 @@ namespace {
 	}
 }
 
-void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& specEffects, json& releiveInstructions) {
+void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& specEffects, json& releiveInstructions, Logger* log) {
+	_log = log;
 	// get hw extboard config
 	cout << "[INFO][EXTBOARD] load hardware extboard config.." << endl;
 	string driver = JParser::getf(extboard, "driver", "extboard");
@@ -1013,6 +1015,16 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	int csPin = JParser::getf(extboard, "cs-pin", "extboard");
 	int intPin = JParser::getf(extboard, "int-pin", "extboard");
 	_nrstPin = JParser::getf(extboard, "nrst-pin", "extboard");
+	try {
+		_maxHandleErrors = JParser::getf(extboard, "max-handle-error", "extboard");
+	} catch (exception& e) {
+
+	}
+	try {
+		_maxReinitTries = 5;
+	} catch (exception& e) {
+		_maxReinitTries = 3;
+	}
 
 	cout << "[INFO][EXTBOARD] load performing units config.." << endl;
 	for (int i = 0; i < performingUnits.size(); i++) {
@@ -1269,8 +1281,6 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 
 		cout << "[INFO][EXTBOARD] upload options.." << endl;
 		_uploadAllOptions();
-		cout << "[INFO][EXTBOARD] init external devices.." << endl;
-		usleep(10000);		
 	} catch (exception& e) {
 		_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
 		throw runtime_error(e.what());
@@ -1278,6 +1288,8 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 
 
 	try {
+		cout << "[INFO][EXTBOARD] init external devices.." << endl;
+		usleep(10000);		
 		_initExtdev();
 	} catch (exception& e) {
 		_onError(ErrorType::DISCONNECT_DEV, e.what());
@@ -1363,7 +1375,7 @@ void registerOnCardReadHandler(void (*handler)(uint64_t cardid)) {
 	_onCard = handler;
 }
 
-void registerOnMoneyAddedHandler(void (*handler)(double nMoney)) {
+void registerOnMoneyAddedHandler(void (*handler)(Pay pay)) {
 	_onMoney = handler;
 }
 
@@ -1395,7 +1407,10 @@ void up_cash() {
 	system("rm -f ./.cash");
 	if (nmoney > 0) {
 		if (_onMoney != nullptr) {
-			_onMoney(nmoney);
+			Pay pay;
+			pay.type = Payment::Type::STORED;
+			pay.count = nmoney;
+			_onMoney(pay);
 		}
 	}
 }
