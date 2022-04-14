@@ -127,7 +127,7 @@ namespace {
 		if (pay.count == 0) {
 			return;
 		}
-		cout << pay.count << " money received: " << pay.type << endl;
+		_log->log(Logger::Type::INFO, "MONEY", to_string(pay.count) + " money received from " + to_string((int)pay.type), 6);
 		_moneyMutex.lock();
 		if (_nMoney == 0) {
 			_onCashAppeared();
@@ -205,6 +205,7 @@ namespace {
 		if (!_normalwork) {
 			if (_normalrend && _normalextb) {
 				_normalwork = true;
+				_log->log(Logger::Type::INFO, "MAIN", "NORMAL WORK");
 			}
 			return OK;
 		}
@@ -228,12 +229,12 @@ namespace {
 			if (previousk > 1 && k <= 1) {
 				previousk = k;
 				render::showFrame(render::SpecFrame::GIVE_MONEY);
-				cout << "[INFO][UTILS] 'give money' mode frame switched to default" << endl;
+				_log->log(Logger::Type::INFO, "UTILS", "'give money' mode frame switched to default", 8);
 			} else
 			if (previousk <= 1 && k > 1) {
 				previousk = k;
 				render::showFrame(render::SpecFrame::GIVE_MONEY_BONUS);
-				cout << "[INFO][UTILS] 'give money' mode frame switched to bonus" << endl;
+				_log->log(Logger::Type::INFO, "UTILS", "'give money' mode frame switched to bonus", 8);
 			}
 		}
 
@@ -244,13 +245,13 @@ namespace {
 
 	void _softTerminate() {
 		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal");
-		cout << "[INFO][UTILS] wait end of wash.." << endl;
 		while (mode != Mode::GIVE_MONEY && mode != Mode::WAIT) {
 			usleep(10000);
 		}
 		_terminate = true;
-		render::showFrame(render::SpecFrame::REPAIR);
 		sleep(2);
+		render::showFrame(render::SpecFrame::REPAIR);
+		sleep(3);
 	}
 
 	void _extboardError(extboard::ErrorType et, string text) {
@@ -263,7 +264,6 @@ namespace {
 			case Mode::SERVICE: setServiceMode();
 			case Mode::WAIT: setWaitMode();
 			}
-			cout << "[INFO][EXTBOARD] restored " << text << endl;
 			_normalextb = true;
 			return;
 		case extboard::ErrorType::DISCONNECT_DEV: ets = "DISCONNECT DEV"; break;
@@ -552,6 +552,8 @@ void init(
 
 	cout << "[INFO][UTILS] initialize complete." << endl;
 	_normalwork = true;
+	_log->log(Logger::Type::INFO, "MAIN", "NORMAL WORK");
+	extboard::restoreMoney();
 }
 
 void setGiveMoneyMode() {
@@ -571,9 +573,9 @@ void setGiveMoneyMode() {
 	render::showFrame(f);
 
 	if (isBonus) {
-		cout << "[INFO][UTILS] 'give money' mode applied with bonus frame" << endl;
+		_log->log(Logger::Type::INFO, "MODE", "'give money' mode applied with bonus frame", 8);
 	} else {
-		cout << "[INFO][UTILS] 'give money' mode applied" << endl;
+		_log->log(Logger::Type::INFO, "MODE", "'give money' mode applied", 8);
 	}
 	mode = Mode::GIVE_MONEY;
 	_tGiveMoneyMode = 0;
@@ -585,7 +587,7 @@ void setWaitMode() {
 	extboard::flap(false);
 	render::showFrame(render::SpecFrame::WAIT);
 
-	cout << "[INFO][MODE] 'wait' mode applied" << endl;
+	_log->log(Logger::Type::INFO, "MODE", "'wait' mode applied", 8);
 	mode = Mode::WAIT;
 }
 
@@ -598,7 +600,7 @@ void setServiceMode() {
 	render::showFrame(render::SpecFrame::SERVICE);
 
 	extboard::startLightEffect(extboard::SpecEffect::SERVICE_EFFECT, 0);
-	cout << "[INFO][UTILS] 'service' mode applied" << endl;
+	_log->log(Logger::Type::INFO, "MODE", "'service' mode applied", 8);
 	_tOffServiceMode = time(NULL) + _tServiceMode;
 	mode = Mode::SERVICE;
 }
@@ -612,7 +614,7 @@ void setProgram(int id) {
 		return;
 	}
 	if (!_session.isBegin) {
-		cout << "[WARNING][LOGIC] call 'setProgram' without session" << endl;
+		_log->log(Logger::Type::WARNING, "INTERNAL", "call 'setProgram' without session", 8);
 		return;
 	}
 	Program* p;
@@ -641,7 +643,7 @@ void setProgram(int id) {
 		render::showFrame(p->frame);
 	}
 
-	cout << "[INFO][UTILS] program '" << p->name << "' set" << endl;
+	_log->log(Logger::Type::INFO, "PROGRAM", "program '" + p->name + "' set", 8);
 	mode = Mode::PROGRAM;
 }
 
@@ -666,6 +668,7 @@ void setServiceProgram(int id) {
 	render::showFrame(p->frame);
 
 	cout << "[INFO][UTILS] service program '" << p->name << "' set" << endl;
+	_log->log(Logger::Type::INFO, "PROGRAM", "service program '" + p->name + "' set", 8);
 	if (mode != Mode::SERVICE) {
 		_tOffServiceMode = time(NULL) + _tServiceMode;
 		mode = Mode::SERVICE;
@@ -701,13 +704,13 @@ void beginSession(Session::Type type, uint64_t id) {
 	json sd;
 	_putSession(sd, to_string(_session.tBegin));
 	if (type == Session::Type::CLIENT) {
-		cout << "[INFO][UTILS] client session begin, k " << _session.k << endl;
+		_log->log(Logger::Type::INFO, "MONITOR", "client session begin, k: '" + to_string(_session.k), 8);
 	} else
 	if (type == Session::Type::SERVICE) {
-		cout << "[INFO][UTILS] service session begin" << endl;
+		_log->log(Logger::Type::INFO, "MONITOR", "service session begin", 8);
 	} else
 	if (type == Session::Type::COLLECTION) {
-		cout << "[INFO][UTILS] collection session begin" << endl;
+		_log->log(Logger::Type::INFO, "MONITOR", "collector session begin", 8);
 	}
 	_session.isBegin = true;
 }
@@ -717,6 +720,7 @@ void dropSession(Session::EndType endType) {
 		return;
 	}
 	if (_session.type == Session::Type::CLIENT) {
+		extboard::dropMoney();
 		json sd;
 		sd["type"] = "client";
 		switch (endType)
@@ -811,7 +815,6 @@ void accrueRemainBonusesAndClose() {
 }
 
 bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid) {
-	cout << "finding card " << cardid << endl;
 	for (int i = 0; i < _cards.size(); i++) {
 		if (_cards[i].id == cardid) {
 			cardInfo = _cards[i];

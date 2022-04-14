@@ -95,7 +95,9 @@ namespace {
 		RELIEVE_PRESSURE = 0x10,
 		FLAP = 0x12,
 		RESET_EFFECT = 0x20,
-		APPLAY_RGROUP = 0x30
+		APPLAY_RGROUP = 0x30,
+		RESTORE_MONEY = 0x40,
+		DROP_MONEY = 0x41
 	};
 
 	enum class IntReason {
@@ -205,7 +207,8 @@ namespace {
 		RELEIVE_PRESSURE,	// data: none
 		SET_RELAY_GROUP,	// data: group_id 
 		DIRECT_SET_RELAYS,	// data: addr, states
-		FLAP				// data: state
+		FLAP,				// data: state
+		MONEY_CTRL			// data: drop or restore money (0 - drop, 1 - restore)
 	};
 
 	struct Handle {
@@ -239,6 +242,7 @@ namespace {
 	int _nrstPin = -1;
 	uint8_t _lor = (uint8_t)LOR::OP_NONE | (uint8_t)LOR::ST_OK;
 	mutex _mutex;
+	mutex _fifomutex;
 	int _maxHandleErrors = 5;
 	int _maxReinitTries = 3;
 	Logger* _log;
@@ -904,7 +908,9 @@ namespace {
 					buf[0] = h->data[0];
 					buf[1] = h->data[1];
 					_mspi->write((int)Addr::DIRECT_SET, buf, 2);
+					_fifomutex.lock();
 					fifo_pop(&_operations);
+					_fifomutex.unlock();
 					suspicion = 0;
 				} else
 				if (h->type == HandleType::RELEIVE_PRESSURE) {
@@ -922,7 +928,9 @@ namespace {
 							break;
 						}
 					}
+					_fifomutex.lock();
 					fifo_pop(&_operations);
+					_fifomutex.unlock();
 					suspicion = 0;
 				} else
 				if (h->type == HandleType::RESET_EFFECT) {
@@ -934,7 +942,9 @@ namespace {
 							break;
 						}
 					}
+					_fifomutex.lock();
 					fifo_pop(&_operations);
+					_fifomutex.unlock();
 					suspicion = 0;
 				} else
 				if (h->type == HandleType::SET_RELAY_GROUP) {
@@ -942,7 +952,9 @@ namespace {
 					try {
 						rgi = _get_rgi(h->data[0]);
 					} catch (exception& e) {
+						_fifomutex.lock();
 						fifo_pop(&_operations);
+						_fifomutex.unlock();
 						throw runtime_error(e.what());
 					}
 					_mspi->cmd((int)Cmd::APPLAY_RGROUP, rgi);
@@ -959,16 +971,22 @@ namespace {
 							break;
 						}
 					}
+					_fifomutex.lock();
 					fifo_pop(&_operations);
+					_fifomutex.unlock();
 					suspicion = 0;
 				} else
 				if (h->type == HandleType::FLAP) {
 					_mspi->cmd((int)Cmd::FLAP, h->data[0]);
+					_fifomutex.lock();
 					fifo_pop(&_operations);
+					_fifomutex.unlock();
 					suspicion = 0;
 				} else
 				if (h->type == HandleType::START_EFFECT) {
+					_fifomutex.lock();
 					fifo_pop(&_operations);
+					_fifomutex.unlock();
 					try {
 						LightEffect* ef = _getEffect(h->data[0]);
 						ef->data[0] = h->data[1];
@@ -977,8 +995,21 @@ namespace {
 					} catch (exception& e) {
 						_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to start effect: " + string(e.what()), 4);
 					}
-				} else {
+				} else
+				if (h->type == HandleType::MONEY_CTRL) {
+					if (h->data[0]) {
+						_mspi->cmd((int)Cmd::RESTORE_MONEY, 0);
+					} else {
+						_mspi->cmd((int)Cmd::DROP_MONEY, 0);
+					}
+					_fifomutex.lock();
 					fifo_pop(&_operations);
+					_fifomutex.unlock();
+					suspicion = 0;
+				} else {
+					_fifomutex.lock();
+					fifo_pop(&_operations);
+					_fifomutex.unlock();
 					_log->log(Logger::Type::WARNING, "EXTBOARD", "undefined handle: " + to_string((int)h->type), 4);
 				}
 			} catch (exception& e) {
@@ -1309,7 +1340,9 @@ void startLightEffect(int id, int index) {
 	h.data[0] = id;
 	h.data[1] = index;
 	resetLightEffect(index);
+	_fifomutex.lock();
 	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
 }
 
 void startLightEffect(SpecEffect effect, int index) {
@@ -1325,15 +1358,19 @@ void startLightEffect(SpecEffect effect, int index) {
 void resetLightEffect(int index) {
 	Handle h;
 	h.type = HandleType::RESET_EFFECT;
-	h.data[0] = index;
+	h.data[0] = index;\
+	_fifomutex.lock();
 	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
 }
 
 /* Performing functions */
 void relievePressure() {
 	Handle h;
 	h.type = HandleType::RELEIVE_PRESSURE;
+	_fifomutex.lock();
 	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
 }
 
 void setRelayGroup(int id) {
@@ -1347,7 +1384,9 @@ void setRelayGroup(int id) {
 	_currentRelayGroupId = id;
 	h.type = HandleType::SET_RELAY_GROUP;
 	h.data[0] = id;
+	_fifomutex.lock();
 	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
 }
 
 void setRelaysState(int address, int states) {
@@ -1355,7 +1394,9 @@ void setRelaysState(int address, int states) {
 	h.type = HandleType::DIRECT_SET_RELAYS;
 	h.data[0] = address;
 	h.data[1] = states;
+	_fifomutex.lock();
 	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
 }
 
 /* Other control functions */
@@ -1363,7 +1404,9 @@ void flap(bool state) {
 	Handle h;
 	h.type = HandleType::FLAP;
 	h.data[0] = state ? 1 : 0;
+	_fifomutex.lock();
 	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
 }
 
 /* Event handlers registration */
@@ -1387,32 +1430,22 @@ void registerOnErrorHandler(void (*handler)(ErrorType et, string text)) {
 	_onError = handler;
 }
 
-void up_cash() {
-	char buf[256] = {0};
-	double nmoney = 0;
-	try {
-		ifstream f("./.cash", ios_base::in);
-		while (f.getline(buf, 256)) {
-			try {
-				nmoney += strtod(buf, NULL);
-			} catch (exception& e) {
-				cout << "[WARNING][EXTBOARD] fail to up cash line: " << e.what() << endl;
-			}
-			memset(buf, 0, 256);
-		}			
-	} catch (exception& e) {
-		cout << "[WARNING][EXTBOARD] fail to up cash: " << e.what() << endl;
-	}
-	
-	system("rm -f ./.cash");
-	if (nmoney > 0) {
-		if (_onMoney != nullptr) {
-			Pay pay;
-			pay.type = Payment::Type::STORED;
-			pay.count = nmoney;
-			_onMoney(pay);
-		}
-	}
+void restoreMoney() {
+	Handle h;
+	h.type = HandleType::MONEY_CTRL;
+	h.data[0] = 1;
+	_fifomutex.lock();
+	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
+}
+
+void dropMoney() {
+	Handle h;
+	h.type = HandleType::MONEY_CTRL;
+	h.data[0] = 0;
+	_fifomutex.lock();
+	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
 }
 
 }

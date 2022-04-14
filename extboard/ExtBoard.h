@@ -77,9 +77,9 @@ namespace extboard {
 	void registerOnObjectCloserHandler(void (*handler)(bool state));
 	void registerOnErrorHandler(void (*handler)(ErrorType et, string text));
 
-	// * * * DEPRICATED * * *
-	// up cash from temp file, it was created when error initialize and read money before reset not null
-	// void up_cash();
+	/* * * Advanced money control * * */
+	void restoreMoney(); // Restore money from backup registers
+	void dropMoney(); // Clear backup money registers
 }
 
 #endif
