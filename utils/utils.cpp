@@ -68,7 +68,20 @@ namespace {
 	char errord[64];
 	int _tGiveMoneyMode = 0;
 	int _tMaxGiveMoneyMode = 120;
+	bool _money_enable = false;
 
+	string _paytype2str(Payment::Type type) {
+		switch (type) {
+		case Payment::Type::BONUS_EXT: return "BONUS_EXTERNAL"; break;
+		case Payment::Type::BONUS_LOCAL: return "BONUS_LOCAL"; break;
+		case Payment::Type::CASH: return "CASH"; break;
+		case Payment::Type::COIN: return "COIN"; break;
+		case Payment::Type::SERVICE: return "SERVICE"; break;
+		case Payment::Type::STORED: return "STORED"; break;
+		case Payment::Type::TERM: return "TERMINAL"; break;
+		default: return "unknown"; break;
+		}
+	}
 	string _setprec(double v) {
 		v *= 100;
 		v = floor(v + 0.5);
@@ -124,10 +137,10 @@ namespace {
 	}
 
 	void _onMoneyAdd(Pay pay) {
-		if (pay.count == 0) {
+		if (pay.count == 0 || !_money_enable) {
 			return;
 		}
-		_log->log(Logger::Type::INFO, "MONEY", to_string(pay.count) + " money received from " + to_string((int)pay.type), 6);
+		_log->log(Logger::Type::INFO, "MONEY", "current money: " + to_string(_nMoney) + ", " + to_string(pay.count) + " money received from " + _paytype2str(pay.type), 6);
 		_moneyMutex.lock();
 		if (_nMoney == 0) {
 			_onCashAppeared();
@@ -199,6 +212,7 @@ namespace {
 		static double previousk = 0;
 
 		_normalrend = render::getState();
+		_normalextb = extboard::getState();
 		if (!_normalrend) {
 			_normalwork = false;
 		}
@@ -206,6 +220,12 @@ namespace {
 			if (_normalrend && _normalextb) {
 				_normalwork = true;
 				_log->log(Logger::Type::INFO, "MAIN", "NORMAL WORK");
+				switch (mode) {
+				case Mode::GIVE_MONEY: setGiveMoneyMode(); break;
+				case Mode::PROGRAM: setProgram(_currentProgram); break;
+				case Mode::SERVICE: setServiceMode(); setServiceProgram(_currentProgram); break;
+				case Mode::WAIT: setWaitMode(); break;
+				}
 			}
 			return OK;
 		}
@@ -281,6 +301,10 @@ namespace {
 		sleep(2);
 	}
 
+	void _money_restored() {
+		_log->log(Logger::Type::INFO, "MONEY", "money restored", 7);
+		_money_enable = true;
+	}
 }
 
 Mode cmode() {
@@ -544,6 +568,9 @@ void init(
 	extboard::registerOnMoneyAddedHandler(_onExtCashAdd);
 	extboard::registerOnCardReadHandler(onCard);
 
+	usleep(100000);
+	extboard::restoreMoney(_money_restored);
+
 	cout << "[INFO][UTILS] register genereal handler.." << endl;
 	callHandler(_handler, NULL, 500, 0);
 
@@ -553,7 +580,6 @@ void init(
 	cout << "[INFO][UTILS] initialize complete." << endl;
 	_normalwork = true;
 	_log->log(Logger::Type::INFO, "MAIN", "NORMAL WORK");
-	extboard::restoreMoney();
 }
 
 void setGiveMoneyMode() {

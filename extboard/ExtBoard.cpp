@@ -31,7 +31,8 @@ namespace {
 		INIT_SELF = 0x02,
 		LOAD_OPT = 0x03,
 		INIT_EXTDEV = 0x05,
-		WORK = 0x06
+		WORK = 0x06,
+		READY_TO_RESET = 0x09
 	};
 	enum class LOR {
 		ST_MASK = 0x03,
@@ -246,6 +247,8 @@ namespace {
 	int _maxHandleErrors = 5;
 	int _maxReinitTries = 3;
 	Logger* _log;
+	bool _first_init = true;
+	void (*_moneyrestcplt)();
 
 	void (*_onButton)(int iButton);
 	void (*_onCard)(uint64_t id);
@@ -608,22 +611,66 @@ namespace {
 		int timeout;
 
 		try {
-			if (_nrstPin > 0) {
-				pinMode(_nrstPin, OUTPUT);
-				digitalWrite(_nrstPin, 0);
-				usleep(10000);
-				digitalWrite(_nrstPin, 1);
-			} else {
-				_mspi->cmd((int)Cmd::RESET, 0);
+			try {
+				int tries = 0;
+				while (true) {
+					try {
+						_mspi->cmd((int)Cmd::RESET, 0);
+						break;
+					} catch (exception& e) {
+						tries++;
+						if (tries > 3) {
+							throw runtime_error("fail to perform RESET command");
+						}
+						usleep(100000);
+					}
+				}
+				
+				timeout = 0;
+				while (true) {
+					usleep(100000);
+					try {
+						_mspi->read((int)Addr::STATUS, buf, 1);
+						if (buf[0] == (uint8_t)Status::READY_TO_RESET) {
+							_mspi->cmd((int)Cmd::RESET, 0);
+							usleep(100000);
+							break;
+						} else
+						if (buf[0] != (uint8_t)Status::WORK) {
+							break;
+						}
+					} catch (exception& e) {
+						if (timeout > 2) {
+							_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to read status or reset: " + string(e.what()), 6);
+						}
+					}
+
+					timeout++;
+					if (timeout > 400) {
+						throw runtime_error("too long preparing to reset");
+					}
+				}
+			} catch (exception& e) {
+				_log->log(Logger::Type::WARNING, "EXTBOARD", "fault software reset: " + string(e.what()) + " - try hardware reset", 5);
+				if (_nrstPin > 0) {
+					pinMode(_nrstPin, OUTPUT);
+					digitalWrite(_nrstPin, 0);
+					usleep(10000);
+					digitalWrite(_nrstPin, 1);
+				} else {
+					throw runtime_error("no nrst pin");
+				}
 			}
+
 			sleep(1); // bootloader
+			cout << "read WIA and VERSION" << endl;
 			_mspi->read((int)Addr::WIA, buf, 3);
 			_mspi->read((int)Addr::VERSION, &buf[3], 2);
 		} catch (exception& e) {
 			sleep(2);
 			tries++;
 			if (tries >= 10) {
-				throw runtime_error("fail to connect");
+				throw runtime_error("fail to connect: " + string(e.what()));
 			}
 		}
 		cout << "[INFO][EXTBOARD] connected, WIA_PRJ: " << (int)(buf[0] << 8 | buf[1]) << ", WIA_SUB: " << (int)buf[2] << ", VERSION: [" << (int)buf[3] << ", " << (int)buf[4] << "]" << endl;
@@ -639,6 +686,7 @@ namespace {
 				throw runtime_error("too long self init");
 			}
 		}
+		_first_init = true;
 	}
 
 	void _uploadAllOptions() {
@@ -765,9 +813,13 @@ namespace {
 			}
 		} else
 		if (reason == (int)IntReason::WAIT_OPT) {
-			_isInit = false;
-			_log->log(Logger::Type::WARNING, "EXTBOARD", "extboard was reset during operations - reinit..", 2);
-			_mspi->disableInt();
+			if (!_first_init) {
+				_isInit = false;
+				_log->log(Logger::Type::WARNING, "EXTBOARD", "extboard was reset during operations - reinit..", 2);
+				_mspi->disableInt();
+			} else {
+				_first_init = false;
+			}
 		} else
 		if (reason == (int)IntReason::LOR) {
 			if (!_isInit) {
@@ -999,6 +1051,7 @@ namespace {
 				if (h->type == HandleType::MONEY_CTRL) {
 					if (h->data[0]) {
 						_mspi->cmd((int)Cmd::RESTORE_MONEY, 0);
+						_moneyrestcplt();
 					} else {
 						_mspi->cmd((int)Cmd::DROP_MONEY, 0);
 					}
@@ -1333,6 +1386,10 @@ void init(json& extboard, json& performingUnits, json& relaysGroups, json& payme
 	_mspi->enableInt();	
 }
 
+bool getState() {
+	return _isInit;
+}
+
 /* Light control */
 void startLightEffect(int id, int index) {
 	Handle h;
@@ -1358,7 +1415,7 @@ void startLightEffect(SpecEffect effect, int index) {
 void resetLightEffect(int index) {
 	Handle h;
 	h.type = HandleType::RESET_EFFECT;
-	h.data[0] = index;\
+	h.data[0] = index;
 	_fifomutex.lock();
 	fifo_put(&_operations, &h);
 	_fifomutex.unlock();
@@ -1430,7 +1487,8 @@ void registerOnErrorHandler(void (*handler)(ErrorType et, string text)) {
 	_onError = handler;
 }
 
-void restoreMoney() {
+void restoreMoney(void (*cplt)()) {
+	_moneyrestcplt = cplt; 
 	Handle h;
 	h.type = HandleType::MONEY_CTRL;
 	h.data[0] = 1;

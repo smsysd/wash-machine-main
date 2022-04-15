@@ -57,6 +57,8 @@ namespace extboard {
 
 	void init(json& extboard, json& performingUnits, json& relaysGroups, json& payment, json& buttons, json& rangeFinder, json& tempSens, json& leds, json& effects, json& specEffects, json& releiveInstructions, Logger* log);
 	
+	bool getState();
+
 	/* Light control no exceptions */
 	void startLightEffect(int id, int index);
 	void startLightEffect(SpecEffect effect, int index);
@@ -78,7 +80,7 @@ namespace extboard {
 	void registerOnErrorHandler(void (*handler)(ErrorType et, string text));
 
 	/* * * Advanced money control * * */
-	void restoreMoney(); // Restore money from backup registers
+	void restoreMoney(void (*cplt)()); // Restore money from backup registers
 	void dropMoney(); // Clear backup money registers
 }
 

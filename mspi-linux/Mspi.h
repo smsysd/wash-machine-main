@@ -26,6 +26,7 @@ public:
 	void registerCallback(int reason, void (*callback)());
 	void enableInt();
 	void disableInt();
+	void setTimeout(int timeoutMs);
 
 private:
     enum class OB {
@@ -45,7 +46,7 @@ private:
 		void (*function)();
 	};
 
-	const int timeOutMs = 1000;
+	int timeOutMs = 1000;
 
     int _fd;
 	int _delay;

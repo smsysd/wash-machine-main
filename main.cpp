@@ -171,6 +171,7 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 
 void onQr(const char* qr) {
 	bonus::CardInfo newcard;
+	render::showFrame(render::SpecFrame::SERVER_CONNECT);
 	bonus::Result rc = bonus::info(newcard, qr);
 	if (rc == bonus::Result::OK) {
 		_handleCard(newcard);
@@ -192,7 +193,7 @@ void onCard(uint64_t cardid) {
 		_handleCard(newcard, true);
 		return;
 	}
-
+	render::showFrame(render::SpecFrame::SERVER_CONNECT);
 	bonus::Result rc = bonus::info(newcard, cardid);
 	if (rc == bonus::Result::OK) {
 		_handleCard(newcard);

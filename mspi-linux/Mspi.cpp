@@ -197,6 +197,10 @@ void Mspi::disableInt() {
 	_enableInt = false;
 }
 
+void Mspi::setTimeout(int timeoutMs) {
+	timeOutMs = timeoutMs;
+}
+
 int Mspi::_getIntReason() {
 	uint8_t data[6] = {0};
 	data[0] = (uint8_t)OB::INTR;

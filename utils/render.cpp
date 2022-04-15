@@ -79,6 +79,7 @@ namespace {
 	int _repairFrame = -1;
 	int _nomoneyFrame = -1;
 	int _waitFrame = -1;
+	int _serverConnectFrame = -1;
 	int _disconnectBg = -1;
 	int _disconnectFrameTimeout = -1;
 	char _encode[32] = {0};
@@ -184,7 +185,7 @@ namespace {
 						_pushedRedraw = false;
 						i = _redrawBorehole + 1;
 					} else {
-						if (time(NULL) - tf.tBegin >= tf.tShow) {
+						if (time(NULL) - tf.tBegin >= tf.tShow && tf.tShow > 0) {
 							_tempFrameQueue.pop();
 							if (_tempFrameQueue.size() == 0) {
 								_currentRenderingFrame = _renderingFrame;
@@ -419,6 +420,9 @@ void _init_ledmatrix() {
 	}
 
 	lminit:
+	if (_lm != nullptr) {
+		delete _lm;
+	}
 	try {
 		_lm = new LedMatrix(addr, driver, br, dp);
 	} catch (exception& e) {
@@ -430,6 +434,7 @@ void _init_ledmatrix() {
 	// prepare fonts
 	cout << "[INFO][RENDER] prepare fonts.." << endl;
 	json fonts = _renderData->get("fonts");
+	int tries = 0;
 	prepfont:
 	for (int i = 0; i < fonts.size(); i++) {
 		try {
@@ -445,6 +450,10 @@ void _init_ledmatrix() {
 		} catch (exception& e) {
 			cout << "fail to prepare font " << i << ": " << e.what() << endl;
 			sleep(10);
+			tries++;
+			if (tries > 10) {
+				goto lminit;
+			}
 			goto prepfont;
 		}
 	}
@@ -452,6 +461,7 @@ void _init_ledmatrix() {
 	// prepare blocks
 	cout << "[INFO][RENDER] prepre blocks.." << endl;
 	json bg = _renderData->get("backgrounds");
+	tries = 0;
 	prepbg:
 	for (int i = 0; i < bg.size(); i++) {
 		try {
@@ -465,10 +475,15 @@ void _init_ledmatrix() {
 		} catch (exception& e) {
 			cout << "fail to prepare block " << i << ": " << e.what() << endl;
 			sleep(10);
+			tries++;
+			if (tries > 10) {
+				goto lminit;
+			}
 			goto prepbg;
 		}
 	}
 	
+	tries = 0;
 	setaclear:
 	try {
 		if (_disconnectBg >= 0 && _disconnectFrameTimeout > 0) {
@@ -481,6 +496,10 @@ void _init_ledmatrix() {
 	} catch (exception& e) {
 		cout << "fail to reset display: " << e.what() << endl;
 		sleep(10);
+		tries++;
+		if (tries > 10) {
+			goto lminit;
+		}
 		goto setaclear;
 	}
 
@@ -541,6 +560,11 @@ void _assertSpecFrames() {
 	} catch (exception& e) {
 		throw runtime_error("no wait frame (" + to_string(_waitFrame) + ") in frames");
 	}
+	try {
+		_getFrame(_serverConnectFrame);
+	} catch (exception& e) {
+		throw runtime_error("no 'server-connect' frame (" + to_string(_serverConnectFrame) + ") in frames");
+	}
 }
 
 }
@@ -549,6 +573,12 @@ void init(json& displaycnf) {
 	// get necessary config fields
 	cout << "[INFO][RENDER] get necessary config fields.." << endl;
 	_type = JParser::getf(displaycnf, "type", "display");
+	bool blockinit;
+	try {
+		blockinit = JParser::getf(displaycnf, "blockinit", "display");
+	} catch (exception& e) {
+		blockinit = true;
+	}
 	_renderData = new JParser("./config/frames.json");
 	json specFrames = _renderData->get("spec-frames");
 	_config = displaycnf;
@@ -563,12 +593,17 @@ void init(json& displaycnf) {
 	_repairFrame = JParser::getf(specFrames, "repair", "spec-frames");
 	_nomoneyFrame = JParser::getf(specFrames, "nomoney", "spec-frames");
 	_waitFrame = JParser::getf(specFrames, "wait", "spec-frames");
+	_serverConnectFrame = JParser::getf(specFrames, "server-connect", "spec-frames");
 
 	if (_type == "none") {
 		return;
 	}
 	if (_type == "ledmatrix") {
-		_init_ledmatrix();
+		if (blockinit) {
+			_init_ledmatrix();
+		} else {
+			new thread(_init_ledmatrix);
+		}
 	} else
 	if (_type == "std") {
 		throw runtime_error("'std' display type still not supported");
@@ -592,6 +627,7 @@ void showFrame(SpecFrame frame) {
 	case SpecFrame::REPAIR: f = _repairFrame; break;
 	case SpecFrame::NOMONEY: f = _nomoneyFrame; break;
 	case SpecFrame::WAIT: f = _waitFrame; break;
+	case SpecFrame::SERVER_CONNECT: f = _serverConnectFrame; break;
 	}
 
 	try {
@@ -626,6 +662,7 @@ void showTempFrame(SpecFrame frame, int tSec) {
 	case SpecFrame::REPAIR: f = _repairFrame; break;
 	case SpecFrame::NOMONEY: f = _nomoneyFrame; break;
 	case SpecFrame::WAIT: f = _waitFrame; break;
+	case SpecFrame::SERVER_CONNECT: f = _serverConnectFrame; break;
 	}
 	
 	try {
@@ -642,6 +679,17 @@ void showTempFrame(int idFrame, int tSec) {
 	tf.tShow = tSec;
 	tf.tBegin = 0;
 	_tempFrameQueue.push(tf);
+}
+
+void dropTempFrame() {
+	if (!_state) {return;}
+	if (_tempFrameQueue.size() > 0) {
+		_tempFrameQueue.pop();
+		if (_tempFrameQueue.size() == 0) {
+			_currentRenderingFrame = _renderingFrame;
+			_pushedRedraw = true;
+		}
+	}
 }
 
 void redraw() {

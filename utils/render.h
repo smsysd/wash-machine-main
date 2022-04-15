@@ -20,7 +20,8 @@ namespace render {
 		GIVE_MONEY_BONUS,
 		SERVICE,
 		NOMONEY,
-		WAIT
+		WAIT,
+		SERVER_CONNECT
 	};
 	enum DisplayType {
 		LEDMATRIX,
@@ -39,8 +40,11 @@ namespace render {
 	void init(json& displaycnf);
 	void showFrame(SpecFrame frame);
 	void showFrame(int idFrame);
+
+	/* * * Show frame for a few seconds, if tSec = 0 - frame showing while call dropTempFrame * * */
 	void showTempFrame(SpecFrame frame, int tSec);
 	void showTempFrame(int idFrame, int tSec);
+	void dropTempFrame();
 
 	void redraw();
 
