@@ -575,7 +575,7 @@ void init(json& displaycnf) {
 	_type = JParser::getf(displaycnf, "type", "display");
 	bool blockinit;
 	try {
-		blockinit = JParser::getf(displaycnf, "blockinit", "display");
+		blockinit = JParser::getf(displaycnf, "block-init", "display");
 	} catch (exception& e) {
 		blockinit = true;
 	}
