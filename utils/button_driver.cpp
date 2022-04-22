@@ -2,11 +2,13 @@
 #include "../extboard/ExtBoard.h"
 #include "../json.h"
 #include "../jparser-linux/JParser.h"
+#include "../linux-ipc/ipc.h"
 
 #include <iostream>
 #include <vector>
 #include <string>
 #include <stdint.h>
+#include <unistd.h>
 
 using namespace std;
 using json = nlohmann::json;
@@ -16,6 +18,7 @@ namespace button_driver {
 namespace {
 	vector<Button> _buttons;
 	void (*_onButtonPushed)(const Button& button);
+	IpcServer _ipcsrv;
 
 	void _onExtboardButton(int iButton) {
 		Button::Type type;
@@ -55,7 +58,7 @@ namespace {
 	}
 }
 
-void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
+void init(json& buttons, json& hwbuttons, void (*onButtonPushed)(const Button& button)) {
 	for (int i = 0; i < buttons.size(); i++) {
 		try {
 			Button b;
@@ -79,9 +82,9 @@ void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
 					throw runtime_error("'bm' must be in [0:7]");
 				}
 			} else
-			if (type == "touch") {
-				b.type = Button::Type::TOUCH;
-				throw runtime_error("type 'touch' still not supported");
+			if (type == "nwjs") {
+				b.type = Button::Type::NWJS;
+				b.name = JParser::getf(buttons[i], "name", "");
 			} else {
 				throw runtime_error("unkown type '" + type + "'");
 			}
@@ -114,6 +117,19 @@ void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
 
 	_onButtonPushed = onButtonPushed;
 	extboard::registerOnButtonPushedHandler(_onExtboardButton);
+}
+
+void _onNwjsButton(const char* n) {
+	string name(n);
+	Button::Type type = Button::Type::NWJS;
+	for (int i = 0; i < _buttons.size(); i++) {
+		if (_buttons[i].type == type) {
+			if (_buttons[i].name == name) {
+				cout << "[INFO][BUTTON] button " << _buttons[i].id << " pushed" << endl;
+				_onButtonPushed(_buttons[i]);
+			}
+		}
+	}
 }
 
 }

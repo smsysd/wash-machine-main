@@ -6,6 +6,8 @@
 #include "../font-linux/Font.h"
 #include "../BMP.h"
 #include "../logger-linux/Logger.h"
+#include "../linux-ipc/ipc.h"
+#include "./button_driver.h"
 
 #include <queue>
 #include <sstream>
@@ -20,6 +22,7 @@
 #include <locale>
 #include <unistd.h>
 #include <time.h>
+#include <fstream>
 
 using namespace std;
 
@@ -42,6 +45,7 @@ namespace {
 		LedMatrix::Mode mode;
 		wstring format;
 		vector<Var> vars;
+		string html;
 	};
 	struct TempFrame {
 		Frame* frame;
@@ -51,15 +55,22 @@ namespace {
 
 	thread* _genth = nullptr;
 	thread* _initthread = nullptr;
-	LedMatrix* _lm;
+	LedMatrix* _lm = nullptr;
 	vector<Var> _vars;
 	vector<Frame> _lmframes;
+	vector<Frame> _nwjsframes;
 	int defFont;
 	uint8_t defColor;
 	uint8_t defX;
 	uint8_t defY;
 	LedMatrix::Mode defMode;
 	string _type;
+	string _nwjs_sock;
+	string _main_sock;
+	string _nwjs_dir;
+	IpcServer _nwjsSrv;
+	thread* _nwjsth = nullptr;
+	char _nwjsbuf[128];
 	
 	Frame* _currentRenderingFrame = nullptr;
 	Frame* _renderingFrame = nullptr;
@@ -89,11 +100,13 @@ namespace {
 
 	JParser* _renderData;
 	json _config;
+	Logger* _log;
 
 	int _parse(wstring& s, int b, Frame& f);
 	int _parseCtrl(wstring& s, int b, Frame& f);
 	void _assertSpecFrames();
 	void _init_ledmatrix();
+	void _init_nwjs();
 
 	template<typename T>
 	bool _is_contain(vector<T> vec, T val) {
@@ -118,6 +131,36 @@ namespace {
 		std::wstring_convert<convert_typeX, wchar_t> converterX;
 
 		return converterX.to_bytes(wstr);
+	}
+
+	void _nwjsredraw() {
+		char buf[256] = {0};
+		int nData;
+
+		// Send vars
+		json vars;
+		for (int i = 0; i < _vars.size(); i++) {
+			if (_vars[i].type == VarType::FLOAT) {
+				double dv = *((const double*)_vars[i].var);
+				int iv = (int)ceil(dv);
+				nData = sprintf(buf, "v%s:%i", _ws2s(_vars[i].name).c_str(), iv);
+			} else 
+			if (_vars[i].type == VarType::INT) {
+				nData = sprintf(buf, "v%s:%i", _ws2s(_vars[i].name).c_str(), *((const int*)_vars[i].var));
+			} else
+			if (_vars[i].type == VarType::STRING) {
+				nData = sprintf(buf, "v%s:%s", _ws2s(_vars[i].name).c_str(), (const char*)_vars[i].var);
+			}
+			if (ipc_send(_nwjs_sock.c_str(), buf, nData) != 0) {
+				throw runtime_error("fail to send draw data to nwjs process");
+			};
+		}
+
+		// Send frame
+		nData = sprintf(buf, "f%s", _currentRenderingFrame->html.c_str());
+		if (ipc_send(_nwjs_sock.c_str(), buf, nData) != 0) {
+			throw runtime_error("fail to send draw data to nwjs process");
+		}
 	}
 
 	void _lmredraw() {
@@ -166,8 +209,7 @@ namespace {
 		if (_lm != nullptr) {
 			_lmredraw();
 		} else {
-			sleep(5);
-			throw runtime_error ("std redraw still not supported");
+			_nwjsredraw();
 		}
 	}
 
@@ -182,10 +224,10 @@ namespace {
 						_currentRenderingFrame = tf.frame;
 						tf.tBegin = time(NULL);
 						_redraw();
+						if (time(NULL) - tf.tBegin >= tf.tShow && tf.tShow > 0) {
 						_pushedRedraw = false;
 						i = _redrawBorehole + 1;
 					} else {
-						if (time(NULL) - tf.tBegin >= tf.tShow && tf.tShow > 0) {
 							_tempFrameQueue.pop();
 							if (_tempFrameQueue.size() == 0) {
 								_currentRenderingFrame = _renderingFrame;
@@ -207,12 +249,17 @@ namespace {
 				suspicion = 0;
 			} catch (exception& e) {
 				suspicion++;
-				cout << "[WARNING][RENDER]|HANDLER| " << e.what() << endl;
+				_log->log(Logger::Type::WARNING, "RENDER", string(e.what()), 5);
 				usleep(10000);
 				if (suspicion > 3) {
-					cout << "[ERROR][RENDER]|HANDLER| display fault 3 times, reinit.." << endl;
+					_log->log(Logger::Type::ERROR, "RENDER",  "display fault 3 times, reinit..", 5);
 					_state = false;
-					_initthread = new thread(_init_ledmatrix);
+					if (_type == "ledmatrix") {
+						_initthread = new thread(_init_ledmatrix);
+					} else
+					if (_type == "nwjs") {
+						_initthread = new thread(_init_nwjs);
+					}
 					return;
 				}
 			}
@@ -220,12 +267,25 @@ namespace {
 	}
 
 	Frame* _getFrame(int id) {
-		for (int i = 0; i < _lmframes.size(); i++) {
-			if (_lmframes[i].id == id) {
-				return & _lmframes[i];
+		if (_type == "ledmatrix") {
+			for (int i = 0; i < _lmframes.size(); i++) {
+				if (_lmframes[i].id == id) {
+					return & _lmframes[i];
+				}
 			}
+			throw runtime_error("ledmatrix frame '" + to_string(id) + "' not found");
+		} else
+		if (_type == "nwjs") {
+			// cout << "[DEBUG][RENDER] find nwjs frame " << id << ".." << endl;
+			for (int i = 0; i < _nwjsframes.size(); i++) {
+				if (_nwjsframes[i].id == id) {
+					return & _nwjsframes[i];
+				}
+			}
+			throw runtime_error("nwjs frame '" + to_string(id) + "' not found");
+		} else {
+			throw runtime_error("fail get frame '" + to_string(id) + "' unknown display type");
 		}
-		throw runtime_error("ledmatrix frame '" + to_string(id) + "' not found");
 	}
 
 	Var& _getVar(wstring name) {
@@ -256,7 +316,6 @@ namespace {
 		}
 		return i - b;
 	}
-
 	int _parseCtrl(wstring& s, int b, Frame& f) {
 		if (s[b] != '{') {
 			return 0;
@@ -508,6 +567,77 @@ void _init_ledmatrix() {
 	_genth = new thread(_handler);
 }
 
+void _onNwjs(int sock) {
+	cout << "[DEBUG][RENDER] nwjs message" << endl;
+	_state = true;
+	int rc = read(sock, _nwjsbuf, sizeof(_nwjsbuf));
+	if (rc > 0) {
+		_nwjsbuf[rc] = 0;
+		if (_nwjsbuf[0] == 'b') {
+			button_driver::_onNwjsButton(&_nwjsbuf[1]);
+		}
+	}
+}
+
+void _nwjs_thread() {
+	char buf[128] = {0};
+	sprintf(buf, "nw %s %s %s", _nwjs_dir.c_str(), _main_sock.c_str(), _nwjs_sock.c_str());
+	cout << "[DEBUG][RENDER] run nwjs-app as " << buf << endl;
+	while (1) {
+		system("sudo pkill nw");
+		system(buf);
+		_log->log(Logger::Type::WARNING, "RENDER", "nwjs app was terminate");
+		sleep(5);
+	}
+}
+
+void _init_nwjs() {
+	cout << "[INFO][RENDER] display type is 'nwjs'" << endl;	
+
+	// parse general options
+	cout << "[INFO][RENDER] parse general options.." << endl;
+	json option = _renderData->get("general-option");
+
+	// Assert all frames has 'html' fild and html file exists
+	cout << "[INFO][RENDER] load frames.." << endl;
+	json frames = _renderData->get("frames");
+	for (int i = 0; i < frames.size(); i++) {
+		try {
+			Frame f;
+			f.id = JParser::getf(frames[i], "id", "");
+			f.html = JParser::getf(frames[i], "html", "");
+			ifstream hf(("./config/html/" + f.html));
+			if (!hf.good()) {
+				throw runtime_error("html file does not exists");
+			}
+			_nwjsframes.push_back(f);
+		} catch (exception& e) {
+			_log->log(Logger::Type::WARNING, "RENDER", "fail to load frame " + to_string(i) + ": " + string(e.what()), 6);
+		}
+	}
+	_assertSpecFrames();
+
+	// Run nwjs app
+	_nwjs_sock = JParser::getf(_config, "nwjs-socket", "display");
+	_main_sock = JParser::getf(_config, "main-socket", "display");
+	_nwjs_dir = JParser::getf(_config, "nwjs-app", "display");
+	int rc = ipc_server(&_nwjsSrv, _main_sock.c_str(), 3, _onNwjs);
+	if (rc != 0) {
+		throw runtime_error("fail to create nwjs2main scoket: " + to_string(rc));
+	}
+	if (_nwjsth != nullptr) {
+		delete _nwjsth;
+	}
+	_nwjsth = new thread(_nwjs_thread);
+	
+	while (!_state) {
+		usleep(2000);
+	}
+
+	cout << "[INFO][RENDER] start handler.." << endl;
+	_genth = new thread(_handler);
+}
+
 void _assertSpecFrames() {
 	cout << "[INFO][RENDER] assert spec frames.." << endl;
 	try {
@@ -569,8 +699,9 @@ void _assertSpecFrames() {
 
 }
 
-void init(json& displaycnf) {
+void init(json& displaycnf, Logger* log) {
 	// get necessary config fields
+	_log = log;
 	cout << "[INFO][RENDER] get necessary config fields.." << endl;
 	_type = JParser::getf(displaycnf, "type", "display");
 	bool blockinit;
@@ -605,8 +736,12 @@ void init(json& displaycnf) {
 			new thread(_init_ledmatrix);
 		}
 	} else
-	if (_type == "std") {
-		throw runtime_error("'std' display type still not supported");
+	if (_type == "nwjs") {
+		if (blockinit) {
+			_init_nwjs();
+		} else {
+			new thread(_init_nwjs);
+		}
 	} else {
 		throw runtime_error("unknown display type '" + _type + "'");
 	}

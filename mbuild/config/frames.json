@@ -19,7 +19,8 @@
 		"repair": 6,
 		"service": 8,
 		"nomoney": 7,
-		"wait": 9
+		"wait": 9,
+		"server-connect": 201
 	},
 
 	"frames": [
@@ -29,7 +30,9 @@
 			"bg": 1,
 			"mode": "center",
 			"color": 7,
-			"lines": []
+			"lines": [],
+
+			"html": "logo.html"
 		},
 		{
 			"id": 1,
@@ -40,7 +43,9 @@
 			"lines": [
 				"ВНЕСИТЕ",
 				"ДЕНЬГИ"
-			]
+			],
+
+			"html": "give_money.html"
 		},
 		{
 			"id": 2,
@@ -52,7 +57,9 @@
 				"$gbonus%",
 				"ВНЕСИТЕ",
 				"ДЕНЬГИ"
-			]
+			],
+
+			"html": "give_money_bonus.html"
 		},
 		{
 			"id": 3,
@@ -64,7 +71,9 @@
 				"ОШИБКА",
 				"БОНУСНОЙ",
 				"СИСТЕМЫ"
-			]
+			],
+
+			"html": "error_bonus.html"
 		},
 		{
 			"id": 4,
@@ -76,7 +85,9 @@
 				"ОШИБКА",
 				"$errort",
 				"$errord"
-			]
+			],
+
+			"html": "error.html"
 		},
 		{
 			"id": 5,
@@ -87,7 +98,9 @@
 			"lines": [
 				"КАРТА   НЕ",
 				"НАЙДЕНА"
-			]
+			],
+
+			"html": "card_not_found.html"
 		},
 		{
 			"id": 6,
@@ -98,7 +111,9 @@
 			"lines": [
 				"ТЕХ.",
 				"РАБОТЫ"
-			]
+			],
+
+			"html": "repair.html"
 		},
 		{
 			"id": 7,
@@ -109,7 +124,9 @@
 			"lines": [
 				"НЕТ",
 				"СРЕДСТВ"
-			]
+			],
+
+			"html": "no_money.html"
 		},
 		{
 			"id": 8,
@@ -120,7 +137,9 @@
 			"lines": [
 				"",
 				"СЕРВИС"
-			]			
+			],
+
+			"html": "service.html"
 		},
 		{
 			"id": 9,
@@ -131,7 +150,20 @@
 			"lines": [
 				"НАЖМИТЕ",
 				"КНОПКУ"
-			]			
+			],
+			"html": "wait.html"		
+		},
+		{
+			"id": 201,
+			"font": 1,
+			"bg": "none",
+			"mode": "center",
+			"color": 7,
+			"lines": [
+				"СОЕДИНЕНИЕ",
+				"ОЖИДАЙТЕ"
+			],
+			"html": "server_connect.html"		
 		},
 		{
 			"id": 10,
@@ -143,7 +175,8 @@
 				"ВЫБЕРИТЕ",
 				"ПРОГРАММУ",
 				"$money"
-			]
+			],
+			"html": "choose.html"
 		},
 		{
 			"id": 11,
@@ -155,7 +188,8 @@
 				"ВЫБЕРИТЕ",
 				"ПРОГРАММУ",
 				"{c5:$money}"
-			]
+			],
+			"html": "choose.html"
 		},
 		{
 			"id": 12,
@@ -166,7 +200,8 @@
 			"lines": [
 				"ПАУЗА",
 				"$money Р.   {c1:$rfut}"
-			]
+			],
+			"html": "pause.html"
 		},
 		{
 			"id": 13,
@@ -177,7 +212,8 @@
 			"lines": [
 				"ПАУЗА",
 				"{c5:$money Р.}    {c1:$rfut}"
-			]
+			],
+			"html": "pause.html"
 		},
 		{
 			"id": 14,
@@ -190,7 +226,8 @@
 				"",
 				"ВОДА",
 				"$money"
-			]
+			],
+			"html": "water.html"
 		},
 		{
 			"id": 15,
@@ -203,7 +240,8 @@
 				"",
 				"ВОДА",
 				"{c5:$money}"
-			]
+			],
+			"html": "water.html"
 		},
 		{
 			"id": 16,

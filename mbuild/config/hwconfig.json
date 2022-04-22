@@ -33,11 +33,15 @@
 	],
 
 	"display": {
-		"type": "ledmatrix",
+		"type": "nwjs",
+		"nwjs-app": "./nwjs-render",
+		"nwjs-socket": "/home/elpi/wash-machine-main/2nwjs.socket",
+		"main-socket": "/home/elpi/wash-machine-main/2main.socket",
+
 		"address": 64,
 		"dir-pin": 6,
 		"driver": "/dev/ttyS5",
-		"baud-rate": 115200,
+		"baud-rate": 9600,
 		"handler-delay": 10000,
 		"redraw-borehole": 500
 	},

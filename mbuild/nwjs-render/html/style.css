@@ -1,0 +1,19 @@
+body {
+	text-align: center;
+	font-size: larger;
+	font-family: 'Courier New', Courier, monospace;
+	/* background-image: "url(file:./bg.jpg)"; */
+	background-color: lavender;
+}
+
+input[type="button"] {
+	padding: .5em 1em;
+	border-radius: 3px;
+	border: solid red 2px;
+	background-color: antiquewhite;
+}
+.test {
+	text-shadow: 5px;
+	font-size: 2em;
+	color: maroon;
+}

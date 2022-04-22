@@ -265,6 +265,9 @@ namespace {
 
 	void _softTerminate() {
 		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal");
+		if (!_normalwork) {
+			return;
+		}
 		while (mode != Mode::GIVE_MONEY && mode != Mode::WAIT) {
 			usleep(10000);
 		}
@@ -456,7 +459,7 @@ void init(
 		json& display = _hwconfig->get("display");
 		string rendtype = JParser::getf(display, "type", "hwdisplay");
 		if (rendtype != "none") {
-			render::init(display);
+			render::init(display, _log);
 			render::regVar(&_nMoney, L"money", 0);
 			render::regVar(&_session.k100, L"sbonus");
 			render::regVar(&_session.rk100, L"srbonus");
@@ -512,7 +515,8 @@ void init(
 	try {
 		cout << "[INFO][UTILS] init button driver.." << endl;
 		json& buttons = _config->get("buttons");
-		bd::init(buttons, onButtonPushed);
+		json& hwbuttons = _hwconfig->get("buttons");
+		bd::init(buttons, hwbuttons, onButtonPushed);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "BUTTON", "fail to init button driver: " + string(e.what()));
 		exit(-4);

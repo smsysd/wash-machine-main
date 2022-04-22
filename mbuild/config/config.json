@@ -44,7 +44,9 @@
 		{"id": 0, "type": "eb", "index": 0, "purpose": "end"},
 		{"id": 1, "type": "bm", "bm": 0, "index": 4, "purpose": "program", "program": 1, "service-program": 2},
 		{"id": 2, "type": "bm", "bm": 1, "index": 4, "purpose": "program", "program": 2, "service-program": 2},
-		{"id": 3, "type": "bm", "bm": 2, "index": 4, "purpose": "program", "program": 3, "service-program": 5}
+		{"id": 3, "type": "bm", "bm": 2, "index": 4, "purpose": "program", "program": 3, "service-program": 5},
+		{"id": 11, "type": "nwjs", "name": "pause", "purpose": "program", "program": 1},
+		{"id": 12, "type": "nwjs", "name": "water", "purpose": "program", "program": 2}
 	],
 
 	"cards": [

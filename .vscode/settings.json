@@ -4,6 +4,12 @@
 		"ostream": "cpp",
 		"cmath": "cpp",
 		"iostream": "cpp",
-		"optional": "cpp"
+		"optional": "cpp",
+		"*.tcc": "cpp",
+		"unordered_map": "cpp",
+		"fstream": "cpp",
+		"istream": "cpp",
+		"numeric": "cpp",
+		"sstream": "cpp"
 	}
 }

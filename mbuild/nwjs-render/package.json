@@ -1,0 +1,16 @@
+{
+    "name": "nwjs-render",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.html",
+    "nodejs": true,
+    "author": "elpi",
+    "window": {
+      "kiosk": true
+    },
+    "chromium-args": "--mixed-context --disable-devtools",
+    "license": "ISC",
+    "dependencies": {
+      
+    }
+  }

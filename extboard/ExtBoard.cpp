@@ -573,12 +573,6 @@ namespace {
 		return pays;
 	}
 
-	void _put_cash(double nMoney) {
-		ofstream f("./.cash", ios_base::app);
-		f << nMoney << endl;
-		f.close();
-	}
-
 	void _getErrorAndThrow() {
 		uint8_t buf[128];
 		memset(buf, 0, sizeof(buf));

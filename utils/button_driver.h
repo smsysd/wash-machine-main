@@ -21,8 +21,9 @@ struct Button {
 	enum class Type {
 		EB,
 		BM,
-		TOUCH
+		NWJS
 	};
+	string name;
 	Purpose purpose;
 	Type type;
 	int id;
@@ -32,7 +33,9 @@ struct Button {
 	int serviceProg;
 };
 
-void init(json& buttons, void (*onButtonPushed)(const Button& button));
+void init(json& buttons, json& hwbuttons, void (*onButtonPushed)(const Button& button));
+
+void _onNwjsButton(const char* name);
 
 }
 

@@ -1,8 +1,8 @@
 {
     "version": [
         0,
-        7,
-        11
+        8,
+        0
     ],
     "repository": "bitbucket.org/sm-sys/wash-machine-main",
     "type": "exec"

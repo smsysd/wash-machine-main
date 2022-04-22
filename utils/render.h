@@ -4,6 +4,7 @@
 
 #include "../json.h"
 #include "../jparser-linux/JParser.h"
+#include "../logger-linux/Logger.h"
 
 #include <stdint.h>
 
@@ -37,7 +38,7 @@ namespace render {
 	void regVar(const double* var, wstring name, int precision);
 	void regVar(const char* var, wstring name);
 
-	void init(json& displaycnf);
+	void init(json& displaycnf, Logger* log);
 	void showFrame(SpecFrame frame);
 	void showFrame(int idFrame);
 
