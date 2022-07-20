@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "../extboard/ExtBoard.h"
+#include "../perf/Perf.h"
 #include "../general-tools/general_tools.h"
 #include "../jparser-linux/JParser.h"
 #include "../logger-linux/Logger.h"
@@ -505,9 +506,23 @@ void init(
 			}
 		}
 		extboard::registerOnErrorHandler(_extboardError);
-		extboard::init(extBoardCnf, performingUnitsCnf, relaysGroups, payment, buttons, rangeFinder, tempSens, ledsCnf, effects, specef, relIns, _log);
+		extboard::init(extBoardCnf, payment, buttons, ledsCnf, effects, specef, _log);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
+		exit(-3);
+	}
+
+	// performers init
+	cout << "[INFO][UTILS] init perf unit.." << endl;
+	try {
+		json& perfGen = _hwconfig->get("performing-gen");
+		json& relaysGroups = _config->get("relays-groups");
+		json& performingUnitsCnf = _hwconfig->get("performing-units");
+		json& relIns = _hwconfig->get("releive-instructions");
+		json& payment = _hwconfig->get("payment");
+		perf::init(perfGen, performingUnitsCnf, relaysGroups, relIns, _log);
+	} catch (exception& e) {
+		_log->log(Logger::Type::ERROR, "PERF", "fail to init performing units: " + string(e.what()));
 		exit(-3);
 	}
 
@@ -593,8 +608,8 @@ void setGiveMoneyMode() {
 	bool isBonus = false;
 	extboard::startLightEffect(extboard::SpecEffect::GIVE_MONEY_EFFECT, 0);
 	extboard::flap(true);
-	extboard::setRelayGroup(0);
-	extboard::relievePressure();
+	perf::setRelayGroup(0);
+	perf::relievePressure();
 	render::SpecFrame f = render::SpecFrame::GIVE_MONEY;
 	if (bonus::getCoef() > 1) {
 		f = render::SpecFrame::GIVE_MONEY_BONUS;
@@ -612,7 +627,7 @@ void setGiveMoneyMode() {
 }
 
 void setWaitMode() {
-	extboard::setRelayGroup(0);
+	perf::setRelayGroup(0);
 	extboard::startLightEffect(extboard::SpecEffect::WAIT, 0);
 	extboard::flap(false);
 	render::showFrame(render::SpecFrame::WAIT);
@@ -625,7 +640,7 @@ void setServiceMode() {
 	if (_terminate) {
 		return;
 	}
-	extboard::setRelayGroup(0);
+	perf::setRelayGroup(0);
 	extboard::flap(false);
 	render::showFrame(render::SpecFrame::SERVICE);
 
@@ -658,9 +673,9 @@ void setProgram(int id) {
 
 	extboard::startLightEffect(p->effect, 0);
 	extboard::flap(p->flap);
-	extboard::setRelayGroup(p->relayGroup);
+	perf::setRelayGroup(p->relayGroup);
 	if (p->releivePressure && _currentProgram != previous) {
-		extboard::relievePressure();
+		perf::relievePressure();
 	}
 	_tRemainFreeUseTime = _programs[_currentProgram].freeUseTimeSec - _programs[_currentProgram].useTimeSec;
 	if (_tRemainFreeUseTime < 0) {
@@ -694,7 +709,7 @@ void setServiceProgram(int id) {
 	}
 
 	extboard::startLightEffect(p->effect, 0);
-	extboard::setRelayGroup(p->relayGroup);
+	perf::setRelayGroup(p->relayGroup);
 	render::showFrame(p->frame);
 
 	cout << "[INFO][UTILS] service program '" << p->name << "' set" << endl;

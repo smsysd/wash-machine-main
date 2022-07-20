@@ -12,4 +12,4 @@ echo $VER
 fi
 
 git commit -a -m "$VER"
-git push
+git push origin feature/board2
