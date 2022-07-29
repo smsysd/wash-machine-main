@@ -97,7 +97,7 @@ namespace {
 	mutex _fifomutex;
 	int _maxHandleErrors = 5;
 	Logger* _log;
-	bool _isInit;
+	int _fail_perf_addr = 0;
 
 	uint64_t _collectn(uint8_t* src, int nb) {
 		uint64_t val = 0;
@@ -137,24 +137,28 @@ namespace {
 		int buf[256];
 		int suspicion = 0;
 		int borehole = 0;
+		int perf_addr = 0;
 		while (true) {
 			_mutex.lock();
 			try {
 				Handle* h = (Handle*)fifo_get(&_operations);
-				if (h != nullptr) {
-					cout << "[INFO][PERF] handling " << (int)h->type << ", total fifo size " << _operations.nElements << endl;
-				}
 				if (h == nullptr) {
 					usleep(10000);
 				} else
 				if (h->type == HandleType::DIRECT_SET_RELAYS) {
+					// cout << "[INFO][PERF] handling DIRECT_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
 					buf[0] = h->data[1];
+					perf_addr = h->data[0];
 					_mb->rwrite(h->data[0], 0x13, buf, 1, 500);
 
 					_fifomutex.lock();
 					fifo_pop(&_operations);
 					_fifomutex.unlock();
 					suspicion = 0;
+					if (perf_addr == _fail_perf_addr) {
+						cout << "PERF REPAIR " << perf_addr << endl;
+						_fail_perf_addr = 0;
+					}
 				} else
 				if (h->type == HandleType::DELAY) {
 					usleep((h->data[0] << 8) + h->data[1]);
@@ -166,21 +170,20 @@ namespace {
 					_fifomutex.lock();
 					fifo_pop(&_operations);
 					_fifomutex.unlock();
-					_log->log(Logger::Type::WARNING, "EXTBOARD", "undefined handle: " + to_string((int)h->type), 4);
+					_log->log(Logger::Type::WARNING, "PERF", "undefined handle: " + to_string((int)h->type), 4);
 				}
 			} catch (exception& e) {
-				_log->log(Logger::Type::WARNING, "PERF", "fail handle: " + string(e.what()), 4);
+				_log->log(Logger::Type::WARNING, "PERF", "fail handle: " + string(e.what()), 6);
 				suspicion++;
 				usleep(200000);
 			}
 			_mutex.unlock();
 			if (suspicion > _maxHandleErrors) {
 				suspicion = 0;
-				_isInit = false;
-				_log->log(Logger::Type::WARNING, "EXTBOARD", "extboard was not responding at commands - reinit..", 3);
-				// _onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
+				_fail_perf_addr = perf_addr;
+				_log->log(Logger::Type::ERROR, "PERF", "performer was not responding at commands", 1);
 			}
-			if (borehole % 1000 == 0) {
+			if (borehole % 100 == 0) {
 				// add repetive handles
 				if (_currentRelayGroupId >= 0) {
 					setRelayGroup(_currentRelayGroupId);
@@ -270,16 +273,24 @@ void init(json& performingGen, json& performingUnits, json& relaysGroups, json& 
 	}
 
 	cout << "[INFO][PERF] init performers.." << endl;
-	_mb = new MbAsciiMaster(-1, driver.c_str(), B9600);
+	_mb = new MbAsciiMaster(-1, driver.c_str(), B9600, false);
 
 
 	for (int i = 0; i < _performersu.size(); i++) {
 		while (true) {
 			try {
+				cout << "performer " << i << " config = addr: " << _performersu[i].addr << " normalst: " << _performersu[i].normalStates << " dep: ";
+				for (int j = 0; j < 6; j++) {
+					cout << _performersu[i].dependencies[j] << " ";
+				}
+				cout << endl;
+				_mb->cmd(_performersu[i].addr, 0x00, 1000);
+				usleep(100000);
 				_mb->rwrite(_performersu[i].addr, 0x20, &_performersu[i].normalStates, 1, 1000);
 				_mb->rwrite(_performersu[i].addr, 0x21, _performersu[i].dependencies, 6, 1000);
+				break;
 			} catch (exception& e) {
-				_log->log(Logger::Type::ERROR, "PERF", "fail to init performer at addr " + to_string(_performersu[i].addr), 1);
+				_log->log(Logger::Type::ERROR, "PERF", "fail to init performer at addr " + to_string(_performersu[i].addr) + ": " + string(e.what()), 1);
 				sleep(5);
 			}
  		}
@@ -288,11 +299,10 @@ void init(json& performingGen, json& performingUnits, json& relaysGroups, json& 
 	cout << "[INFO][PERF] start handler.." << endl;
 	pthread_create(&_thread_id, NULL, _handler, NULL);
 	_operations = fifo_create(32, sizeof(Handle));
-	_isInit = true;
 }
 
-bool getState() {
-	return _isInit;
+int getState() {
+	return _fail_perf_addr;
 }
 
 /* Performing functions */

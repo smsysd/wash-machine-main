@@ -8,7 +8,7 @@
 
 class MbAsciiMaster {
 public:
-	MbAsciiMaster(int dirPin, const char* driver = "/dev/tty0", int baudRate = B9600);
+	MbAsciiMaster(int dirPin, const char* driver = "/dev/tty0", int baudRate = B9600, bool loopback = false);
 	virtual ~MbAsciiMaster();
 
 	void cmd(int addr, int cmd, int timeout);
@@ -19,6 +19,7 @@ public:
 private:
 	int _fd;
 	int _dir;
+	bool _loopback;
 
 	int _receive(char* buffer, int timeout);
 	uint8_t _extract8(char* buff, uint8_t b);

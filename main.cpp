@@ -36,7 +36,7 @@ void stop(Session::EndType endType);
 
 int main(int argc, char const *argv[]) {
 	init(onCashAppeared, onCashRunout, onButtonPushed, onQr, onCard, onServiceEnd);
-	render::showTempFrame(render::SpecFrame::LOGO, tLogoFrame);
+	render::showTempFrame("logo");
 	setGiveMoneyMode();
 	
 	while (true) {
@@ -89,12 +89,12 @@ void writeoffBonus() {
 	bonus::Result rc = bonus::writeoff(count);
 	if (rc == bonus::Result::OK) {
 		if (count <= 0) {
-			render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+			render::showTempFrame("no_money");
 			return;
 		}
 		addMoney(count, Payment::Type::BONUS_EXT);
 	} else {
-		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
+		render::showTempFrame("error_bonus");
 	}	
 }
 
@@ -105,7 +105,7 @@ void beginBonus(bonus::CardInfo& card) {
 		curCard = card;
 		writeoffBonus();
 	} else {
-		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
+		render::showTempFrame("error_bonus");
 	}
 }
 
@@ -131,7 +131,7 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 			return;
 		}
 		if (card.count <= 0) {
-			render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+			render::showTempFrame("no_money");
 			return;
 		}
 		if (isBonusBegin) {
@@ -156,33 +156,33 @@ void _handleCard(bonus::CardInfo& card, bool local = false) {
 			addMoney(card.count, Payment::Type::BONUS_EXT);
 		} else
 		if (rc == bonus::Result::COND_NOT_MET) {
-			render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+			render::showTempFrame("no_money");
 		} else {
-			render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
+			render::showTempFrame("error_bonus");
 		}
 	} else
 	if (card.type == CardInfo::COLLECTOR) {
 		beginSession(Session::Type::COLLECTION, card.id);
 		dropSession(Session::EndType::BUTTON);
 	} else {
-		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		render::showTempFrame("unknown_card");
 	}
 }
 
 void onQr(const char* qr) {
 	bonus::CardInfo newcard;
-	render::showFrame(render::SpecFrame::SERVER_CONNECT);
+	render::showTempFrame("wait_server");
 	bonus::Result rc = bonus::info(newcard, qr);
 	if (rc == bonus::Result::OK) {
 		_handleCard(newcard);
 	} else
 	if (rc == bonus::Result::COND_NOT_MET) {
-		render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+		render::showTempFrame("no_money");
 	} else
 	if (rc == bonus::Result::NOT_FOUND) {
-		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		render::showTempFrame("unknown_card");
 	} else {
-		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
+		render::showTempFrame("error_bonus");
 	}
 }
 
@@ -193,18 +193,18 @@ void onCard(uint64_t cardid) {
 		_handleCard(newcard, true);
 		return;
 	}
-	render::showFrame(render::SpecFrame::SERVER_CONNECT);
+	render::showTempFrame("wait_server");
 	bonus::Result rc = bonus::info(newcard, cardid);
 	if (rc == bonus::Result::OK) {
 		_handleCard(newcard);
 	} else
 	if (rc == bonus::Result::COND_NOT_MET) {
-		render::showTempFrame(render::SpecFrame::NOMONEY, tErrorFrame);
+		render::showTempFrame("no_money");
 	} else
 	if (rc == bonus::Result::NOT_FOUND) {
-		render::showTempFrame(render::SpecFrame::UNKNOWN_CARD, tErrorFrame);
+		render::showTempFrame("unknown_card");
 	} else {
-		render::showTempFrame(render::SpecFrame::BONUS_ERROR, tErrorFrame);
+		render::showTempFrame("error_bonus");
 	}
 }
 

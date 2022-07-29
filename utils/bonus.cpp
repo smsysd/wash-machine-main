@@ -1,5 +1,4 @@
 #include "bonus.h"
-#include "render.h"
 #include "../json.h"
 #include "../jparser-linux/JParser.h"
 
@@ -212,10 +211,6 @@ namespace {
 }
 
 void init(json& bonusSysCnf, json& promotions) {
-	// link with render
-	render::regVar(&_bonus, L"gbonus");
-	render::regVar(&_rbonus, L"grbonus");
-	
 	// general init
 	string bt = JParser::getf(bonusSysCnf, "type", "bonus-system");
 	if (bt == "aquanter") {
@@ -464,18 +459,15 @@ double getCoef() {
 		}
 	}
 	if (vap.size() == 0) {
-		cout << "[INFO][BONUS] no one promotions is active" << endl;
 		_bonus = 100;
 		_rbonus = 0;
 		return 1;
 	} else
 	if (vap.size() == 1) {
-		cout << "[INFO][BONUS] one promotions is active, type: " << _promotions[vap[0]].type << ", k: " << _promotions[vap[0]].k << endl;
 		_bonus = round((_promotions[vap[0]].k+1)*100);
 		_rbonus = _bonus - 100;
 		return _promotions[vap[0]].k + 1;
 	} else {
-		cout << "[INFO][BONUS] ";
 		int maxprior = 0;
 		for (int i = 0; i < vap.size(); i++) {
 			if (_promotions[vap[i]].priority > maxprior) {
@@ -489,7 +481,6 @@ double getCoef() {
 				cout << _promotions[vap[i]].id << " " << _promotions[vap[i]].sk << " | ";
 			}
 		}
-		cout << "ids promotions is active, summary k: " << k << endl;
 		_bonus = round((1+k)*100);
 		_rbonus = _bonus - 100;
 		return k + 1;

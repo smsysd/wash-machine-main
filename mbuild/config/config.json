@@ -5,48 +5,50 @@
 		{
 			"id": 0,
 			"performers": [
-				{"address": 48, "state": 0}
+				{"address": 48, "state": 0},
+				{"address": 51, "state": 0}
 			]
 		},
 		{
 			"id": 1,
 			"performers": [
-				{"address": 48, "state": 1}
+				{"address": 48, "state": 255},
+				{"address": 51, "state": 255}
 			]
 		},
 		{
 			"id": 2,
 			"performers": [
-				{"address": 48, "state": 2}
+				{"address": 48, "state": 255},
+				{"address": 51, "state": 255}
 			]
 		},
 		{
 			"id": 4,
 			"performers": [
-				{"address": 48, "state": 4}
+				{"address": 48, "state": 255},
+				{"address": 51, "state": 255}
 			]
 		}
 	],
 
 	"programs": [
-		{"id": 0, "name": "choose", "frame": 10, "bonus-frame": 11, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0, "releive": false, "flap": true},
-		{"id": 1, "name": "pause", "frame": 12, "bonus-frame": 13, "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0, "releive": true, "flap": true},
-		{"id": 2, "name": "water", "frame": 14, "bonus-frame": 15, "relay-group": 1, "free-use-time": 2, "rate": 20, "effect": 0, "releive": false, "flap": false},
-		{"id": 3, "name": "foam", "frame": 16, "bonus-frame": 17, "relay-group": 2, "free-use-time": 2, "rate": 60, "effect": 0, "releive": false, "flap": false}
+		{"id": 0, "name": "choose", "frame": "choose", "bonus-frame": "choose", "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0, "releive": false, "flap": true},
+		{"id": 1, "name": "pause", "frame": "pause", "bonus-frame": "pause", "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0, "releive": true, "flap": true},
+		{"id": 2, "name": "water", "frame": "water", "bonus-frame": "water", "relay-group": 1, "free-use-time": 2, "rate": 20, "effect": 0, "releive": false, "flap": false},
+		{"id": 3, "name": "foam", "frame": "foam", "bonus-frame": "foam", "relay-group": 2, "free-use-time": 2, "rate": 60, "effect": 0, "releive": false, "flap": false}
 	],
 
 	"service-programs": [
-		{"id": 2, "name": "s.water", "frame": 101, "relay-group": 1, "effect": 0},
-		{"id": 5, "name": "s.cleaner", "frame": 102, "relay-group": 4, "effect": 0}
+		{"id": 2, "name": "s.water", "frame": "s.water", "relay-group": 1, "effect": 0},
+		{"id": 5, "name": "s.cleaner", "frame": "s.cleaner", "relay-group": 4, "effect": 0}
 	],
 
 	"buttons": [
 		{"id": 0, "type": "eb", "index": 0, "purpose": "end"},
-		{"id": 1, "type": "bm", "bm": 0, "index": 4, "purpose": "program", "program": 1, "service-program": 2},
-		{"id": 2, "type": "bm", "bm": 1, "index": 4, "purpose": "program", "program": 2, "service-program": 2},
-		{"id": 3, "type": "bm", "bm": 2, "index": 4, "purpose": "program", "program": 3, "service-program": 5},
-		{"id": 11, "type": "nwjs", "name": "pause", "purpose": "program", "program": 1},
-		{"id": 12, "type": "nwjs", "name": "water", "purpose": "program", "program": 2}
+		{"id": 1, "type": "bm", "bm": 0, "index": 0, "purpose": "program", "program": 1, "service-program": 2},
+		{"id": 2, "type": "bm", "bm": 1, "index": 0, "purpose": "program", "program": 2, "service-program": 2},
+		{"id": 3, "type": "bm", "bm": 2, "index": 0, "purpose": "program", "program": 3, "service-program": 5}
 	],
 
 	"cards": [
@@ -56,5 +58,6 @@
 
 	"service-time": 300,
 	"give-money-time": 120,
-	"log-level": 3
+	"log-level": 3,
+	"rfut_exceeded": "*ПЛАТНАЯ"
 }

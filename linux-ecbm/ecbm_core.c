@@ -207,6 +207,7 @@ void _ecbmc_onrx(int d, uint8_t b) {
 
 	if (_ecbm_ports[d].rxptr >= _ECBM_BUF_SIZE) {
 		_ecbm_ports[d].rxctl = _ECBM_RXCTL_NORX;
+		return;
 	}
 
 	if (_ecbm_ports[d].rxptr == 0) {
@@ -292,7 +293,7 @@ static int _ecbm_perform(int d, int addr, int sig, const uint8_t* data, int ndat
 			_ecbm_ports[d].yeld();
 		}
 		// Construct packet in port buffer
-		rc = _ecbm_make_base(_ecbm_ports[d].buf, begin, addr, sig, data, ndata);
+		rc = _ecbm_make_base(_ecbm_ports[d].buf, begin, addr, sig, data, ndata); 
 		if (rc < 0) {
 			return rc;
 		}
@@ -621,6 +622,7 @@ static int _ecbm_get_event(int d, int addr, int* event) {
 	if (rc > 0) {
 		if (rc == 2) {
 			*event = (buf[0] << 8) + buf[1];
+			return ECBM_RC_OK;
 		} else {
 			return ECBM_RC_INC_ANSWER;
 		}

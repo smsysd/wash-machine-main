@@ -33,7 +33,7 @@ struct Button {
 	int serviceProg;
 };
 
-void init(json& buttons, json& hwbuttons, void (*onButtonPushed)(const Button& button));
+void init(json& buttons, void (*onButtonPushed)(const Button& button));
 
 void _onNwjsButton(const char* name);
 

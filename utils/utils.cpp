@@ -7,6 +7,7 @@
 #include "../qrscaner-linux/qrscaner.h"
 #include "../timer/Timer.h"
 #include "../linux-stdsiga/stdsiga.h"
+#include "../linux-ipc/ipc.h"
 #include "render.h"
 #include "button_driver.h"
 #include "bonus.h"
@@ -50,10 +51,9 @@ namespace {
 	Logger* _log = nullptr;
 	Timer* _wdtimer = nullptr;
 	mutex _moneyMutex;
+	IpcServer _main_srv;
 	bool _terminate = false;
 	bool _normalwork = false;
-	bool _normalextb = true;
-	bool _normalrend = true;
 
 	vector<Program> _programs;
 	vector<Program> _servicePrograms;
@@ -65,11 +65,11 @@ namespace {
 	time_t _tOffServiceMode = 0;
 	int _tRemainFreeUseTime = 0;
 	int _tServiceMode = 0;
-	char errort[32];
-	char errord[64];
+	char _errort[32];
 	int _tGiveMoneyMode = 0;
 	int _tMaxGiveMoneyMode = 120;
 	bool _money_enable = false;
+	string _rfut_exceeded;
 
 	string _paytype2str(Payment::Type type) {
 		switch (type) {
@@ -163,7 +163,6 @@ namespace {
 			_nMoney += pay.count;
 		}
 		_moneyMutex.unlock();
-		render::redraw();
 	}
 
 	void _onExtCashAdd(Pay pay) {
@@ -199,7 +198,6 @@ namespace {
 			if (_tRemainFreeUseTime < 0) {
 				_tRemainFreeUseTime = 0;
 			}
-			render::redraw();
 		} else
 		if (mode == Mode::SERVICE) {
 			_servicePrograms[_currentProgram].useTimeSec++;
@@ -211,14 +209,9 @@ namespace {
 	ReturnCode _handler(uint16_t id, void* arg) {
 		static int borehole = 0;
 		static double previousk = 0;
-
-		_normalrend = render::getState();
-		_normalextb = extboard::getState();
-		if (!_normalrend) {
-			_normalwork = false;
-		}
-		if (!_normalwork) {
-			if (_normalrend && _normalextb) {
+		if (perf::getState() == 0 && extboard::getState()) {
+			if (!_normalwork) {
+				extboard::payment_ctl(true);
 				_normalwork = true;
 				_log->log(Logger::Type::INFO, "MAIN", "NORMAL WORK");
 				switch (mode) {
@@ -227,6 +220,19 @@ namespace {
 				case Mode::SERVICE: setServiceMode(); setServiceProgram(_currentProgram); break;
 				case Mode::WAIT: setWaitMode(); break;
 				}
+			}
+		} else {
+			if (_normalwork) {
+				_normalwork = false;
+				int perf_addr = perf::getState();
+				memset(_errort, 0, sizeof(_errort));
+				if (perf_addr > 0) {
+					extboard::payment_ctl(false);
+					sprintf(_errort, "PERF: %i", perf_addr);
+				} else {
+					sprintf(_errort, "EXTBOARD");
+				}
+				render::showFrame("error");
 			}
 			return OK;
 		}
@@ -249,12 +255,12 @@ namespace {
 			double k = bonus::getCoef();
 			if (previousk > 1 && k <= 1) {
 				previousk = k;
-				render::showFrame(render::SpecFrame::GIVE_MONEY);
+				render::showFrame("give_money");
 				_log->log(Logger::Type::INFO, "UTILS", "'give money' mode frame switched to default", 8);
 			} else
 			if (previousk <= 1 && k > 1) {
 				previousk = k;
-				render::showFrame(render::SpecFrame::GIVE_MONEY_BONUS);
+				render::showFrame("give_money_bonus");
 				_log->log(Logger::Type::INFO, "UTILS", "'give money' mode frame switched to bonus", 8);
 			}
 		}
@@ -265,6 +271,11 @@ namespace {
 	}
 
 	void _softTerminate() {
+		static bool first = true;
+		if (!first) {
+			return;
+		}
+		first = false;
 		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal");
 		if (!_normalwork) {
 			return;
@@ -272,42 +283,83 @@ namespace {
 		while (mode != Mode::GIVE_MONEY && mode != Mode::WAIT) {
 			usleep(10000);
 		}
+		render::terminate();
+		ipc_server_destroy(&_main_srv);
 		_terminate = true;
 		sleep(2);
-		render::showFrame(render::SpecFrame::REPAIR);
+		render::showFrame("repair");
 		sleep(3);
-	}
-
-	void _extboardError(extboard::ErrorType et, string text) {
-		string ets;
-		switch (et) {
-		case extboard::ErrorType::NONE:
-			switch (mode) {
-			case Mode::GIVE_MONEY: setGiveMoneyMode(); break;
-			case Mode::PROGRAM: setProgram(_currentProgram); break;
-			case Mode::SERVICE: setServiceMode();
-			case Mode::WAIT: setWaitMode();
-			}
-			_normalextb = true;
-			return;
-		case extboard::ErrorType::DISCONNECT_DEV: ets = "DISCONNECT DEV"; break;
-		case extboard::ErrorType::INTERNAL: ets = "INTERNAL"; break;
-		default: break;
-		}
-		_normalextb = false;
-		_normalwork = false;
-		_log->log(Logger::Type::ERROR, "EXTBOARD", ets + ": " + text);
-		memset(errort, 0, sizeof(errort));
-		memset(errord, 0, sizeof(errord));
-		snprintf(errort, sizeof(errort), "%s", ets.c_str());
-		snprintf(errord, sizeof(errord), "%s", text.c_str());
-		render::showFrame(render::SpecFrame::INTERNAL_ERROR);
-		sleep(2);
 	}
 
 	void _money_restored() {
 		_log->log(Logger::Type::INFO, "MONEY", "money restored", 7);
 		_money_enable = true;
+	}
+
+	int _srv_handler_getbody(const char* req) {
+		for (int i = 0; i < strlen(req); i++) {
+			if (req[i] == ' ') {
+				return i + 1;
+			}
+		}
+		return -1;
+	}
+
+	void _srv_handler(int sock) {
+		char buf[256] = {0};
+		int rc = read(sock, buf, sizeof(buf)-1);
+		if (rc > 0) {
+			if (strstr(buf, "gv") == buf) {
+				rc = _srv_handler_getbody(buf);
+				if (rc > 0) {
+					char* body = &buf[rc];
+					int len = strlen(body);
+					if (len > 0) {
+						if (body[len-1] == '\n') {
+							len--;
+						}
+						body[len] = 0;
+						if (strcmp(body, "money") == 0) {
+							memset(buf, 0, sizeof(buf));
+							rc = sprintf(buf, "%i", (int)(_nMoney+0.99));
+							write(sock, buf, rc);
+						} else
+						if (strcmp(body, "bonus") == 0) {
+							memset(buf, 0, sizeof(buf));
+							rc = sprintf(buf, "%i", (int)(bonus::getCoef()*100));
+							write(sock, buf, rc);
+						} else
+						if (strcmp(body, "bonus_add") == 0) {
+							memset(buf, 0, sizeof(buf));
+							rc = sprintf(buf, "%i", (int)(bonus::getCoef()*100)-100);
+							write(sock, buf, rc);
+						} else
+						if (strcmp(body, "rfut") == 0) {
+							if (_currentProgram >= 0 && mode == Mode::PROGRAM) {
+								memset(buf, 0, sizeof(buf));
+								int temp = _programs[_currentProgram].freeUseTimeSec - _programs[_currentProgram].useTimeSec;
+								if (temp > 0) {
+									rc = sprintf(buf, "%i", (int)temp);
+								} else {
+									rc = sprintf(buf, "%s", _rfut_exceeded.c_str());
+								}
+								write(sock, buf, rc);
+							}
+						} else
+						if (strcmp(body, "error") == 0) {
+							memset(buf, 0, sizeof(buf));
+							rc = sprintf(buf, "%s", _errort);
+							write(sock, buf, rc);
+						}
+					}
+				}
+			} else
+			if (strstr(buf, "poll") == buf) {
+				memset(buf, 0, sizeof(buf));
+				rc = sprintf(buf, "%i", 0);
+				write(sock, buf, rc);
+			}
+		}
 	}
 }
 
@@ -363,6 +415,7 @@ void init(
 		_config = new JParser("./config/config.json");
 		_tServiceMode = _config->get("service-time");
 		_tMaxGiveMoneyMode = _config->get("give-money-time");
+		_rfut_exceeded = _config->get("rfut_exceeded");
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "CONFIG", "fail to load necessary config files: " + string(e.what()));
 		exit(-1);
@@ -458,16 +511,7 @@ void init(
 	try {
 		cout << "[INFO][UTILS] init render module.." << endl;
 		json& display = _hwconfig->get("display");
-		string rendtype = JParser::getf(display, "type", "hwdisplay");
-		if (rendtype != "none") {
-			render::init(display, _log);
-			render::regVar(&_nMoney, L"money", 0);
-			render::regVar(&_session.k100, L"sbonus");
-			render::regVar(&_session.rk100, L"srbonus");
-			render::regVar(errort, L"errort");
-			render::regVar(errord, L"errord");
-			render::regVar(&_tRemainFreeUseTime, L"rfut");
-		}
+		render::init(display, _log);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "RENDER", "fail to init render core: " + string(e.what()));
 		exit(-2);
@@ -477,12 +521,6 @@ void init(
 	cout << "[INFO][UTILS] init extboard.." << endl;
 	try {
 		json& extBoardCnf = _hwconfig->get("ext-board");
-		json& relaysGroups = _config->get("relays-groups");
-		json& performingUnitsCnf = _hwconfig->get("performing-units");
-		json& buttons = _hwconfig->get("buttons");
-		json& rangeFinder = _hwconfig->get("range-finder");
-		json& tempSens = _hwconfig->get("temp-sens");
-		json& relIns = _hwconfig->get("releive-instructions");
 		json& payment = _hwconfig->get("payment");
 		json ledsCnf;
 		try {
@@ -505,8 +543,7 @@ void init(
 				_log->log(Logger::Type::WARNING, "CONFIG", "fail get load effects: " + string(e.what()));
 			}
 		}
-		extboard::registerOnErrorHandler(_extboardError);
-		extboard::init(extBoardCnf, payment, buttons, ledsCnf, effects, specef, _log);
+		extboard::init(extBoardCnf, payment, ledsCnf, effects, specef, _log);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to init expander board: " + string(e.what()));
 		exit(-3);
@@ -530,8 +567,7 @@ void init(
 	try {
 		cout << "[INFO][UTILS] init button driver.." << endl;
 		json& buttons = _config->get("buttons");
-		json& hwbuttons = _hwconfig->get("buttons");
-		bd::init(buttons, hwbuttons, onButtonPushed);
+		bd::init(buttons, onButtonPushed);
 	} catch (exception& e) {
 		_log->log(Logger::Type::ERROR, "BUTTON", "fail to init button driver: " + string(e.what()));
 		exit(-4);
@@ -590,6 +626,13 @@ void init(
 	usleep(100000);
 	extboard::restoreMoney(_money_restored);
 
+	// init main ipc server
+	int rc = ipc_server(&_main_srv, "./main.ipc", 20, _srv_handler);
+	if (rc < 0) {
+		_log->log(Logger::Type::ERROR, "UTILS", "fail init main ipc server");
+		exit(-1);
+	}
+
 	cout << "[INFO][UTILS] register genereal handler.." << endl;
 	callHandler(_handler, NULL, 500, 0);
 
@@ -598,6 +641,7 @@ void init(
 
 	cout << "[INFO][UTILS] initialize complete." << endl;
 	_normalwork = true;
+	extboard::payment_ctl(true);
 	_log->log(Logger::Type::INFO, "MAIN", "NORMAL WORK");
 }
 
@@ -610,12 +654,12 @@ void setGiveMoneyMode() {
 	extboard::flap(true);
 	perf::setRelayGroup(0);
 	perf::relievePressure();
-	render::SpecFrame f = render::SpecFrame::GIVE_MONEY;
 	if (bonus::getCoef() > 1) {
-		f = render::SpecFrame::GIVE_MONEY_BONUS;
 		isBonus = true;
+		render::showFrame("give_money_bonus");
+	} else {
+		render::showFrame("give_money");
 	}
-	render::showFrame(f);
 
 	if (isBonus) {
 		_log->log(Logger::Type::INFO, "MODE", "'give money' mode applied with bonus frame", 8);
@@ -630,7 +674,7 @@ void setWaitMode() {
 	perf::setRelayGroup(0);
 	extboard::startLightEffect(extboard::SpecEffect::WAIT, 0);
 	extboard::flap(false);
-	render::showFrame(render::SpecFrame::WAIT);
+	render::showFrame("wait");
 
 	_log->log(Logger::Type::INFO, "MODE", "'wait' mode applied", 8);
 	mode = Mode::WAIT;
@@ -642,7 +686,7 @@ void setServiceMode() {
 	}
 	perf::setRelayGroup(0);
 	extboard::flap(false);
-	render::showFrame(render::SpecFrame::SERVICE);
+	render::showFrame("service");
 
 	extboard::startLightEffect(extboard::SpecEffect::SERVICE_EFFECT, 0);
 	_log->log(Logger::Type::INFO, "MODE", "'service' mode applied", 8);

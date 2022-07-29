@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <mutex>
+#include <algorithm>
 
 using namespace std;
 using json = nlohmann::json;
@@ -47,6 +48,7 @@ namespace {
 	enum class Sig {
 		PAYMENT = 100,
 		MONEY_CTRL = 102,
+		PAYMENT_CTRL = 103,
 		BUTTONS = 110,
 		BUTTONS_OPT = 111,
 		BUTTONS_INF = 112,
@@ -54,11 +56,6 @@ namespace {
 		FLAP = 130,
 		EFFECT = 140,
 		EFFECT_RST = 141
-	};
-
-	enum class ButtonType {
-		MCP23008 = 1,
-		PCF8574 = 2
 	};
 
 	struct LightInstruction {
@@ -75,11 +72,6 @@ namespace {
 		int nTotalInstructions;
 		LightInstruction instructions[256];
 		uint8_t data[1288];
-	};
-
-	struct ButtonModule {
-		ButtonType type;
-		int addr;
 	};
 
 	struct Led {
@@ -99,7 +91,8 @@ namespace {
 		START_EFFECT = 1,	// data: effect_id effect_index
 		RESET_EFFECT,		// data: effect_index
 		FLAP,				// data: state
-		MONEY_CTRL			// data: drop or restore money (0 - drop, 1 - restore)
+		MONEY_CTRL,			// data: drop or restore money (0 - drop, 1 - restore)
+		PAYMENT_CTRL		// data: 0 - disable paymentm, 1 - enable
 	};
 
 	struct Handle {
@@ -109,7 +102,6 @@ namespace {
 
 	vector<Led> _leds;
 	vector<LightEffect> _effects;
-	vector<ButtonModule> _buttonms;
 	int _buttoneb_alvl;
 	Payment _cash;
 	Payment _coin;
@@ -125,14 +117,16 @@ namespace {
 	mutex _fifomutex;
 	int _maxHandleErrors = 5;
 	int _maxReinitTries = 3;
+	int _card_read_timeout_ms = 1000;
+	timespec _tlcard_read = {0};
 	Logger* _log;
 	bool _first_init = true;
+	bool _payment_state = false;
 	void (*_moneyrestcplt)();
 
-	void (*_onButton)(int iButton);
-	void (*_onCard)(uint64_t id);
-	void (*_onMoney)(Pay pay);
-	void (*_onError)(ErrorType et, string text);
+	void (*_onButton)(int iButton) = nullptr;
+	void (*_onCard)(uint64_t id) = nullptr;
+	void (*_onMoney)(Pay pay) = nullptr;
 
 	uint64_t _collectn(uint8_t* src, int nb) {
 		uint64_t val = 0;
@@ -158,6 +152,22 @@ namespace {
 
 		return false;
 	}
+	
+	void _timespec_diff(const struct timespec* start, const struct timespec* stop, struct timespec* result) {
+	    if ((stop->tv_nsec - start->tv_nsec) < 0) {
+	        result->tv_sec = stop->tv_sec - start->tv_sec - 1;
+	        result->tv_nsec = stop->tv_nsec - start->tv_nsec + 1000000000;
+	    } else {
+	        result->tv_sec = stop->tv_sec - start->tv_sec;
+	        result->tv_nsec = stop->tv_nsec - start->tv_nsec;
+	    }
+	}
+
+	int _timespec2ms(const struct timespec* ts) {
+		int ms = ts->tv_sec*1000;
+		ms += ts->tv_nsec / 1000000;
+		return ms;
+	}
 
 	Led* _getLed(int id) {
 		for (int i = 0; i < _leds.size(); i++) {
@@ -166,15 +176,6 @@ namespace {
 			}
 		}
 		throw runtime_error("led '" + to_string(id) + "' not found");
-	}
-
-	int _get_bmi(uint8_t addr) {
-		for (int i = 0; i < _buttonms.size(); i++) {
-			if (_buttonms[i].addr == addr) {
-				return i;
-			}
-		}
-		throw runtime_error("button module with '" + to_string(addr) + "' address not found");
 	}
 
 	LightEffect* _getEffect(int id) {
@@ -262,7 +263,7 @@ namespace {
 				if (leds[i].type == Led::BUTTONMODULE) {
 					bm.push_back(leds[i]);
 				} else {
-					throw runtime_error("undefined led type");
+					_log->log(Logger::Type::WARNING, "EXTBOARD", "undefined led type", 7);
 				}
 			}
 
@@ -305,11 +306,26 @@ namespace {
 				aiv.push_back(li);
 			}
 
-			// sort leds by bm index
-			vector<vector<Led>> bms(8);
+			vector<int> bm_addrs;
 			for (int i = 0; i < bm.size(); i++) {
-				uint8_t bmi = _get_bmi(bm[i].addr);
-				bms[bmi].push_back(bm[i]);
+				if (!_is_contain(bm_addrs, bm[i].addr)) {
+					bm_addrs.push_back(bm[i].addr);
+				}
+			}
+			sort(bm_addrs.begin(), bm_addrs.end());
+			// sort leds by bm addr
+			vector<vector<Led>> bms(32);
+			for (int i = 0; i < bm.size(); i++) {
+				int bmi = -1;
+				for (int j = 0; j < bm_addrs.size(); j++) {
+					if (bm_addrs[j] == bm[i].addr) {
+						bmi = j;
+						break;
+					}
+				}
+				if (bmi >= 0) {
+					bms[bmi].push_back(bm[i]);
+				}
 			}
 			
 			// handle all bms
@@ -327,7 +343,7 @@ namespace {
 							resetbits |= 1 << bms[i][j].i;
 						}
 					}
-					li.data[0] = i;
+					li.data[0] = bm_addrs[i];
 					li.data[1] = resetbits;
 					li.data[2] = setbits;
 					aiv.push_back(li);
@@ -469,21 +485,8 @@ namespace {
 		_first_init = true;
 	}
 
-	void _uploadAllOptions() {
-		uint8_t buf[256] = {0};
-
-		buf[0] = _buttoneb_alvl;
-		buf[1] = 0;
-		for (int i = 0; i < _buttonms.size(); i++) {
-			buf[2 + i*3] = _buttonms[i].addr;
-			buf[2 + i*3 + 1] = (uint8_t)_buttonms[i].type;
-			buf[2 + i*3 + 2] = 0;
-		}
-		ecbm_write(0, 1, (int)Sig::BUTTONS_OPT, buf, 26);
-	}
-
 	void* _handler(void* arg) {
-		uint8_t buf[2048];
+		uint8_t buf[4096];
 		int suspicion = 0;
 		int borehole = 0;
 		bool hpos;
@@ -495,29 +498,23 @@ namespace {
 				try {
 					hpos = false;
 					_connect();
-					_uploadAllOptions();
 					hpos = true;
 					usleep(50000);
 					_isInit = true;
-					_onError(ErrorType::NONE, "");
 					suspicion = 0;
 				} catch (exception& e) {
 					tries++;
+					digitalWrite(_nrstPin, 0);
+					usleep(10000);
+					digitalWrite(_nrstPin, 1);
 					sleep(2);
 					_log->log(Logger::Type::ERROR, "EXTBOARD", "fail to reinit: " + string(e.what()), 2);
-					if (tries > _maxReinitTries) {
-						if (hpos) {
-							_onError(ErrorType::DISCONNECT_DEV, string(e.what()));
-						} else {
-							_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
-						}
-					}
 				}
 			}
 			try {
 				Handle* h = (Handle*)fifo_get(&_operations);
 				if (h != nullptr) {
-					cout << "[INFO][EXTBOARD] handling " << (int)h->type << ", total fifo size " << _operations.nElements << endl;
+					// cout << "[INFO][EXTBOARD] handling " << (int)h->type << ", total fifo size " << _operations.nElements << endl;
 				}
 				if (h == nullptr) {
 					// Poll for event
@@ -525,18 +522,74 @@ namespace {
 					int rc = ecbm_get_event(0, 1, &event);
 					if (rc == ECBM_RC_OK) {
 						if (event == (int)Sig::PAYMENT) {
-
+							rc = ecbm_read(0, 1, event, buf, sizeof(buf));
+							if (rc == 6) {
+								uint8_t moneybuf[6] = {0};
+								memcpy(moneybuf, buf, 6);
+								memset(buf, 0, 6);
+								rc = ecbm_write(0, 1, (int)Sig::PAYMENT, buf, 6);
+								if (rc == ECBM_RC_OK) {
+									vector<Pay> pays = _injectMoney(moneybuf);
+									cout << "[INFO][EXTBOARD] moeny received and cleared: " << pays.size() << endl;
+									for (int i = 0; i < pays.size(); i++) {
+										if (_onMoney != nullptr) {
+											_onMoney(pays[i]);
+										}
+									}
+								}
+							}
 						} else
 						if (event == (int)Sig::BUTTONS) {
-
+							rc = ecbm_read(0, 1, event, buf, sizeof(buf));
+							if (rc == 9) {
+								for (int i = 0; i < 8; i++) {
+									if (buf[0] & (1 << i)) {
+										if (_onButton != nullptr) {
+											_onButton(i);
+										}
+									}
+								}
+								for (int i = 0; i < 8; i++) {
+									for (int j = 0; j < 8; j++) {
+										if (buf[i+1] & (1 << j)) {
+											_onButton(8+i*8+j);
+										}
+									}
+								}
+							}
 						} else
 						if (event == (int)Sig::BUTTONS_INF) {
-
+							rc = ecbm_read(0, 1, event, buf, sizeof(buf));
+							if (rc > 0) {
+								
+							}
 						} else
 						if (event == (int)Sig::RFID_CARD) {
-
+							rc = ecbm_read(0, 1, event, buf, sizeof(buf));
+							if (rc >= 4) {
+								timespec now = {0};
+								timespec res = {0};
+								clock_gettime(CLOCK_MONOTONIC, &now);
+								_timespec_diff(&_tlcard_read, &now, &res);
+								if (_timespec2ms(&res) > _card_read_timeout_ms) {
+									uint64_t cid = _collectn(buf, rc);
+									cid &= 0x3FFFFFFFF;
+									printf("[INFO][EXTBOARD] card read: %X\n", cid);
+									clock_gettime(CLOCK_MONOTONIC, &_tlcard_read);
+									if (_onCard != nullptr) {
+										_onCard(cid);
+									}
+									clock_gettime(CLOCK_MONOTONIC, &_tlcard_read);
+								}
+							}
 						} else {
-
+							if (event > 0) {
+								cout << "[INFO][EXTBOARD] read unknown event " << event << endl;
+							}
+							rc = ECBM_RC_OK;
+						}
+						if (rc < 0) {
+							throw runtime_error("fail to get event data: " + to_string(rc));
 						}
 					} else {
 						throw runtime_error("fail to get event: " + to_string(rc));
@@ -581,6 +634,13 @@ namespace {
 					fifo_pop(&_operations);
 					_fifomutex.unlock();
 					suspicion = 0;
+				} else
+				if (h->type == HandleType::PAYMENT_CTRL) {
+					ecbm_write(0, 1, (int)Sig::PAYMENT_CTRL, h->data, 1);
+					_fifomutex.lock();
+					fifo_pop(&_operations);
+					_fifomutex.unlock();
+					suspicion = 0;
 				} else {
 					_fifomutex.lock();
 					fifo_pop(&_operations);
@@ -597,10 +657,14 @@ namespace {
 				suspicion = 0;
 				_isInit = false;
 				_log->log(Logger::Type::WARNING, "EXTBOARD", "extboard was not responding at commands - reinit..", 3);
-				// _onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
+			} else {
+				_isInit = true;
 			}
-			if (borehole % 1000 == 0) {
+			if (borehole % 100 == 0) {
 				// add repetive handles
+				if (_payment_state) {
+					payment_ctl(true);
+				}
 			}
 			usleep(20000);
 			borehole++;
@@ -608,14 +672,17 @@ namespace {
 	}
 }
 
-void init(json& extboard, json& payment, json& buttons, json& leds, json& effects, json& specEffects, Logger* log) {
+void init(json& extboard, json& payment, json& leds, json& effects, json& specEffects, Logger* log) {
 	_log = log;
 	// get hw extboard config
 	cout << "[INFO][EXTBOARD] load hardware extboard config.." << endl;
 	string driver = JParser::getf(extboard, "driver", "extboard");
-	int speed = JParser::getf(extboard, "speed", "extboard");
-	int csPin = JParser::getf(extboard, "cs-pin", "extboard");
 	_nrstPin = JParser::getf(extboard, "nrst-pin", "extboard");
+	try {
+		_card_read_timeout_ms = JParser::getf(extboard, "card_read_timeout_ms", "extboard");
+	} catch (exception& e) {
+		_card_read_timeout_ms = 1000;
+	}
 	try {
 		_maxHandleErrors = JParser::getf(extboard, "max-handle-error", "extboard");
 	} catch (exception& e) {
@@ -634,43 +701,6 @@ void init(json& extboard, json& payment, json& buttons, json& leds, json& effect
 	_loadPayment(coin, _coin, "coin");
 	json& terminal = JParser::getf(payment, "terminal", "payment");
 	_loadPayment(terminal, _terminal, "terminal");
-
-	cout << "[INFO][EXTBOARD] load buttons hardware config.." << endl;
-	_buttoneb_alvl = JParser::getf(buttons, "extboard", "buttons");
-	json& bsms = JParser::getf(buttons, "modules", "buttons");
-	if (bsms.size() > 8) {
-		throw runtime_error("buttons modules must be 8 or less");
-	}
-	for (int i = 0; i < bsms.size(); i++) {
-		try {
-			ButtonModule bm;
-			bm.addr = JParser::getf(bsms[i], "address", "");
-			string type = JParser::getf(bsms[i], "type", "");
-			if (type == "mcp23008") {
-				bm.type = ButtonType::MCP23008;
-			} else
-			if (type == "pcf8574") {
-				bm.type = ButtonType::PCF8574;
-			} else {
-				_log->log(Logger::Type::WARNING, "EXTBOARD", "button module " + to_string(i) + " has incorrect type");
-				continue;
-			}
-			_buttonms.push_back(bm);
-		} catch (exception& e) {
-				_log->log(Logger::Type::WARNING, "EXTBOARD", "fail to load button module " + to_string(i) + ": " + string(e.what()));
-				continue;
-		}
-	}
-
-	int rbuff[256] = {0};
-	for (int i = 0; i < _buttonms.size(); i++) {
-		rbuff[_buttonms[i].addr]++;
-	}
-	for (int i = 1; i < 256; i++) {
-		if (rbuff[i] > 1) {
-			_log->log(Logger::Type::WARNING, "EXTBOARD", "button module  with " + to_string(i) + " address was repeated");
-		}
-	}
 
 	cout << "[INFO][EXTBOARD] load leds.." << endl;
 	for (int i = 0; i < leds.size(); i++) {
@@ -809,11 +839,7 @@ void init(json& extboard, json& payment, json& buttons, json& leds, json& effect
 		// connect to extboard
 		cout << "[INFO][EXTBOARD] connect to extboard.." << endl;
 		_connect();
-
-		cout << "[INFO][EXTBOARD] upload options.." << endl;
-		_uploadAllOptions();
 	} catch (exception& e) {
-		_onError(ErrorType::DISCONNECT_DEV, "EXTBOARD");
 		throw runtime_error(e.what());
 	}
 
@@ -868,6 +894,16 @@ void flap(bool state) {
 	_fifomutex.unlock();
 }
 
+void payment_ctl(bool state) {
+	_payment_state = state;
+	Handle h;
+	h.type = HandleType::PAYMENT_CTRL;
+	h.data[0] = state ? 1 : 0;
+	_fifomutex.lock();
+	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
+}
+
 /* Event handlers registration */
 void registerOnButtonPushedHandler(void (*handler)(int iButton)) {
 	_onButton = handler;
@@ -879,10 +915,6 @@ void registerOnCardReadHandler(void (*handler)(uint64_t cardid)) {
 
 void registerOnMoneyAddedHandler(void (*handler)(Pay pay)) {
 	_onMoney = handler;
-}
-
-void registerOnErrorHandler(void (*handler)(ErrorType et, string text)) {
-	_onError = handler;
 }
 
 void restoreMoney(void (*cplt)()) {

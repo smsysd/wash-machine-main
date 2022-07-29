@@ -3,7 +3,6 @@
 #define PERF_H_
 
 #include "../json.h"
-#include "../rgb332/rgb332.h"
 #include "../logger-linux/Logger.h"
 
 #include <vector>
@@ -17,7 +16,7 @@ namespace perf {
 
 	void init(json& performingGen, json& performingUnits, json& relaysGroups, json& releiveInstructions, Logger* log);
 	
-	bool getState();
+	int getState();
 
 	/* Performing functions no exceptions */
 	void relievePressure();

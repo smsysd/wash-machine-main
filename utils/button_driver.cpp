@@ -24,7 +24,7 @@ namespace {
 		Button::Type type;
 		int bm;
 		int index;
-		// cout << "[INFO][BUTTON] ibutton " << iButton << endl;
+		cout << "[INFO][BUTTON] ibutton " << iButton << endl;
 		if (iButton >= 72) {
 			return;
 		}
@@ -44,6 +44,7 @@ namespace {
 			iButton -= 8;
 			bm = iButton / 8;
 			index = iButton % 8;
+			cout << "BUTTON bm:" << bm << " i:" << index << endl;
 			for (int i = 0; i < _buttons.size(); i++) {
 				if (_buttons[i].type == type) {
 					if (_buttons[i].bm == bm) {
@@ -58,7 +59,7 @@ namespace {
 	}
 }
 
-void init(json& buttons, json& hwbuttons, void (*onButtonPushed)(const Button& button)) {
+void init(json& buttons, void (*onButtonPushed)(const Button& button)) {
 	for (int i = 0; i < buttons.size(); i++) {
 		try {
 			Button b;

@@ -17,7 +17,7 @@
 
 using namespace std;
 
-MbAsciiMaster::MbAsciiMaster(int dirPin, const char* driver, int baudRate) {
+MbAsciiMaster::MbAsciiMaster(int dirPin, const char* driver, int baudRate, bool loopback) {
 	_dir = dirPin;
 	if (dirPin > 0) {
 		pinMode(dirPin, OUTPUT);
@@ -28,6 +28,7 @@ MbAsciiMaster::MbAsciiMaster(int dirPin, const char* driver, int baudRate) {
 	if (_fd < 0) {
 		throw runtime_error("fail to open driver");
 	}
+	_loopback = loopback;
 
 	termios tio = {0};
 	cfsetispeed(&tio, baudRate); 
@@ -136,6 +137,7 @@ void MbAsciiMaster::rread(int addr, int raddr, int* regs, int nRegs, int timeout
 	if (_dir > 0) {
 		digitalWrite(_dir, HIGH);
 	}
+	while (read(_fd, buff, sizeof(buff)) > 0) {}
 	write(_fd, buff, 17);
 	tcdrain(_fd);
 	usleep(1100);
@@ -159,17 +161,27 @@ int MbAsciiMaster::_receive(char* buff, int timeout) {
 	}
 
 	// wait entry
+	bool first = true;
 	auto tla = chrono::steady_clock::now();
 	while (true) {
 		if (read(_fd, &c, 1) > 0) {
+			// cout << c;
 			tla = chrono::steady_clock::now();
 			if (c == ':') {
-				// cout << "entry" << endl;
-				break;
+				if (_loopback) {
+					if (first) {
+						first = false;
+					} else {
+						break;
+					}
+				} else {
+					break;
+				}
 			}
 		}
 		auto d = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - tla);
 		if (d.count() > timeout) {
+			// cout << endl;
 			throw runtime_error("timeout");
 		}
 	}
@@ -178,6 +190,7 @@ int MbAsciiMaster::_receive(char* buff, int timeout) {
 	int i = 0;
 	while (true) {
 		if (read(_fd, &c, 1) > 0) {
+			// cout << c;
 			tla = chrono::steady_clock::now();
 			buff[i] = c;
 			i++;
@@ -190,9 +203,11 @@ int MbAsciiMaster::_receive(char* buff, int timeout) {
 		}
 		auto d = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - tla);
 		if (d.count() > timeout) {
+			// cout << endl;
 			throw runtime_error("timeout");
 		}
 	}
+	// cout << endl;
 }
 
 uint8_t MbAsciiMaster::_extract8(char* buff, uint8_t b) {

@@ -3,7 +3,6 @@
 #define EXT_BOARD_H_
 
 #include "../json.h"
-#include "../rgb332/rgb332.h"
 #include "../logger-linux/Logger.h"
 
 #include <vector>
@@ -48,13 +47,8 @@ namespace extboard {
 		SERVICE_EFFECT,
 		WAIT
 	};
-	enum class ErrorType {
-		NONE,
-		DISCONNECT_DEV,
-		INTERNAL
-	};
 
-	void init(json& extboard, json& payment, json& buttons, json& leds, json& effects, json& specEffects, Logger* log);
+	void init(json& extboard, json& payment, json& leds, json& effects, json& specEffects, Logger* log);
 	
 	bool getState();
 
@@ -65,12 +59,12 @@ namespace extboard {
 
 	/* Other control functions no exceptions */
 	void flap(bool state);
+	void payment_ctl(bool state);
 
 	/* Event handlers registration */
 	void registerOnButtonPushedHandler(void (*handler)(int iButton));
 	void registerOnCardReadHandler(void (*handler)(uint64_t cardid));
 	void registerOnMoneyAddedHandler(void (*handler)(Pay pay));
-	void registerOnErrorHandler(void (*handler)(ErrorType et, string text));
 
 	/* * * Advanced money control * * */
 	void restoreMoney(void (*cplt)()); // Restore money from backup registers

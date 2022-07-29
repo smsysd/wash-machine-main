@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 
-EcbmLinux _ecbml_ports[ECBM_PORTS] = {0};
+EcbmLinux _ecbml_ports[ECBM_PORTS] = {0}; 
 
 
 static void* _ecbm_thread(void* arg) {
@@ -45,7 +45,6 @@ static void _ecbm_get_time(struct timespec* now) {
 
 static void _ecbm_write(int d, const uint8_t* data, int ndata) {
 	write(_ecbml_ports[d].fd, data, ndata);
-	tcdrain(_ecbml_ports[d].fd);
 }
 
 static void _ecbm_sendbreak(int d) {

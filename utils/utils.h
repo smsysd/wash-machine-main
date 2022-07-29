@@ -31,8 +31,8 @@ enum class Mode {
 struct Program {
 	int id;
 	string name;
-	int frame;
-	int bonusFrame;
+	string frame;
+	string bonusFrame;
 	int relayGroup;
 	double rate;
 	int freeUseTimeSec;
