@@ -1,28 +1,19 @@
 {
-	"buttons": {
-		"extboard": {
-			"active-levels": 0,
-			"used-mask": 3
-		},
-		"modules": [
-			{"address": 32, "active-levels": 0, "io-mask": 239},
-			{"address": 33, "active-levels": 0, "io-mask": 239},
-			{"address": 34, "active-levels": 0, "io-mask": 239}
-		]
-	},
-
 	"ext-board": {
-		"driver": "/dev/spidev1.1",
-		"int-pin": 2,
-		"cs-pin": 15,
+		"driver": "/dev/ttyS5",
 		"nrst-pin": 16,
-		"speed": 50000,
 		"max-handle-error": 5,
 		"max-reinit-tries": 5
 	},
 
+	"performing-gen": {
+		"driver": "/dev/ttyUSB1",
+		"max-handle-errors": 5
+	},
+
 	"performing-units": [
-		{"address": 48, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]}
+		{"address": 48, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]},
+		{"address": 51, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]}
 	],
 
 	"releive-instructions": [
@@ -33,31 +24,13 @@
 	],
 
 	"display": {
-		"type": "nwjs",
-		"nwjs-app": "./nwjs-render",
-		"nwjs-socket": "/home/elpi/wash-machine-main/2nwjs.socket",
-		"main-socket": "/home/elpi/wash-machine-main/2main.socket",
-
-		"address": 64,
-		"dir-pin": 6,
-		"driver": "/dev/ttyS5",
-		"baud-rate": 9600,
-		"handler-delay": 10000,
-		"redraw-borehole": 500
+		"render": "./render_ledmatrx",
+		"rsock": "./render.ipc"
 	},
-
-	"range-finder": {
-		"closer-range": 40
-	},
-
-	"temp-sens": [
-		{"address": 123},
-		{"address": 123}
-	],
 
 	"payment": {
 		"cash": {
-			"mode": "counter",
+			"mode": "bill-code",
 			"rate": 10,
 			"bill-codes": [
 				[2, 50],
@@ -91,10 +64,10 @@
 	},
 
 	"leds": [
-		{"id": 1, "type": "bm", "address": 32, "index": 0},
-		{"id": 2, "type": "bm", "address": 32, "index": 1},
-		{"id": 3, "type": "bm", "address": 32, "index": 2},
-		{"id": 4, "type": "bm", "address": 32, "index": 3},
+		{"id": 1, "type": "bm", "address": 32, "index": 1},
+		{"id": 2, "type": "bm", "address": 32, "index": 2},
+		{"id": 3, "type": "bm", "address": 32, "index": 3},
+		{"id": 4, "type": "bm", "address": 32, "index": 4},
 		{"id": 5, "type": "bm", "address": 32, "index": 5},
 		{"id": 6, "type": "bm", "address": 32, "index": 6},
 		{"id": 7, "type": "bm", "address": 32, "index": 7},
