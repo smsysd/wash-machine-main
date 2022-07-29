@@ -147,7 +147,7 @@ namespace {
 					usleep(10000);
 				} else
 				if (h->type == HandleType::DIRECT_SET_RELAYS) {
-					cout << "[INFO][PERF] handling DIRECT_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
+					// cout << "[INFO][PERF] handling DIRECT_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
 					buf[0] = h->data[1];
 					perf_addr = h->data[0];
 					_mb->rwrite(h->data[0], 0x13, buf, 1, 500);
@@ -162,7 +162,7 @@ namespace {
 					}
 				} else
 				if (h->type == HandleType::FORCE_SET_RELAYS) {
-					cout << "[INFO][PERF] handling FORCE_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
+					// cout << "[INFO][PERF] handling FORCE_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
 					buf[0] = h->data[1];
 					perf_addr = h->data[0];
 					_mb->rwrite(h->data[0], 0x10, buf, 1, 500);
@@ -178,7 +178,7 @@ namespace {
 				} else
 				if (h->type == HandleType::DELAY) {
 					int delay = (h->data[0] << 8) + h->data[1];
-					cout << "[INFO][PERF] handling DELAYS: delay: " << delay << endl;
+					// cout << "[INFO][PERF] handling DELAYS: delay: " << delay << endl;
 					usleep(delay*1000);
 
 					_fifomutex.lock();
