@@ -78,6 +78,7 @@ namespace {
 
 	enum class HandleType {
 		DIRECT_SET_RELAYS,	// data: addr, states
+		FORCE_SET_RELAYS, // data: addr, states
 		DELAY
 	};
 
@@ -146,7 +147,7 @@ namespace {
 					usleep(10000);
 				} else
 				if (h->type == HandleType::DIRECT_SET_RELAYS) {
-					// cout << "[INFO][PERF] handling DIRECT_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
+					cout << "[INFO][PERF] handling DIRECT_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
 					buf[0] = h->data[1];
 					perf_addr = h->data[0];
 					_mb->rwrite(h->data[0], 0x13, buf, 1, 500);
@@ -160,8 +161,25 @@ namespace {
 						_fail_perf_addr = 0;
 					}
 				} else
+				if (h->type == HandleType::FORCE_SET_RELAYS) {
+					cout << "[INFO][PERF] handling FORCE_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
+					buf[0] = h->data[1];
+					perf_addr = h->data[0];
+					_mb->rwrite(h->data[0], 0x10, buf, 1, 500);
+
+					_fifomutex.lock();
+					fifo_pop(&_operations);
+					_fifomutex.unlock();
+					suspicion = 0;
+					if (perf_addr == _fail_perf_addr) {
+						cout << "PERF REPAIR " << perf_addr << endl;
+						_fail_perf_addr = 0;
+					}
+				} else
 				if (h->type == HandleType::DELAY) {
-					usleep((h->data[0] << 8) + h->data[1]);
+					int delay = (h->data[0] << 8) + h->data[1];
+					cout << "[INFO][PERF] handling DELAYS: delay: " << delay << endl;
+					usleep(delay*1000);
 
 					_fifomutex.lock();
 					fifo_pop(&_operations);
@@ -311,7 +329,13 @@ void relievePressure() {
 	
 	for (int i = 0; i < _releiveIns.size(); i++) {
 		if (_releiveIns[i].type == ReleiveInsType::SET) {
-			setRelaysState(_releiveIns[i].addr, _releiveIns[i].state);			
+			Handle h;
+			h.type = HandleType::FORCE_SET_RELAYS;
+			h.data[0] = _releiveIns[i].addr;
+			h.data[1] = _releiveIns[i].state;
+			_fifomutex.lock();
+			fifo_put(&_operations, &h);
+			_fifomutex.unlock();
 		} else
 		if (_releiveIns[i].type == ReleiveInsType::DELAY) {
 			h.type = HandleType::DELAY;
