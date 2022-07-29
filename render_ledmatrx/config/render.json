@@ -1,0 +1,42 @@
+{
+	"fonts": [
+		{"name": "font1", "font": "./config/1.bdf"}
+	],
+
+	"gen_options": {
+		"start_frame": "start",
+		"default_color": [255,255,255],
+		"default_font": "font1",
+		"tty_driver": "/dev/ttyUSB0",
+		"temp_frame_dur": 2500
+	},
+
+	"frames": [
+		{
+			"name": "start",
+			"lines": [
+				{"y": 0, "data": "HELLO"},
+				{"y": 15, "data": "MEAN"}
+			]
+		},
+		{
+			"name": "frame1",
+			"lines": [
+				{"y": 0, "data": "FIRST LINE"},
+				{"y": 10, "data": "{test_var}"},
+				{"y": 20, "data": "TWO LINE"}
+			]
+		},
+		{
+			"name": "frame2",
+			"bg": "./config/1.png"
+		},
+		{
+			"name": "frame3",
+			"bg": "./config/1.png",
+			"lines": [
+				{"data": "LLINE!", "color": [0, 0, 0]}
+			]
+		}
+	]
+}

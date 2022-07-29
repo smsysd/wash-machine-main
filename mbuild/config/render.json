@@ -1,0 +1,132 @@
+{
+	"fonts": [
+		{"name": "1", "font": "./config/fonts/1.bdf"},
+		{"name": "2", "font": "./config/fonts/2.bdf"},
+		{"name": "3", "font": "./config/fonts/3.bdf"},
+		{"name": "4", "font": "./config/fonts/4.bdf"}
+	],
+
+	"gen_options": {
+		"start_frame": "logo",
+		"no_main_frame": "no_main",
+		"default_color": [255,255,255],
+		"default_font": "2",
+		"tty_driver": "/dev/ttyUSB0",
+		"temp_frame_dur": 2500
+	},
+
+	"frames": [
+		{
+			"name": "logo",
+			"bg": "./config/logo.png",
+			"lines": [
+				{"data": "LOGO"}
+			]
+		},
+		{
+			"name": "no_main",
+			"lines": [
+				{"color":[255,0,0], "data": "ТЕХ  РАБОТЫ"}
+			]
+		},
+		{
+			"name": "wait",
+			"lines": [
+				{"y": 0, "data": "PRESS"},
+				{"y": 15, "data": "BUTTON"}
+			]
+		},
+		{
+			"name": "give_money",
+			"lines": [
+				{"y": 0, "data": "GIVE"},
+				{"y": 15, "data": "MONEY"}
+			]
+		},
+		{
+			"name": "give_money_bonus",
+			"lines": [
+				{"y": 0, "data": "GIVE"},
+				{"y": 10, "data": "MONEY"},
+				{"y": 20, "data": "{bonus_add} % !"}
+			]
+		},
+		{
+			"name": "water",
+			"lines": [
+				{"color": [0,0,255], "y": 0, "data": "WATER"},
+				{"y": 15, "data": "{money}"}
+			]
+		},
+		{
+			"name": "foam",
+			"lines": [
+				{"color": [0,255,0], "y": 0, "data": "FOAM"},
+				{"y": 15, "data": "{money}"}
+			]
+		},
+		{
+			"name": "choose",
+			"lines": [
+				{"y": 0, "data": "CHOOSE"},
+				{"y": 15, "data": "{money}"}
+			]
+		},
+		{
+			"name": "pause",
+			"lines": [
+				{"y": 0, "data": "PAUSE"},
+				{"y": 11, "data": "{money}"},
+				{"color": [255,0,0], "x": 0, "y": 23, "data": "{rfut}"}
+			]
+		},
+		{
+			"name": "service",
+			"lines": [
+				{"y": 0, "data": "SERVICE"}
+			]
+		},
+		{
+			"name": "s.water",
+			"lines": [
+				{"y": 0, "data": "SERVICE"},
+				{"y": 15, "data": "WATER"}
+			]
+		},
+		{
+			"name": "s.cleaner",
+			"lines": [
+				{"y": 0, "data": "SERVICE"},
+				{"y": 15, "data": "CLEANER"}
+			]
+		},
+		{
+			"name": "wait_server",
+			"lines": [
+				{"y": 0, "data": "WAIT"},
+				{"y": 15, "data": "SERVER"}
+			]
+		},
+		{
+			"name": "unknown_card",
+			"lines": [
+				{"y": 0, "data": "UNKNOWN"},
+				{"y": 15, "data": "CARD"}
+			]
+		},
+		{
+			"name": "error_bonus",
+			"lines": [
+				{"y": 0, "data": "ERROR"},
+				{"y": 15, "data": "BONUS"}
+			]
+		},
+		{
+			"name": "error",
+			"lines": [
+				{"color": [255,0,0], "y": 0, "data": "ERROR"},
+				{"color": [255,0,0], "y": 15, "data": "{error}"}
+			]
+		}
+	]
+}
