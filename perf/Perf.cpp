@@ -99,6 +99,9 @@ namespace {
 	int _maxHandleErrors = 5;
 	Logger* _log;
 	int _fail_perf_addr = 0;
+	string _driver;
+	json _drivers;
+	bool _scan_drivers;
 
 	uint64_t _collectn(uint8_t* src, int nb) {
 		uint64_t val = 0;
@@ -132,6 +135,22 @@ namespace {
 		}
 
 		return false;
+	}
+
+	string _find_driver(json& drivers) {
+		int addr = _performersu[0].addr;
+		for (int i = 0; i < drivers.size(); i++) {
+			string tdrv = drivers[i];
+			try {
+				MbAsciiMaster mb(-1, tdrv.c_str(), B9600, false);
+				mb.cmd(addr, 0x00, 1000);
+				cout << "[INFO][PERF] driver auto detected as " << tdrv << endl;
+				return tdrv;
+			} catch (exception& e) {
+				usleep(100000);				
+			}
+		}
+		throw runtime_error("fail to detect performing port");
 	}
 
 	void* _handler(void* arg) {
@@ -200,6 +219,21 @@ namespace {
 				suspicion = 0;
 				_fail_perf_addr = perf_addr;
 				_log->log(Logger::Type::ERROR, "PERF", "performer was not responding at commands", 1);
+				delete _mb;
+				_mb = nullptr;
+				while (1) {
+					try {
+						cout << "[INFO][PERF] reopen port.." << endl;
+						if (_scan_drivers) {
+							_mb = new MbAsciiMaster(-1, _find_driver(_drivers).c_str(), B9600);
+						} else {
+							_mb = new MbAsciiMaster(-1, _driver.c_str(), B9600);
+						}
+						break;
+					} catch (exception& e) {
+						sleep(2);
+					}
+				}
 			}
 			if (borehole % 100 == 0) {
 				// add repetive handles
@@ -216,7 +250,7 @@ namespace {
 void init(json& performingGen, json& performingUnits, json& relaysGroups, json& releiveInstructions, Logger* log) {
 	_log = log;
 
-	string driver = JParser::getf(performingGen, "driver", "performing-gen");
+	json driver_raw = JParser::getf(performingGen, "driver", "performing-gen");
 	_maxHandleErrors = JParser::getf(performingGen, "max-handle-errors", "performing-gen");
 
 	cout << "[INFO][PERF] load releive instructions.." << endl;
@@ -291,7 +325,16 @@ void init(json& performingGen, json& performingUnits, json& relaysGroups, json& 
 	}
 
 	cout << "[INFO][PERF] init performers.." << endl;
-	_mb = new MbAsciiMaster(-1, driver.c_str(), B9600, false);
+	if (driver_raw.is_array()) {
+		_drivers = driver_raw;
+		_scan_drivers = true;
+		_mb = new MbAsciiMaster(-1, _find_driver(_drivers).c_str(), B9600);
+	} else {
+		string driver = driver_raw;
+		_mb = new MbAsciiMaster(-1, driver.c_str(), B9600, false);
+		_driver = driver;
+		_scan_drivers = false;
+	}
 
 
 	for (int i = 0; i < _performersu.size(); i++) {
