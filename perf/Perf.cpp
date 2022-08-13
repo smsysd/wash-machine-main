@@ -102,6 +102,7 @@ namespace {
 	string _driver;
 	json _drivers;
 	bool _scan_drivers;
+	int _reinit_period = -1;
 
 	uint64_t _collectn(uint8_t* src, int nb) {
 		uint64_t val = 0;
@@ -151,6 +152,24 @@ namespace {
 			}
 		}
 		throw runtime_error("fail to detect performing port");
+	}
+
+	void _init_hardware(int iperf) {
+		_mb->cmd(_performersu[iperf].addr, 0x00, 1000);
+		usleep(100000);
+		_mb->rwrite(_performersu[iperf].addr, 0x20, &_performersu[iperf].normalStates, 1, 1000);
+		_mb->rwrite(_performersu[iperf].addr, 0x21, _performersu[iperf].dependencies, 6, 1000);
+	}
+
+	void _init_hardware_all() {
+		for (int i = 0; i < _performersu.size(); i++) {
+			cout << "performer " << i << " config = addr: " << _performersu[i].addr << " normalst: " << _performersu[i].normalStates << " dep: ";
+			for (int j = 0; j < 6; j++) {
+				cout << _performersu[i].dependencies[j] << " ";
+			}
+			cout << endl;
+			_init_hardware(i);
+		}
 	}
 
 	void* _handler(void* arg) {
@@ -229,16 +248,45 @@ namespace {
 						} else {
 							_mb = new MbAsciiMaster(-1, _driver.c_str(), B9600);
 						}
+						cout << "[INFO][PERF] reinit hardware.." << endl;
+						_init_hardware_all();
 						break;
 					} catch (exception& e) {
 						sleep(2);
 					}
 				}
+				_fail_perf_addr = 0;
 			}
 			if (borehole % 100 == 0) {
 				// add repetive handles
 				if (_currentRelayGroupId >= 0) {
 					setRelayGroup(_currentRelayGroupId);
+				}
+			}
+			if (_reinit_period > 0) {
+				if (borehole % _reinit_period == 0) {
+					cout << "[INFO][PERF] reinit.." << endl;
+					if (_mb != nullptr) {
+						delete _mb;
+					}
+					_mb = nullptr;
+					while (1) {
+						try {
+							cout << "[INFO][PERF] reopen port.." << endl;
+							if (_scan_drivers) {
+								_mb = new MbAsciiMaster(-1, _find_driver(_drivers).c_str(), B9600);
+							} else {
+								_mb = new MbAsciiMaster(-1, _driver.c_str(), B9600);
+							}
+							cout << "[INFO][PERF] reinit hardware.." << endl;
+							_init_hardware_all();
+							break;
+						} catch (exception& e) {
+							_fail_perf_addr = 0xFF;
+							sleep(2);
+						}
+					}
+					_fail_perf_addr = 0;
 				}
 			}
 			usleep(20000);
@@ -252,6 +300,11 @@ void init(json& performingGen, json& performingUnits, json& relaysGroups, json& 
 
 	json driver_raw = JParser::getf(performingGen, "driver", "performing-gen");
 	_maxHandleErrors = JParser::getf(performingGen, "max-handle-errors", "performing-gen");
+	try {
+		_reinit_period = JParser::getf(performingGen, "reinit_period", "performing_gen");
+	} catch (exception& e) {
+		_reinit_period = -1;
+	}
 
 	cout << "[INFO][PERF] load releive instructions.." << endl;
 	for (int i = 0; i < releiveInstructions.size(); i++) {
@@ -325,6 +378,7 @@ void init(json& performingGen, json& performingUnits, json& relaysGroups, json& 
 	}
 
 	cout << "[INFO][PERF] init performers.." << endl;
+
 	if (driver_raw.is_array()) {
 		_drivers = driver_raw;
 		_scan_drivers = true;
@@ -337,25 +391,7 @@ void init(json& performingGen, json& performingUnits, json& relaysGroups, json& 
 	}
 
 
-	for (int i = 0; i < _performersu.size(); i++) {
-		while (true) {
-			try {
-				cout << "performer " << i << " config = addr: " << _performersu[i].addr << " normalst: " << _performersu[i].normalStates << " dep: ";
-				for (int j = 0; j < 6; j++) {
-					cout << _performersu[i].dependencies[j] << " ";
-				}
-				cout << endl;
-				_mb->cmd(_performersu[i].addr, 0x00, 1000);
-				usleep(100000);
-				_mb->rwrite(_performersu[i].addr, 0x20, &_performersu[i].normalStates, 1, 1000);
-				_mb->rwrite(_performersu[i].addr, 0x21, _performersu[i].dependencies, 6, 1000);
-				break;
-			} catch (exception& e) {
-				_log->log(Logger::Type::ERROR, "PERF", "fail to init performer at addr " + to_string(_performersu[i].addr) + ": " + string(e.what()), 1);
-				sleep(5);
-			}
- 		}
-	}
+	_init_hardware_all();
 
 	cout << "[INFO][PERF] start handler.." << endl;
 	pthread_create(&_thread_id, NULL, _handler, NULL);
