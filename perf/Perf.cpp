@@ -264,7 +264,7 @@ namespace {
 				}
 			}
 			if (_reinit_period > 0) {
-				if (borehole % _reinit_period == 0) {
+				if ((borehole/50) % _reinit_period == 0) {
 					cout << "[INFO][PERF] reinit.." << endl;
 					if (_mb != nullptr) {
 						delete _mb;
