@@ -7,6 +7,9 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <signal.h>
+
+#include <stdio.h>
 
 static void* _ipc_serverh(void* arg) {
 	IpcServer* srv = (IpcServer*)arg;
@@ -20,9 +23,7 @@ static void* _ipc_serverh(void* arg) {
         close(srv->data_sock);
 		srv->data_sock = -1;
 		if (srv->cancel) {
-			while (1) {
-				sleep(1);
-			}
+            break;
 		}
     }
 }
@@ -77,6 +78,8 @@ int ipc_server(IpcServer* srv, const char* path, int backlog, void (*onaccept)(i
 	if (ret != 0) {
 		return -5;
 	}
+
+    signal(SIGPIPE, SIG_IGN);
 	return 0;
 }
 
@@ -84,7 +87,8 @@ int ipc_server_destroy(IpcServer* srv) {
 	/* Ожидание завершения обработки соединения */
 	srv->cancel = 1;
 	for (int i = 0; i < IPC_DESTROY_TIMEOUT_MS; i++) {
-		if (srv->data_sock == -1) {
+		// printf("%i\n", i);
+        if (srv->data_sock == -1) {
 			break;
 		}
 		usleep(1000);
@@ -94,7 +98,9 @@ int ipc_server_destroy(IpcServer* srv) {
 	pthread_cancel(srv->thread);
     
 	/* Удаляем сокет */
+    // printf("close\n");
 	close(srv->connection_sock);
+    // printf("unlink\n");
     unlink(srv->socka.sun_path);
 
 	return 0;

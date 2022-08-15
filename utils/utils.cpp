@@ -273,18 +273,18 @@ namespace {
 	void _softTerminate(int sock) {
 		char buf[256] = {0};
 		int rc;
-		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal");
+		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal", 5);
 		if ((!_normalwork && _nMoney > 0) || (mode != Mode::GIVE_MONEY && mode != Mode::WAIT)) {
 			rc = sprintf(buf, "%i\n", -1);
 			write(sock, buf, rc);
 			return;
 		}
-		rc = sprintf(buf, "%i\n", -1);
+		rc = sprintf(buf, "%i\n", 0);
 		write(sock, buf, rc);
+		close(sock);
 		render::showFrame("repair");
 		sleep(1);
-		ipc_server_destroy(&_main_srv);
-		exit(0);
+		_terminate = true;
 	}
 
 	void _money_restored() {
@@ -302,6 +302,9 @@ namespace {
 	}
 
 	void _srv_handler(int sock) {
+		// static int con_cnt = 0;
+		// con_cnt++;
+		// cout << "con_cnt: " << con_cnt << endl;
 		char buf[256] = {0};
 		int rc = read(sock, buf, sizeof(buf)-1);
 		if (rc > 0) {
@@ -355,7 +358,7 @@ namespace {
 				rc = sprintf(buf, "%i", 0);
 				write(sock, buf, rc);
 			} else
-			if (strstr(buf, "e") == buf) {
+			if (strstr(buf, "exit") == buf) {
 				_softTerminate(sock);
 			}
 		}
@@ -368,6 +371,10 @@ Mode cmode() {
 
 bool issession() {
 	return _session.isBegin;
+}
+
+bool is_terminate() {
+	return _terminate;
 }
 
 void init(
@@ -625,7 +632,7 @@ void init(
 	extboard::restoreMoney(_money_restored);
 
 	// init main ipc server
-	int rc = ipc_server(&_main_srv, "./main.ipc", 20, _srv_handler);
+	int rc = ipc_server(&_main_srv, "./main.ipc", 1, _srv_handler);
 	if (rc < 0) {
 		_log->log(Logger::Type::ERROR, "UTILS", "fail init main ipc server");
 		exit(-1);

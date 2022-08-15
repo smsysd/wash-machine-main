@@ -40,7 +40,10 @@ int main(int argc, char const *argv[]) {
 	setGiveMoneyMode();
 	
 	while (true) {
-		sleep(5);
+		usleep(100000);
+		if (is_terminate()) {
+			break;
+		}
 	}
 
 	return 0;

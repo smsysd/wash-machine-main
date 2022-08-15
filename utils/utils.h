@@ -93,6 +93,7 @@ bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid);
 /* flags */
 Mode cmode();
 bool issession();
+bool is_terminate();
 
 /* extra control */
 void addMoney(double nMoney, Payment::Type type);
