@@ -270,25 +270,21 @@ namespace {
 		return OK;
 	}
 
-	void _softTerminate() {
-		static bool first = true;
-		if (!first) {
-			return;
-		}
-		first = false;
+	void _softTerminate(int sock) {
+		char buf[256] = {0};
+		int rc;
 		_log->log(Logger::Type::INFO, "SIG", "receive soft terminate signal");
-		if (!_normalwork) {
+		if ((!_normalwork && _nMoney > 0) || (mode != Mode::GIVE_MONEY && mode != Mode::WAIT)) {
+			rc = sprintf(buf, "%i\n", -1);
+			write(sock, buf, rc);
 			return;
 		}
-		while (mode != Mode::GIVE_MONEY && mode != Mode::WAIT) {
-			usleep(10000);
-		}
-		render::terminate();
-		ipc_server_destroy(&_main_srv);
-		_terminate = true;
-		sleep(2);
+		rc = sprintf(buf, "%i\n", -1);
+		write(sock, buf, rc);
 		render::showFrame("repair");
-		sleep(3);
+		sleep(1);
+		ipc_server_destroy(&_main_srv);
+		exit(0);
 	}
 
 	void _money_restored() {
@@ -358,6 +354,9 @@ namespace {
 				memset(buf, 0, sizeof(buf));
 				rc = sprintf(buf, "%i", 0);
 				write(sock, buf, rc);
+			} else
+			if (strstr(buf, "e") == buf) {
+				_softTerminate(sock);
 			}
 		}
 	}
@@ -400,7 +399,6 @@ void init(
 		throw runtime_error("[ERROR][LOGGER] fail to create logger: " + string(e.what()));
 	}
 
-	stdsiga_init(_softTerminate);
 	general_tools_init();
 	int wprc = wiringPiSetup();
 	if (wprc != 0) {
