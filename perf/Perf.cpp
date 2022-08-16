@@ -250,6 +250,9 @@ namespace {
 						}
 						cout << "[INFO][PERF] reinit hardware.." << endl;
 						_init_hardware_all();
+						if (_currentRelayGroupId >= 0) {
+							setRelayGroup(_currentRelayGroupId);
+						}
 						break;
 					} catch (exception& e) {
 						sleep(2);
@@ -280,6 +283,9 @@ namespace {
 							}
 							cout << "[INFO][PERF] reinit hardware.." << endl;
 							_init_hardware_all();
+							if (_currentRelayGroupId >= 0) {
+								setRelayGroup(_currentRelayGroupId);
+							}
 							break;
 						} catch (exception& e) {
 							_fail_perf_addr = 0xFF;
