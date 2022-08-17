@@ -79,7 +79,8 @@ namespace {
 	enum class HandleType {
 		DIRECT_SET_RELAYS,	// data: addr, states
 		FORCE_SET_RELAYS, // data: addr, states
-		DELAY
+		DELAY,
+		REINIT
 	};
 
 	struct Handle {
@@ -103,6 +104,7 @@ namespace {
 	json _drivers;
 	bool _scan_drivers;
 	int _reinit_period = -1;
+	bool _reinit_on_request = false;
 
 	uint64_t _collectn(uint8_t* src, int nb) {
 		uint64_t val = 0;
@@ -169,7 +171,41 @@ namespace {
 			}
 			cout << endl;
 			_init_hardware(i);
+			usleep(50000);
 		}
+		usleep(100000);
+	}
+
+	void _reinit() {
+		cout << "[INFO][PERF] reinit.." << endl;
+		if (_mb != nullptr) {
+			delete _mb;
+		}
+		_mb = nullptr;
+		int tries = 0;
+		while (1) {
+			try {
+				cout << "[INFO][PERF] reopen port.." << endl;
+				if (_scan_drivers) {
+					_mb = new MbAsciiMaster(-1, _find_driver(_drivers).c_str(), B9600);
+				} else {
+					_mb = new MbAsciiMaster(-1, _driver.c_str(), B9600);
+				}
+				cout << "[INFO][PERF] reinit hardware.." << endl;
+				_init_hardware_all();
+				if (_currentRelayGroupId >= 0) {
+					setRelayGroup(_currentRelayGroupId, true);
+				}
+				break;
+			} catch (exception& e) {
+				tries++;
+				if (tries > 4) {
+					_fail_perf_addr = 127;
+				}
+				sleep(2);
+			}
+		}
+		_fail_perf_addr = 0;
 	}
 
 	void* _handler(void* arg) {
@@ -188,7 +224,7 @@ namespace {
 					// cout << "[INFO][PERF] handling DIRECT_SET_RELAYS: addr: " << (int)h->data[0] << " data: " << (int)h->data[1] << endl;
 					buf[0] = h->data[1];
 					perf_addr = h->data[0];
-					_mb->rwrite(h->data[0], 0x13, buf, 1, 500);
+					_mb->rwrite(h->data[0], 0x10, buf, 1, 500);
 
 					_fifomutex.lock();
 					fifo_pop(&_operations);
@@ -222,6 +258,9 @@ namespace {
 					_fifomutex.lock();
 					fifo_pop(&_operations);
 					_fifomutex.unlock();
+				} else
+				if (h->type == HandleType::REINIT) {
+					_reinit();
 				} else {
 					_fifomutex.lock();
 					fifo_pop(&_operations);
@@ -251,7 +290,7 @@ namespace {
 						cout << "[INFO][PERF] reinit hardware.." << endl;
 						_init_hardware_all();
 						if (_currentRelayGroupId >= 0) {
-							setRelayGroup(_currentRelayGroupId);
+							setRelayGroup(_currentRelayGroupId, true);
 						}
 						break;
 					} catch (exception& e) {
@@ -263,36 +302,12 @@ namespace {
 			if (borehole % 100 == 0) {
 				// add repetive handles
 				if (_currentRelayGroupId >= 0) {
-					setRelayGroup(_currentRelayGroupId);
+					setRelayGroup(_currentRelayGroupId, true);
 				}
 			}
 			if (_reinit_period > 0) {
 				if (borehole % (_reinit_period*50) == 0) {
-					cout << "[INFO][PERF] reinit.." << endl;
-					if (_mb != nullptr) {
-						delete _mb;
-					}
-					_mb = nullptr;
-					while (1) {
-						try {
-							cout << "[INFO][PERF] reopen port.." << endl;
-							if (_scan_drivers) {
-								_mb = new MbAsciiMaster(-1, _find_driver(_drivers).c_str(), B9600);
-							} else {
-								_mb = new MbAsciiMaster(-1, _driver.c_str(), B9600);
-							}
-							cout << "[INFO][PERF] reinit hardware.." << endl;
-							_init_hardware_all();
-							if (_currentRelayGroupId >= 0) {
-								setRelayGroup(_currentRelayGroupId);
-							}
-							break;
-						} catch (exception& e) {
-							_fail_perf_addr = 0xFF;
-							sleep(2);
-						}
-					}
-					_fail_perf_addr = 0;
+					reinit();
 				}
 			}
 			usleep(20000);
@@ -310,6 +325,11 @@ void init(json& performingGen, json& performingUnits, json& relaysGroups, json& 
 		_reinit_period = JParser::getf(performingGen, "reinit_period", "performing_gen");
 	} catch (exception& e) {
 		_reinit_period = -1;
+	}
+	try {
+		_reinit_on_request = JParser::getf(performingGen, "reinit_on_request", "performing_gen");
+	} catch (exception& e) {
+		_reinit_on_request = false;
 	}
 
 	cout << "[INFO][PERF] load releive instructions.." << endl;
@@ -433,7 +453,7 @@ void relievePressure() {
 	}
 }
 
-void setRelayGroup(int id) {
+void setRelayGroup(int id, bool internal) {
 	Handle h;
 	int rgi;
 	try {
@@ -443,6 +463,9 @@ void setRelayGroup(int id) {
 		return;
 	}
 	_currentRelayGroupId = id;
+	if (!internal && _reinit_on_request) {
+		_reinit();
+	}
 	for (int i = 0; i < 4; i++) {
 		if (_rgroups[rgi].addr[i] > 0) {
 			setRelaysState(_rgroups[rgi].addr[i], _rgroups[rgi].state[i]);
@@ -455,6 +478,14 @@ void setRelaysState(int address, int states) {
 	h.type = HandleType::DIRECT_SET_RELAYS;
 	h.data[0] = address;
 	h.data[1] = states;
+	_fifomutex.lock();
+	fifo_put(&_operations, &h);
+	_fifomutex.unlock();
+}
+
+void reinit() {
+	Handle h;
+	h.type = HandleType::REINIT;
 	_fifomutex.lock();
 	fifo_put(&_operations, &h);
 	_fifomutex.unlock();

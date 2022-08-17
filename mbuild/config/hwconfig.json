@@ -1,4 +1,20 @@
 {
+        "buttons": {
+                "extboard": {
+                        "active-levels": 0,
+                        "used-mask": 3
+                },
+                "modules": [
+                        {"address": 32, "active-levels": 0, "io-mask": 31},
+                        {"address": 33, "active-levels": 0, "io-mask": 31},
+                        {"address": 34, "active-levels": 0, "io-mask": 31},
+                        {"address": 35, "active-levels": 0, "io-mask": 31},
+                        {"address": 36, "active-levels": 0, "io-mask": 31},
+                        {"address": 37, "active-levels": 0, "io-mask": 31},
+                        {"address": 38, "active-levels": 0, "io-mask": 31}
+		]
+	},
+
 	"ext-board": {
 		"driver": "/dev/ttyS5",
 		"nrst-pin": 16,
@@ -8,7 +24,9 @@
 
 	"performing-gen": {
 		"driver": "/dev/ttyUSB1",
-		"max-handle-errors": 5
+		"max-handle-errors": 5,
+		"reinit_period": -1,
+                "reinit_on_request": false
 	},
 
 	"performing-units": [
@@ -16,36 +34,19 @@
 		{"address": 51, "normal-states": 0, "dependencies": [0, 0, 0, 0, 0, 0]}
 	],
 
-	"releive-instructions": [
-		{"set": [48, 1]},
-		{"delay": 1000},
-		{"set": [48, 2]},
-		{"delay": 1000},
-		{"set": [48, 4]},
-		{"delay": 1000},
-		{"set": [48, 8]},
-		{"delay": 1000},
-		{"set": [48, 16]},
-		{"delay": 1000},
-		{"set": [48, 32]},
-		{"delay": 1000},
-		{"set": [48, 0]},
-		{"set": [51, 1]},
-		{"delay": 1000},
-		{"set": [51, 1]},
-		{"delay": 1000},
-		{"set": [51, 2]},
-		{"delay": 1000},
-		{"set": [51, 4]},
-		{"delay": 1000},
-		{"set": [51, 8]},
-		{"delay": 1000},
-		{"set": [51, 16]},
-		{"delay": 1000},
-		{"set": [51, 32]},
-		{"delay": 1000},
-		{"set": [51, 0]}
-	],
+        "releive-instructions": [
+                {"delay": 1000},
+                {"set": [48, 34]},
+                {"delay": 500},
+                {"set": [48, 36]},
+                {"delay": 500},
+                {"set": [48, 40]},
+                {"delay": 500},
+                {"set": [48, 48]},
+                {"delay": 500},
+                {"set": [48, 0]},
+                {"delay": 1000}
+        ],
 
 	"display": {
 		"render": "./render_ledmatrx",
@@ -54,14 +55,17 @@
 
 	"payment": {
 		"cash": {
-			"mode": "bill-code",
-			"rate": 10,
-			"bill-codes": [
-				[2, 50],
-				[3, 100],
-				[4, 200],
-				[5, 500],
-				[6, 1000]
+                        "mode": "bill-code",
+                        "rate": 10,
+                        "bill-codes": [
+                                [1, 10],
+                                [2, 50],
+                                [3, 100],
+                                [7, 200],
+                                [4, 500],
+                                [5, 1000],
+                                [8, 2000],
+                                [6, 5000]
 			]
 		},
 		"coin": {
@@ -87,29 +91,52 @@
 		"driver": "/dev/v4l/by-id/usb-Sonix_Technology_Co.__Ltd._A4tech_FHD_1080P_PC_Camera_SN0001-video-index0"
 	},
 
-	"leds": [
-		{"id": 1, "type": "bm", "address": 32, "index": 1},
-		{"id": 2, "type": "bm", "address": 32, "index": 2},
-		{"id": 3, "type": "bm", "address": 32, "index": 3},
-		{"id": 4, "type": "bm", "address": 32, "index": 4},
-		{"id": 5, "type": "bm", "address": 32, "index": 5},
-		{"id": 6, "type": "bm", "address": 32, "index": 6},
-		{"id": 7, "type": "bm", "address": 32, "index": 7},
-		{"id": 10, "type": "lp", "index": 0},
-		{"id": 11, "type": "lp", "index": 1},
-		{"id": 12, "type": "lp", "index": 2},
-		{"id": 13, "type": "lp", "index": 3},
-		{"id": 14, "type": "lp", "index": 4},
-		{"id": 15, "type": "lp", "index": 5},
-		{"id": 16, "type": "lp", "index": 6},
-		{"id": 17, "type": "lp", "index": 7},
-		{"id": 18, "type": "lp", "index": 8},
-		{"id": 19, "type": "lp", "index": 9},
-		{"id": 20, "type": "lp", "index": 10},
-		{"id": 21, "type": "lp", "index": 11},
-		{"id": 22, "type": "lp", "index": 12},
-		{"id": 23, "type": "lp", "index": 13},
-		{"id": 24, "type": "lp", "index": 14},
-		{"id": 25, "type": "lp", "index": 15}
-	]
+       "leds": [
+                {"id": 20, "type": "bm", "address": 32, "index": 2},
+                {"id": 21, "type": "bm", "address": 32, "index": 1},
+                {"id": 22, "type": "bm", "address": 32, "index": 5},
+                {"id": 23, "type": "bm", "address": 32, "index": 4},
+                {"id": 30, "type": "bm", "address": 33, "index": 2},
+                {"id": 31, "type": "bm", "address": 33, "index": 1},
+                {"id": 32, "type": "bm", "address": 33, "index": 5},
+                {"id": 33, "type": "bm", "address": 33, "index": 4},
+                {"id": 40, "type": "bm", "address": 34, "index": 2},
+                {"id": 41, "type": "bm", "address": 34, "index": 1},
+                {"id": 42, "type": "bm", "address": 34, "index": 5},
+                {"id": 43, "type": "bm", "address": 34, "index": 4},
+                {"id": 50, "type": "bm", "address": 35, "index": 2},
+                {"id": 51, "type": "bm", "address": 35, "index": 1},
+                {"id": 52, "type": "bm", "address": 35, "index": 5},
+                {"id": 53, "type": "bm", "address": 35, "index": 4},
+                {"id": 60, "type": "bm", "address": 36, "index": 2},
+                {"id": 61, "type": "bm", "address": 36, "index": 1},
+                {"id": 62, "type": "bm", "address": 36, "index": 5},
+                {"id": 63, "type": "bm", "address": 36, "index": 4},
+                {"id": 70, "type": "bm", "address": 37, "index": 2},
+                {"id": 71, "type": "bm", "address": 37, "index": 1},
+                {"id": 72, "type": "bm", "address": 37, "index": 5},
+                {"id": 73, "type": "bm", "address": 37, "index": 4},
+                {"id": 80, "type": "bm", "address": 38, "index": 2},
+                {"id": 81, "type": "bm", "address": 38, "index": 1},
+                {"id": 82, "type": "bm", "address": 38, "index": 5},
+                {"id": 83, "type": "bm", "address": 38, "index": 4},
+                {"id": 115, "type": "lp", "index": 15},
+                {"id": 114, "type": "lp", "index": 14},
+                {"id": 113, "type": "lp", "index": 13},
+                {"id": 112, "type": "lp", "index": 12},
+                {"id": 111, "type": "lp", "index": 11},
+                {"id": 110, "type": "lp", "index": 10},
+                {"id": 109, "type": "lp", "index": 9},
+                {"id": 108, "type": "lp", "index": 8},
+                {"id": 107, "type": "lp", "index": 7},
+                {"id": 106, "type": "lp", "index": 6},
+                {"id": 105, "type": "lp", "index": 5},
+                {"id": 104, "type": "lp", "index": 4},
+                {"id": 103, "type": "lp", "index": 3},
+                {"id": 102, "type": "lp", "index": 2},
+                {"id": 101, "type": "lp", "index": 1},
+                {"id": 100, "type": "lp", "index": 0}
+        ]
 }
+
+

@@ -1,7 +1,7 @@
 {
 	"fonts": [
 		{"name": "1", "font": "./config/fonts/1.bdf"},
-		{"name": "2", "font": "./config/fonts/2.bdf"},
+		{"name": "2", "font": "./config/fonts/2c-12.bdf"},
 		{"name": "3", "font": "./config/fonts/3.bdf"},
 		{"name": "4", "font": "./config/fonts/4.bdf"}
 	],
@@ -20,105 +20,163 @@
 			"name": "logo",
 			"bg": "./config/logo.png",
 			"lines": [
-				{"data": "LOGO"}
+				{"x": 0, "y": 0, "color":[128,128,0], "data": ""}
 			]
 		},
 		{
 			"name": "no_main",
 			"lines": [
-				{"color":[255,0,0], "data": "ТЕХ  РАБОТЫ"}
+				{"y": 0, "color":[255,0,0], "data": "ТЕХ"},
+				{"y": 15, "color":[255,0,0], "data": "РАБОТЫ"}
 			]
 		},
 		{
 			"name": "wait",
 			"lines": [
-				{"y": 0, "data": "PRESS"},
-				{"y": 15, "data": "BUTTON"}
+				{"y": 0, "data": "НАЖМИТЕ"},
+				{"y": 15, "data": "КНОПКУ"}
 			]
 		},
 		{
 			"name": "give_money",
 			"lines": [
-				{"y": 0, "data": "GIVE"},
-				{"y": 15, "data": "MONEY"}
+				{"y": 0, "data": "ВНЕСИТЕ"},
+				{"y": 15, "data": "ОПЛАТУ"}
 			]
 		},
 		{
 			"name": "give_money_bonus",
 			"lines": [
-				{"y": 0, "data": "GIVE"},
-				{"y": 10, "data": "MONEY"},
+				{"y": 0, "data": "ВНЕСИТЕ"},
+				{"y": 10, "data": "ОПЛАТУ"},
 				{"y": 20, "data": "{bonus_add} % !"}
 			]
 		},
 		{
 			"name": "water",
 			"lines": [
-				{"color": [0,0,255], "y": 0, "data": "WATER"},
+				{"color": [0,0,255], "y": 0, "data": "ВОДА"},
+				{"y": 15, "data": "{money}"}
+			]
+		},
+		{
+			"name": "shampoo",
+			"lines": [
+				{"color": [0,128,128], "y": 0, "data": "ШАМПУНЬ"},
 				{"y": 15, "data": "{money}"}
 			]
 		},
 		{
 			"name": "foam",
 			"lines": [
-				{"color": [0,255,0], "y": 0, "data": "FOAM"},
+				{"color": [0,255,0], "y": 0, "data": "ПЕНА"},
+				{"y": 15, "data": "{money}"}
+			]
+		},
+		{
+			"name": "wax",
+			"lines": [
+				{"color": [128,0,128], "y": 0, "data": "ВОСК"},
+				{"y": 15, "data": "{money}"}
+			]
+		},
+		{
+			"name": "cleaner",
+			"lines": [
+				{"color": [64,128,255], "y": 0, "data": "ПЫЛЕСОС"},
+				{"y": 15, "data": "{money}"}
+			]
+		},
+		{
+			"name": "air",
+			"lines": [
+				{"color": [0,64,255], "y": 0, "data": "ВОЗДУХ"},
 				{"y": 15, "data": "{money}"}
 			]
 		},
 		{
 			"name": "choose",
 			"lines": [
-				{"y": 0, "data": "CHOOSE"},
-				{"y": 15, "data": "{money}"}
+				{"y": 0, "data": "ВЫБОР"},
+				{"x": 5, "y": 11, "data": "программы"},
+				{"color": [255,255,0], "y": 22, "data": "{money}"}
 			]
 		},
 		{
 			"name": "pause",
 			"lines": [
-				{"y": 0, "data": "PAUSE"},
+				{"y": 0, "data": "ПАУЗА"},
 				{"y": 11, "data": "{money}"},
-				{"color": [255,0,0], "x": 0, "y": 23, "data": "{rfut}"}
+				{"color": [255,0,0], "x": 10, "y": 23, "data": "{rfut}"}
 			]
 		},
 		{
 			"name": "service",
 			"lines": [
-				{"y": 0, "data": "SERVICE"}
+				{"y": 11, "data": "SERVICE"}
 			]
 		},
 		{
 			"name": "s.water",
 			"lines": [
-				{"y": 0, "data": "SERVICE"},
-				{"y": 15, "data": "WATER"}
+				{"color": [255,255,0], "y": 2, "data": "СЕРВИС"},
+				{"y": 15, "data": "ВОДА"}
+			]
+		},
+		{
+			"name": "s.shampoo",
+			"lines": [
+				{"y": 2, "data": "СЕРВИС"},
+				{"y": 15, "data": "ШАМПУНЬ"}
+			]
+		},
+		{
+			"name": "s.foam",
+			"lines": [
+				{"y": 2, "data": "СЕРВИС"},
+				{"y": 15, "data": "ПЕНА"}
+			]
+		},
+		{
+			"name": "s.wax",
+			"lines": [
+				{"y": 2, "data": "СЕРВИС"},
+				{"y": 15, "data": "ВОСК"}
 			]
 		},
 		{
 			"name": "s.cleaner",
 			"lines": [
-				{"y": 0, "data": "SERVICE"},
-				{"y": 15, "data": "CLEANER"}
+				{"y": 2, "data": "СЕРВИС"},
+				{"y": 15, "data": "ПЫЛЕСОС"}
+			]
+		},
+		{
+			"name": "s.air",
+			"lines": [
+				{"y": 2, "data": "СЕРВИС"},
+				{"y": 15, "data": "ВОЗДУХ"}
 			]
 		},
 		{
 			"name": "wait_server",
 			"lines": [
-				{"y": 0, "data": "WAIT"},
-				{"y": 15, "data": "SERVER"}
+				{"y": 2, "data": "ПОИСК"},
+				{"y": 15, "data": "КАРТЫ"}
 			]
 		},
 		{
 			"name": "unknown_card",
 			"lines": [
-				{"y": 0, "data": "UNKNOWN"},
-				{"y": 15, "data": "CARD"}
+				{"y": 2, "data": "КАРТА"},
+				{"y": 16, "data": "НЕ НАЙДЕНА"}
 			]
 		},
 		{
 			"name": "error_bonus",
 			"lines": [
-				{"y": 0, "data": "ERROR"},
-				{"y": 15, "data": "BONUS"}
+				{"y": 2, "data": "НЕТ"},
+				{"y": 16, "data": "БОНУСОВ"}
 			]
 		},
 		{

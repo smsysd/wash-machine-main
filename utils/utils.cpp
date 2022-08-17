@@ -83,6 +83,18 @@ namespace {
 		default: return "unknown"; break;
 		}
 	}
+
+	string _mode2str(Mode mode) {
+		switch (mode) {
+		case Mode::GIVE_MONEY: return "GIVE_MONEY";
+		case Mode::INIT: return "GIVE_MONEY";
+		case Mode::PROGRAM: return "PROGRAM";
+		case Mode::SERVICE: return "SERVICE";
+		case Mode::WAIT: return "WAIT";
+		default: return "unknown";
+		}
+	}
+	
 	string _setprec(double v) {
 		v *= 100;
 		v = floor(v + 0.5);
@@ -360,6 +372,27 @@ namespace {
 			} else
 			if (strstr(buf, "exit") == buf) {
 				_softTerminate(sock);
+			} else
+			if (strstr(buf, "mode") == buf) {
+				memset(buf, 0, sizeof(buf));
+				rc = sprintf(buf, "%s\n", _mode2str(mode).c_str());
+				write(sock, buf, rc);
+			} else
+			if (strstr(buf, "state") == buf) {
+				memset(buf, 0, sizeof(buf));
+				string state;
+				if (_normalwork) {
+					state = "NORMAL_WORK";
+				} else {
+					state = "ERROR: " + string(_errort);
+				}
+				rc = sprintf(buf, "mode: %s\nstate: %s\nsession: %s\n", _mode2str(mode).c_str(), state.c_str(), _session.isBegin ? "BEGIN" : "NOTHING");
+				write(sock, buf, rc);
+			} else
+			if (strstr(buf, "reset") == buf) {
+				_nMoney = 0;
+				mode = Mode::GIVE_MONEY;
+				_session.isBegin = false;
 			}
 		}
 	}

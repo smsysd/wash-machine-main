@@ -12,52 +12,97 @@
 		{
 			"id": 1,
 			"performers": [
-				{"address": 48, "state": 255},
-				{"address": 51, "state": 255}
+				{"address": 48, "state": 1},
+				{"address": 51, "state": 0}
 			]
 		},
 		{
 			"id": 2,
 			"performers": [
-				{"address": 48, "state": 255},
-				{"address": 51, "state": 255}
+				{"address": 48, "state": 17},
+				{"address": 51, "state": 0}
+			]
+		},
+		{
+			"id": 3,
+			"performers": [
+				{"address": 48, "state": 5},
+				{"address": 51, "state": 0}
 			]
 		},
 		{
 			"id": 4,
 			"performers": [
-				{"address": 48, "state": 255},
-				{"address": 51, "state": 255}
+				{"address": 48, "state": 9},
+				{"address": 51, "state": 0}
+			]
+		},
+		{
+			"id": 5,
+			"performers": [
+				{"address": 48, "state": 0},
+				{"address": 51, "state": 1}
+			]
+		},
+		{
+			"id": 6,
+			"performers": [
+				{"address": 48, "state": 0},
+				{"address": 51, "state": 2}
 			]
 		}
 	],
 
 	"programs": [
-		{"id": 0, "name": "choose", "frame": "choose", "bonus-frame": "choose", "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0, "releive": false, "flap": true},
-		{"id": 1, "name": "pause", "frame": "pause", "bonus-frame": "pause", "relay-group": 0, "free-use-time": 30, "rate": 5, "effect": 0, "releive": true, "flap": true},
-		{"id": 2, "name": "water", "frame": "water", "bonus-frame": "water", "relay-group": 1, "free-use-time": 2, "rate": 20, "effect": 0, "releive": false, "flap": false},
-		{"id": 3, "name": "foam", "frame": "foam", "bonus-frame": "foam", "relay-group": 2, "free-use-time": 2, "rate": 60, "effect": 0, "releive": false, "flap": false}
+		{"id": 0, "name": "choose", "frame": "choose", "bonus-frame": "choose", "relay-group": 0, "free-use-time": 60, "rate": 3, "effect": 0, "releive": false, "flap": true},
+		{"id": 1, "name": "water", "frame": "water", "bonus-frame": "water", "relay-group": 1, "free-use-time": 1, "rate": 40, "effect": 31, "releive": false, "flap": false},
+                {"id": 2, "name": "shampoo", "frame": "shampoo", "bonus-frame": "shampoo", "relay-group": 2, "free-use-time": 7, "rate": 70, "effect": 32, "releive": false, "flap": false},
+		{"id": 3, "name": "foam", "frame": "foam", "bonus-frame": "foam", "relay-group": 3, "free-use-time": 1, "rate": 70, "effect": 33, "releive": false, "flap": false},
+                {"id": 4, "name": "wax", "frame": "wax", "bonus-frame": "wax", "relay-group": 4, "free-use-time": 7, "rate": 70, "effect": 34, "releive": false, "flap": false},
+                {"id": 5, "name": "cleaner", "frame": "cleaner", "bonus-frame": "cleaner", "relay-group": 5, "free-use-time": 1, "rate": 20, "effect": 35, "releive": false, "flap": false},
+                {"id": 6, "name": "air", "frame": "air", "bonus-frame": "air", "relay-group": 6, "free-use-time": 1, "rate": 20, "effect": 36, "releive": false, "flap": false},
+                {"id": 8, "name": "pause", "frame": "pause", "bonus-frame": "pause", "relay-group": 0, "free-use-time": 120, "rate": 30, "effect": 38, "releive": false, "flap": true}
 	],
 
-	"service-programs": [
-		{"id": 2, "name": "s.water", "frame": "s.water", "relay-group": 1, "effect": 0},
-		{"id": 5, "name": "s.cleaner", "frame": "s.cleaner", "relay-group": 4, "effect": 0}
-	],
+        "service-programs": [
+                {"id": 1, "name": "s.water", "frame": "s.water", "relay-group": 1, "effect": 0},
+                {"id": 2, "name": "s.shampoo", "frame": "s.shampoo", "relay-group": 2, "effect": 0},
+                {"id": 3, "name": "s.foam", "frame": "s.foam", "relay-group": 3, "effect": 0},
+                {"id": 4, "name": "s.wax", "frame": "s.wax", "relay-group": 4, "effect": 0},
+                {"id": 5, "name": "s.cleaner", "frame": "s.cleaner", "relay-group": 5, "effect": 0},
+                {"id": 6, "name": "s.air", "frame": "s.air", "relay-group": 6, "effect": 0}
+        ],
 
 	"buttons": [
 		{"id": 0, "type": "eb", "index": 0, "purpose": "end"},
-		{"id": 1, "type": "bm", "bm": 0, "index": 0, "purpose": "program", "program": 1, "service-program": 2},
+		{"id": 1, "type": "bm", "bm": 0, "index": 0, "purpose": "program", "program": 1, "service-program": 1},
 		{"id": 2, "type": "bm", "bm": 1, "index": 0, "purpose": "program", "program": 2, "service-program": 2},
-		{"id": 3, "type": "bm", "bm": 2, "index": 0, "purpose": "program", "program": 3, "service-program": 5}
+		{"id": 3, "type": "bm", "bm": 2, "index": 0, "purpose": "program", "program": 3, "service-program": 3},
+		{"id": 4, "type": "bm", "bm": 3, "index": 0, "purpose": "program", "program": 4, "service-program": 4},
+		{"id": 5, "type": "bm", "bm": 4, "index": 0, "purpose": "program", "program": 5, "service-program": 5},
+		{"id": 6, "type": "bm", "bm": 5, "index": 0, "purpose": "program", "program": 6, "service-program": 6},
+		{"id": 8, "type": "bm", "bm": 6, "index": 0, "purpose": "program", "program": 8, "service-program": 8}
 	],
 
 	"cards": [
-		{"id": 1017090366, "type": "service", "owner": "test user"},
-		{"id": 1017090366, "type": "collector", "owner": "test user"}
+                {"id": 1017090366, "type": "service", "owner": "test user"},
+                {"id": 2538388927, "type": "service", "owner": "admin1"},
+                {"id": 1017090366, "type": "service", "owner": "test user"},
+                {"id": 1615159340, "type": "bonus", "bonus": 100, "owner": "test2 user"},
+                {"id": 1388527153, "type": "bonus", "bonus": 50, "owner": "bya2 test"},
+                {"id": 3080782271, "type": "bonus", "bonus": 50, "owner": "Master1"},
+                {"id": 3121248150, "type": "bonus", "bonus": 50, "owner": "Master2"},
+                {"id": 2274050750, "type": "bonus", "bonus": 50, "owner": "Master3"},
+                {"id": 391753151, "type": "bonus", "bonus": 50, "owner": "Master4"},
+                {"id": 2624553245, "type": "bonus", "bonus": 50, "owner": "Master5"},
+                {"id": 3348699411, "type": "service", "owner": "restore"},
+                {"id": 3354591166, "type": "service", "owner": "restore2"},
+                {"id": 1474097087, "type": "service", "bonus": 50, "owner": "restore3"},
+                {"id": 127905983, "type": "service", "owner": "restore4"}
 	],
 
 	"service-time": 300,
-	"give-money-time": 120,
+	"give-money-time": 12000,
 	"log-level": 3,
-	"rfut_exceeded": "*ПЛАТНАЯ"
+	"rfut_exceeded": "платно"
 }

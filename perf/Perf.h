@@ -20,8 +20,9 @@ namespace perf {
 
 	/* Performing functions no exceptions */
 	void relievePressure();
-	void setRelayGroup(int iGroup);
+	void setRelayGroup(int iGroup, bool internal = false);
 	void setRelaysState(int address, int states);
+	void reinit();
 }
 
 #endif
