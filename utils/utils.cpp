@@ -943,7 +943,9 @@ void accrueRemainBonusesAndClose() {
 
 bool getLocalCardInfo(CardInfo& cardInfo, uint64_t cardid) {
 	for (int i = 0; i < _cards.size(); i++) {
+		cout << "\t[GET_LOCAL_CARD] compare " << _cards[i].id << " with " << cardid << endl;
 		if (_cards[i].id == cardid) {
+			cout << "\t[GET_LOCAL_CARD] EQUAL" << endl; 
 			cardInfo = _cards[i];
 			return true;
 		}

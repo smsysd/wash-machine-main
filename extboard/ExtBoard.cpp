@@ -573,7 +573,7 @@ namespace {
 								_timespec_diff(&_tlcard_read, &now, &res);
 								if (_timespec2ms(&res) > _card_read_timeout_ms) {
 									uint64_t cid = _collectn(buf, rc);
-									cid &= 0x3FFFFFFFF;
+									cid &= 0xFFFFFFFF;
 									printf("[INFO][EXTBOARD] card read: %X\n", cid);
 									clock_gettime(CLOCK_MONOTONIC, &_tlcard_read);
 									if (_onCard != nullptr) {
