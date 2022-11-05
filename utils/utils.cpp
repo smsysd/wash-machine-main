@@ -165,7 +165,7 @@ namespace {
 				if (_session.k > 1) {
 					Pay bonuspay;
 					bonuspay.type = Payment::Type::BONUS_LOCAL;
-					bonuspay.count = pay.count * _session.k;
+					bonuspay.count = pay.count * (_session.k - 1);
 					_session.pays.push_back(pay);
 					_nMoney += bonuspay.count;
 				}	
